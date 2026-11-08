@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "DuelingBook Cube Draft (Prototype)",
+  "version": "0.3.0",
+  "description": "Import official and custom cards rendered in a DuelingBook deck page into a local Cube collection.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.duelingbook.com/*"
+  ],
+  "action": {
+    "default_title": "DuelingBook Cube Draft",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.duelingbook.com/deck*",
+        "https://www.duelingbook.com/card*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
