@@ -7,6 +7,7 @@ before(async () => { browser = await chromium.launch({executablePath:process.env
 after(async () => { await browser?.close(); });
 async function fixture(kind, extra = '') {
   const page = await browser.newPage();
+  await page.route('https://example.test/**', route => route.abort());
   await page.setContent(`<style>
     .grid {transform:scale(.3);transform-origin:top left}
     .cardfront_content {position:relative;width:400px;height:580px;overflow:hidden;background:purple}
