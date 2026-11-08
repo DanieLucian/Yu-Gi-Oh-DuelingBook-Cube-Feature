@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DuelingBook Cube Draft</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+<header><div class="brand"><span class="symbol">▣</span><div><h1>Cube Draft</h1><p>DuelingBook companion · Prototype v0.3</p></div></div></header>
+<main>
+  <section class="panel">
+    <div class="spread"><h2>Deck-page importer</h2><span id="site-state" class="status">Checking page…</span></div>
+    <p class="hint">Open a DuelingBook deck page and let its cards load. Then import the official and custom cards currently rendered on that page. Use Preview to test the full-card overlay.</p>
+    <button id="scan" class="primary">Scan &amp; import current page</button>
+    <p id="message" role="status" class="message"></p>
+  </section>
+  <section class="panel">
+    <div class="spread"><h2>Your Cube collection</h2><strong id="total">0 cards</strong></div>
+    <div class="stats"><div><span id="unique">0</span><small>Unique cards</small></div><div><span id="instances">0</span><small>Total copies</small></div><div><span id="extra">0</span><small>Extra Deck marked</small></div></div>
+    <label class="filter-label" for="filter">Find a card</label>
+    <input id="filter" placeholder="Search names or IDs…" autocomplete="off">
+    <div id="cards" class="cards"><div class="empty">Your Cube is empty.</div></div>
+  </section>
+  <section class="panel actions">
+    <h2>Collection tools</h2>
+    <div class="buttons"><button id="export">Export Cube JSON</button><button id="xml">Match card IDs from XML</button></div>
+    <input type="file" id="xml-file" accept=".xml,text/xml,application/xml" hidden>
+    <p class="hint">XML matching can identify official DuelingBook IDs by unique card name, and classify Main/Extra Deck cards. Ambiguous names are skipped.</p>
+    <button id="clear" class="danger">Clear local collection</button>
+  </section>
+  <footer>Stored locally in this Chrome profile. No drafting server yet.</footer>
+</main>
+<script src="popup.js"></script>
+</body></html>
