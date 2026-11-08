@@ -70,43 +70,99 @@
     return { cards: [...records.values()], rendered: roots.length, page: location.href };
   }
 
+  let closePreview = null;
+
   function preview(id) {
-    const roots = [...document.querySelectorAll('.cardfront_content')];
-    const root = roots.find(node => {
-      const url = src(node.querySelector('img.pic'));
-      const customId = url.match(/\/custom-pics\/\d+\/(\d+)\.(?:jpg|jpeg|png|webp)(?:\?|$)/i)?.[1];
-      const name = normalize(text(node.querySelector('.name_txt')) || text(node.querySelector('.name2_txt')));
-      return customId === id || (!customId && officialKey(name, url) === id);
-    });
+    // Ignore our own clone, and prefer a laid-out card over hidden duplicates.
+    const candidates = [...document.querySelectorAll('.cardfront_content')]
+      .filter(node => extractCard(node)?.id === id);
+    const root = candidates.sort((a, b) =>
+      Number(b.getBoundingClientRect().width > 0) - Number(a.getBoundingClientRect().width > 0))[0];
     if (!root) return {ok:false,error:'Card '+id+' is not rendered on this page. Open its deck first.'};
-    document.getElementById('dbcd-preview-overlay')?.remove();
-    const overlay=document.createElement('div');
-    overlay.id='dbcd-preview-overlay';
-    Object.assign(overlay.style, {position:'fixed',inset:'0',zIndex:'2147483647',background:'rgba(4,9,17,.93)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Arial, sans-serif'});
-    const host=document.createElement('div');
-    Object.assign(host.style,{position:'relative',width:'813px',height:'1185px',flex:'none',transformOrigin:'center center'});
-    const clone=root.cloneNode(true);
-    // Preserve DuelingBook's existing typography and positioning without changing the original card.
-    // The computed styles remain available even if the card was hidden in the deck grid.
-    const originals=[root,...root.querySelectorAll('*')];
-    const copies=[clone,...clone.querySelectorAll('*')];
-    const properties=['position','display','left','top','right','bottom','width','height','font-family','font-size','font-weight','font-style','line-height','letter-spacing','text-align','white-space','color','background-color','border','padding','margin','transform','transform-origin','object-fit','opacity','z-index','overflow','box-sizing','text-shadow'];
-    originals.forEach((original,i)=>{
-      const computed=getComputedStyle(original);
-      for (const prop of properties) copies[i].style.setProperty(prop,computed.getPropertyValue(prop));
+    closePreview?.();
+
+    const computed = getComputedStyle(root);
+    // offsetWidth/Height ignore ancestor transforms used by the deck grid.
+    const width = root.offsetWidth || parseFloat(computed.width);
+    const height = root.offsetHeight || parseFloat(computed.height);
+    if (!(width > 0 && height > 0)) {
+      return {ok:false,error:'Card dimensions are unavailable. Wait for the deck to finish loading.'};
+    }
+    const overlay = document.createElement('div');
+    overlay.id = 'dbcd-preview-overlay';
+    overlay.style.setProperty('all', 'initial', 'important');
+    for (const [key, value] of Object.entries({position:'fixed',inset:'0',zIndex:'2147483647',display:'block'})) {
+      overlay.style.setProperty(key.replace(/[A-Z]/g, c => '-'+c.toLowerCase()), value, 'important');
+    }
+    // A shadow root prevents site selectors from restyling the detached card.
+    const shadow = overlay.attachShadow({mode:'open'});
+    const backdrop = document.createElement('div');
+    Object.assign(backdrop.style, {position:'fixed',inset:'0',background:'rgba(4,9,17,.93)',display:'flex',alignItems:'center',justifyContent:'center'});
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
+    backdrop.setAttribute('aria-label', 'Full card preview');
+    const host = document.createElement('div');
+    Object.assign(host.style, {position:'relative',width:width+'px',height:height+'px',flex:'none',transformOrigin:'center'});
+    const clone = root.cloneNode(true);
+    const originals = [root, ...root.querySelectorAll('*')];
+    const copies = [clone, ...clone.querySelectorAll('*')];
+    const pseudoRules = [];
+    originals.forEach((original, i) => {
+      const copy = copies[i];
+      const style = getComputedStyle(original);
+      copy.removeAttribute('style');
+      // Include clipping, background layers, filters, visibility, and typography.
+      for (const prop of style) copy.style.setProperty(prop, style.getPropertyValue(prop));
+      copy.style.setProperty('animation', 'none');
+      copy.style.setProperty('transition', 'none');
+      copy.dataset.dbcdPreviewNode = String(i);
+      for (const pseudo of ['::before', '::after']) {
+        const ps = getComputedStyle(original, pseudo);
+        if (ps.content === 'none' || ps.content === 'normal') continue;
+        const declarations = [...ps].map(prop => prop+':'+ps.getPropertyValue(prop)+';').join('');
+        pseudoRules.push('[data-dbcd-preview-node="'+i+'"]'+pseudo+'{'+declarations+'}');
+      }
+      // Freeze resolved artwork rather than depending on the clone's responsive context.
+      if (original instanceof HTMLImageElement) {
+        copy.removeAttribute('srcset');
+        copy.removeAttribute('sizes');
+        copy.src = original.currentSrc || original.src;
+        copy.loading = 'eager';
+      }
     });
-    Object.assign(clone.style,{display:'block',position:'absolute',left:'0',top:'0',width:'813px',height:'1185px',pointerEvents:'none'});
+    Object.assign(clone.style, {display:'block',visibility:'visible',position:'absolute',left:'0',top:'0',right:'auto',bottom:'auto',margin:'0',transform:'none',width:width+'px',height:height+'px',boxSizing:'border-box',pointerEvents:'none'});
+    clone.setAttribute('inert', '');
+    const styles = document.createElement('style');
+    styles.textContent = pseudoRules.join('\n');
     host.append(clone);
-    const close=document.createElement('button');
-    close.textContent='Close preview ×';
-    Object.assign(close.style,{position:'fixed',right:'18px',top:'18px',zIndex:'2147483647',fontSize:'16px',padding:'12px 16px',background:'#294b78',color:'#fff',border:'1px solid #779cce',borderRadius:'8px',cursor:'pointer'});
-    const esc=e=>{if(e.key==='Escape'){overlay.remove();document.removeEventListener('keydown',esc);}};
-    close.onclick=()=>{overlay.remove();document.removeEventListener('keydown',esc);};
-    overlay.addEventListener('click',e=>{if(e.target===overlay)close.click();});
-    overlay.append(host,close);document.body.append(overlay);
-    const updateScale=()=>{const scale=Math.min((window.innerWidth-64)/813,(window.innerHeight-64)/1185,1);host.style.transform=`scale(${Math.max(.12,scale)})`;};
+    const close = document.createElement('button');
+    close.textContent = 'Close preview ×';
+    Object.assign(close.style, {position:'fixed',right:'18px',top:'18px',zIndex:'1',fontSize:'16px',padding:'12px 16px',background:'#294b78',color:'#fff',border:'1px solid #779cce',borderRadius:'8px',cursor:'pointer'});
+    const previousFocus = document.activeElement;
+    const updateScale = () => {
+      const scale = Math.max(0.01, Math.min((window.innerWidth-32)/width, (window.innerHeight-112)/height, 1));
+      host.style.transform = 'scale('+scale+')';
+    };
+    const onKey = event => {
+      if (event.key === 'Escape') closePreview?.();
+      if (event.key === 'Tab') { event.preventDefault(); close.focus(); }
+    };
+    closePreview = () => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', updateScale);
+      closePreview = null;
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+    close.onclick = () => closePreview?.();
+    backdrop.addEventListener('click', event => { if (event.target === backdrop) closePreview?.(); });
+    backdrop.append(host, close);
+    shadow.append(styles, backdrop);
+    document.body.append(overlay);
     updateScale();
-    document.addEventListener('keydown',esc);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', updateScale);
+    close.focus();
     return {ok:true};
   }
 

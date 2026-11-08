@@ -20,3 +20,16 @@ Use Chrome's `chrome://extensions` → **Developer mode** → **Load unpacked** 
 4. Export DuelingBook-compatible XML decks.
 
 This project is unofficial and not affiliated with DuelingBook. Only import cards you have rights to access and use.
+## Development and automated checks
+
+No application build or runtime dependencies are required. Load this directory as
+an unpacked Chrome extension. Test tooling requires Node.js 20+ and Chromium:
+
+```sh
+npm ci
+CHROMIUM_PATH=/usr/bin/chromium npm test
+```
+
+Set `CHROMIUM_PATH` to your Chromium/Chrome executable if it is elsewhere. Tests
+use Playwright with an isolated browser and synthetic page fixtures; they do not
+contact DuelingBook. See [preview review and manual checks](docs/preview-review.md).
