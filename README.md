@@ -1,2 +1,22 @@
-# Yu-Gi-Oh-DuelingBook-Cube-Feature
-Used to generate cubes from which players draft a 40+ card deck, then export the resulting deck back to Duelingbook for use.
+# DuelingBook Cube Draft
+
+An unofficial Chrome extension prototype to import custom and official Yu-Gi-Oh! cards from DuelingBook deck pages and build a local Cube collection. Online drafting is planned.
+
+## Versions
+
+- **v0.1.0** — Initial custom-card import and Cube management. User verified successful import of 26 unique custom cards and persistence across imports.
+- **v0.2.0** — Experimental full-card previews (not yet verified by user).
+- **v0.3.0** — Mixed official/custom-card import (not yet verified by user).
+
+## Install / update
+
+Use Chrome's `chrome://extensions` → **Developer mode** → **Load unpacked** and select this repository folder. For updates, replace the files in the *same* directory and click **Reload** in Chrome; do not remove the extension without backing up your saved Cube JSON.
+
+## Roadmap
+
+1. Validate complete-card previews and mixed official/custom imports.
+2. Improve Cube editing, duplicate/copy management, and XML ID reconciliation.
+3. Add synchronized four-player drafting and final 40-card deck building.
+4. Export DuelingBook-compatible XML decks.
+
+This project is unofficial and not affiliated with DuelingBook. Only import cards you have rights to access and use.
