@@ -10,7 +10,8 @@ enabling import on app routes. Lobby pages without either container stay disable
 Published `/deck` and `/card` pages continue to work.
 
 When either container exists, scan and preview candidates are restricted to
-`.cardfront_content` elements within `#deck_cards` and `#side_cards`. Both
+`.cardfront_content` elements within containers named `deck_cards` and
+`side_cards`, matched by **ID or CSS class**. Both
 containers are read each time; moving, adding or deleting editor cards is
 reflected in the next scan. A hidden container or an offscreen card is included.
 Empty containers return an empty import rather than falling back to unrelated
@@ -25,16 +26,27 @@ from the container, since one record can occur in both containers and the deck
 container may include Extra Deck cards. Use the Section menu or XML matching to
 assign them.
 
+## v0.4.1 detection fix
+
+v0.4.0 checked only element IDs. A constructor exposing `.deck_cards` and
+`.side_cards` classes therefore returned `editor: false`, disabling the button.
+v0.4.1 uses the same combined ID/class selector for detection, scanning and
+preview. Mixed/overlapping matches do not count one node twice. Empty class-named
+containers still exclude unrelated search cards. Regression fixtures reproduced
+the disabled-button failure before the fix and pass afterward. The screenshot
+alone does not confirm the live DOM structure; the fix still needs a test in the
+user's signed-in constructor page.
+
 ## Automated checks
 
-11 Chromium tests cover mixed official/custom deck and side cards, excluded
+16 Chromium tests cover mixed official/custom deck and side cards, excluded
 search/hover nodes, hidden cards, a single container, empty containers, changing
 the editor after script injection, preview scoping, popup-to-content import from
 the root and an app URL, duplicate reimport/storage preservation, lobby gating,
 origin checks and missing content scripts. These run alongside the existing 30
-checks (41 total).
+checks (46 total).
 
-Tests use synthetic DOM fixtures based on the supplied container IDs and the
+Tests use synthetic DOM fixtures based on the supplied container names (both ID and class forms) and the
 existing `.cardfront_content` card markup. Live DuelingBook rendering and timing
 still require verification; no signed-in session or captured editor DOM is
 available in the test suite.

@@ -56,15 +56,18 @@
     return record;
   }
 
+  // Constructor containers may use class names rather than element IDs.
+  const EDITOR_CONTAINERS = '#deck_cards, .deck_cards, #side_cards, .side_cards';
+
   function editorPresent() {
-    return Boolean(document.querySelector('#deck_cards, #side_cards'));
+    return Boolean(document.querySelector(EDITOR_CONTAINERS));
   }
 
   function cardRoots() {
     // Exclude editor search results and hover previews. Include cards outside
     // the visible area, and re-read the containers after each editor change.
     const selector = editorPresent()
-      ? '#deck_cards .cardfront_content, #side_cards .cardfront_content'
+      ? `:is(${EDITOR_CONTAINERS}) .cardfront_content`
       : '.cardfront_content';
     return [...document.querySelectorAll(selector)];
   }

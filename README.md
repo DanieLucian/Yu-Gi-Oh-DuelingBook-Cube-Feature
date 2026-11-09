@@ -7,7 +7,8 @@ An unofficial Chrome extension prototype to import custom and official Yu-Gi-Oh!
 - **v0.1.0** — Initial custom-card import and Cube management. User verified successful import of 26 unique custom cards and persistence across imports.
 - **v0.2.0** — Experimental full-card previews (not yet verified by user).
 - **v0.3.0** — Mixed official/custom-card import and full-card previews.
-- **v0.4.0** — Cube JSON restore, manual section editing and deck-editor imports (pending user verification).
+- **v0.4.0** — Cube JSON restore, manual section editing and deck-editor imports.
+- **v0.4.1** — Fix constructor detection for class-named deck/side containers (pending user verification).
 
 ## Install / update
 
@@ -30,7 +31,8 @@ the existing extension directory.
 
 Reload the extension and refresh your DuelingBook tab after updating. Open the
 Deck Constructor/editor, load a deck, then use **Scan & import current page**.
-All recognized cards inside `#deck_cards` and `#side_cards` are included. Search
+All recognized cards inside `deck_cards` and `side_cards` containers (IDs or
+CSS classes) are included. Search
 results and hover cards outside those containers are excluded. Existing IDs are
 refreshed without increasing saved copy counts or replacing manual annotations.
 See [deck-editor checks](docs/deck-editor.md) for details and remaining live checks.

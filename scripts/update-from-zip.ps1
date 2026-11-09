@@ -1,5 +1,5 @@
 # Update the unpacked extension from a downloaded GitHub ZIP. PowerShell 5.1+.
-# This updater installs the tested v0.4 revision c513fa8, not an arbitrary ZIP.
+# This updater installs the tested v0.4.1 runtime, not an arbitrary ZIP.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
@@ -10,9 +10,9 @@ param(
 $ErrorActionPreference = 'Stop'
 $expectedName = 'DuelingBook Cube Draft (Prototype)'
 $hashes = [ordered]@{
-    'manifest.json' = '3909b61276c047a28acbb6b73addea746efaef4695c3e911b4029084cac82779'
-    'content.js' = 'b13560448d05300ad17d7d9802fa3269eae8689bb46628122fc00c2b5588319a'
-    'popup.html' = '220727e2d3fb937157465b9aecf0616240d97ecaa33f0f4307bb677d1310f389'
+    'manifest.json' = '712caf1b45d8f5a3f5b7517c8b47687a9ac6fb9984252153b0e550b5fda0efa3'
+    'content.js' = 'bb208f16d3b9e0688af23d632d25298ecd928cb89e96c1fce1969a478d282b5a'
+    'popup.html' = '2657da85385bcf1bb8b26820d6468a6b07f5972b7680fa2a5aeab60fbae02794'
     'popup.css' = 'b9dae710a2d268acf144421eaa5899dbe7c79736b4bac6127be4f2d3e730a9d3'
     'popup.js' = '836ed4f6ad9c8099b996c96b4463adc8e10c9a007e6e4c4dca7210e1d48eabf1'
 }
@@ -57,7 +57,7 @@ try {
         }
         $actual = (Get-FileHash -LiteralPath $sourceFile -Algorithm SHA256).Hash
         if ($actual -ne $hashes[$name]) {
-            throw ('Unexpected revision or changed file: ' + $name + '. Use the specified v0.4 ZIP. No files were changed.')
+            throw ('Unexpected revision or changed file: ' + $name + '. Use the specified v0.4.1 ZIP. No files were changed.')
         }
     }
 

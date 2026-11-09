@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.1 — Pending user verification
+- Fixed constructor detection, scanning and previews for `deck_cards`/`side_cards` containers identified by CSS class as well as ID.
+- Added five regression tests, including the disabled-button case, empty class containers and overlapping selectors.
+- Refreshed the Windows updater checksums for the corrected runtime.
+
 ## v0.4.0 — Pending user verification
 - Added Deck Constructor/editor import from `deck_cards` and `side_cards`, excluding search results and hover cards outside those containers.
 - Enabled the existing content script on DuelingBook app routes and detect the editor when opening the popup; no new host permissions.

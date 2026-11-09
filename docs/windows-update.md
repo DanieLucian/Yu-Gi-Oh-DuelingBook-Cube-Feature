@@ -1,10 +1,9 @@
 # Update an unpacked extension on Windows
 
-The helper `scripts/update-from-zip.ps1` installs the tested v0.4 extension runtime
-from commit `c513fa8d2ccdbc690037a1991a65d92404cf0aea`. It uses a local ZIP so a
+The helper `scripts/update-from-zip.ps1` installs the tested v0.4.1 extension runtime. It uses a local ZIP so a
 private repository does not require a GitHub token in PowerShell.
 
-1. In your signed-in browser, download that revision's source ZIP from GitHub.
+1. In your signed-in browser, download the v0.4.1 source ZIP from GitHub.
 2. Save `scripts/update-from-zip.ps1` as `update-from-zip.ps1` in Downloads.
 3. Open Windows PowerShell and run this block, replacing the target path with the
    folder currently loaded as the unpacked extension:
@@ -27,3 +26,8 @@ helper does not delete unrelated extension-folder files or access Chrome profile
 storage. Export your Cube from Chrome if you want a separate collection backup.
 The checksums intentionally reject other revisions; revise them when preparing
 a future extension update.
+
+When updating from v0.4.0, download the new updater as well as the ZIP and
+replace the older updater file in Downloads. Older updater checksums deliberately
+reject the new runtime files. Confirm **Prototype v0.4.1** in the popup after
+reloading the extension and refreshing DuelingBook.

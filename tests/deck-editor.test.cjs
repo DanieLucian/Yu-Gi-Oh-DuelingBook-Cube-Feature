@@ -128,3 +128,34 @@ test('missing content script prompts the user to refresh the DuelingBook tab',as
   try {assert.equal(await ui.locator('#scan').isDisabled(),true);assert.match(await ui.locator('#message').textContent(),/Refresh the DuelingBook tab/);}
   finally {await ui.close();await source.close();}
 });
+for (const attribute of ['class','id']) {
+  test(`constructor detection and import accept ${attribute}-named deck/side containers`,async()=>{
+    const source=await contentPage(`<div ${attribute}="deck_cards">${card('42','Deck monster')}</div><div ${attribute}="side_cards">${card('43','Side spell')}</div>${card('99','Search result')}`);
+    const ui=await popup(source);
+    try {
+      assert.equal(await ui.locator('#scan').isEnabled(),true);
+      await ui.locator('#scan').click();
+      await ui.waitForFunction(()=>document.querySelector('#message').textContent.includes('Added 2'));
+      assert.deepEqual(Object.keys(await ui.evaluate(()=>window.saved.dbcd_cards_v1)).sort(),['42','43']);
+      assert.equal((await send(source,{type:'DBCD_PREVIEW',id:'43'})).ok,true);
+      assert.equal(await source.locator('#dbcd-preview-overlay .name_txt').textContent(),'Side spell');
+    } finally {await ui.close();await source.close();}
+  });
+}
+for(const container of ['deck_cards','side_cards']) {
+  test(`empty class-named ${container} never imports search results`,async()=>{
+    const source=await contentPage(`<div class="${container} other-class"></div>${card('99','Search result')}`);
+    try {
+      assert.equal((await send(source,{type:'DBCD_CONTEXT'})).editor,true);
+      const scan=await send(source,{type:'DBCD_SCAN'});
+      assert.deepEqual(scan.cards,[]);assert.equal(scan.rendered,0);
+    } finally {await source.close();}
+  });
+}
+test('mixed and overlapping ID/class selectors import each selected node once',async()=>{
+  const source=await contentPage(`<div id="deck_cards" class="deck_cards">${card('42','Deck card')}</div><div class="side_cards other-class">${card('43','Side card')}</div>${card('99','Outside card')}`);
+  try {
+    const scan=await send(source,{type:'DBCD_SCAN'});
+    assert.equal(scan.rendered,2);assert.deepEqual(scan.cards.map(c=>c.id),['42','43']);
+  } finally {await source.close();}
+});

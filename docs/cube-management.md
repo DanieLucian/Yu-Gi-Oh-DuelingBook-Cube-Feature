@@ -51,8 +51,8 @@ isolated fixture data. The 20 Cube-management checks cover:
 - Section/copy changes across popup reload and page reimport.
 - Failed writes, recovery, XML annotation compatibility and rapid edits/export.
 
-The existing 10 preview/storage checks and 11 [deck-editor checks](deck-editor.md)
-also remain in the suite (41 total). A popup fixture
+The existing 10 preview/storage checks and 16 [deck-editor checks](deck-editor.md)
+also remain in the suite (46 total). A popup fixture
 was visually inspected at its 464 px width. This is not an installed-extension
 or live DuelingBook test. This environment's Chromium did not load the unpacked
 extension through command-line flags, and its extension-loading CDP method was
