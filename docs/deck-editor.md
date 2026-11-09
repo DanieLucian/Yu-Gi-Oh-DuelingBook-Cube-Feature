@@ -33,9 +33,11 @@ v0.4.0 checked only element IDs. A constructor exposing `.deck_cards` and
 v0.4.1 uses the same combined ID/class selector for detection, scanning and
 preview. Mixed/overlapping matches do not count one node twice. Empty class-named
 containers still exclude unrelated search cards. Regression fixtures reproduced
-the disabled-button failure before the fix and pass afterward. The screenshot
-alone does not confirm the live DOM structure; the fix still needs a test in the
-user's signed-in constructor page.
+the disabled-button failure before the fix and pass afterward. The user's
+DevTools diagnostic confirmed the live page has **0 matching IDs, 4 matching
+class containers and 1 iframe**. The class containers are accessible in the
+queried document, confirming the ID-only detector was wrong. The updated scan
+and preview still need verification in the signed-in constructor page.
 
 ## Automated checks
 
