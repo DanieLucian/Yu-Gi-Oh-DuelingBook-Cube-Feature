@@ -22,6 +22,10 @@ Use Chrome's `chrome://extensions` → **Developer mode** → **Load unpacked** 
 
 This project is unofficial and not affiliated with DuelingBook. Only import cards you have rights to access and use.
 
+Windows users can use the [ZIP updater](docs/windows-update.md) to extract a
+verified update, back up the files it replaces and copy the runtime files into
+the existing extension directory.
+
 ## Import from the deck editor
 
 Reload the extension and refresh your DuelingBook tab after updating. Open the
