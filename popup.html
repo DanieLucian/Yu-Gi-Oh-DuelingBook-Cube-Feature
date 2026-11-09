@@ -2,7 +2,7 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DuelingBook Cube Draft</title><link rel="stylesheet" href="popup.css"></head>
 <body>
-<header><div class="brand"><span class="symbol">▣</span><div><h1>Cube Draft</h1><p>DuelingBook companion · Prototype v0.3</p></div></div></header>
+<header><div class="brand"><span class="symbol">▣</span><div><h1>Cube Draft</h1><p>DuelingBook companion · Prototype v0.4</p></div></div></header>
 <main>
   <section class="panel">
     <div class="spread"><h2>Deck-page importer</h2><span id="site-state" class="status">Checking page…</span></div>
@@ -19,7 +19,10 @@
   </section>
   <section class="panel actions">
     <h2>Collection tools</h2>
-    <div class="buttons"><button id="export">Export Cube JSON</button><button id="xml">Match card IDs from XML</button></div>
+    <div class="buttons"><button id="export">Export Cube JSON</button><button id="import">Import Cube JSON</button></div>
+    <input type="file" id="json-file" accept=".json,application/json" hidden>
+    <p class="hint">Import adds missing cards from a Cube backup. Existing cards and their copies stay unchanged.</p>
+    <button id="xml">Match card IDs from XML</button>
     <input type="file" id="xml-file" accept=".xml,text/xml,application/xml" hidden>
     <p class="hint">XML matching can identify official DuelingBook IDs by unique card name, and classify Main/Extra Deck cards. Ambiguous names are skipped.</p>
     <button id="clear" class="danger">Clear local collection</button>
