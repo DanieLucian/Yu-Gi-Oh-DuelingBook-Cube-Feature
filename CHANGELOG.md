@@ -1,6 +1,8 @@
 # Changelog
 
 ## v0.4.0 — Pending user verification
+- Added Deck Constructor/editor import from `deck_cards` and `side_cards`, excluding search results and hover cards outside those containers.
+- Enabled the existing content script on DuelingBook app routes and detect the editor when opening the popup; no new host permissions.
 - Added Cube JSON import using the existing backup format; existing card IDs and copy counts stay unchanged.
 - Added per-card Main/Extra/Side/Unassigned section controls.
 - Preserved unknown card metadata when refreshing cards from DuelingBook.

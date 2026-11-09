@@ -38,7 +38,7 @@ function render() {
   </article>`).join('') : '<div class="empty">No matching cards.</div>';
 }
 async function scan() {
-  if (!tabId) return notice('Open a DuelingBook deck or card page first.', true);
+  if (!tabId) return notice('Open the DuelingBook deck editor, a deck page or a card page first.', true);
   $('scan').disabled = true;
   try {
     const response = await chrome.tabs.sendMessage(tabId,{type:'DBCD_SCAN'});
@@ -138,9 +138,29 @@ async function initialize() {
   await collectionLoaded;
   const tabs=await chrome.tabs.query({active:true,currentWindow:true});
   const tab=tabs[0];
-  if(tab && /^https:\/\/www\.duelingbook\.com\/(deck|card)(\?|$)/.test(tab.url||'')) {
-    tabId=tab.id; $('site-state').textContent='DuelingBook page detected';$('site-state').className='status good';
-  } else { $('site-state').textContent='Not on a DuelingBook deck';$('scan').disabled=true; }
+  let url;
+  try { url=new URL(tab?.url || ''); } catch { /* No accessible active URL. */ }
+  if (url?.origin !== 'https://www.duelingbook.com') {
+    $('site-state').textContent='Not on DuelingBook';$('scan').disabled=true;
+    return;
+  }
+  const publishedPage=/^\/(deck|card)\/?$/.test(url.pathname);
+  if (!publishedPage) {
+    try {
+      const context=await chrome.tabs.sendMessage(tab.id,{type:'DBCD_CONTEXT'});
+      if (!context?.ok || !context.editor) {
+        $('site-state').textContent='Open the DuelingBook deck editor';$('scan').disabled=true;
+        return;
+      }
+    } catch {
+      $('site-state').textContent='Refresh this DuelingBook page';$('scan').disabled=true;
+      notice('Refresh the DuelingBook tab after updating the extension, then open the deck editor.',true);
+      return;
+    }
+  }
+  tabId=tab.id;
+  $('site-state').textContent=publishedPage?'DuelingBook page detected':'DuelingBook deck editor detected';
+  $('site-state').className='status good';
 }
 $('scan').addEventListener('click',scan);
 $('filter').addEventListener('input',render);
