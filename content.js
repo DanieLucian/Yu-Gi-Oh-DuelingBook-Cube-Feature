@@ -56,8 +56,24 @@
     return record;
   }
 
+  // Constructor containers may use class names rather than element IDs.
+  const EDITOR_CONTAINERS = '#deck_cards, .deck_cards, #side_cards, .side_cards';
+
+  function editorPresent() {
+    return Boolean(document.querySelector(EDITOR_CONTAINERS));
+  }
+
+  function cardRoots() {
+    // Exclude editor search results and hover previews. Include cards outside
+    // the visible area, and re-read the containers after each editor change.
+    const selector = editorPresent()
+      ? `:is(${EDITOR_CONTAINERS}) .cardfront_content`
+      : '.cardfront_content';
+    return [...document.querySelectorAll(selector)];
+  }
+
   function scan() {
-    const roots = [...document.querySelectorAll('.cardfront_content')];
+    const roots = cardRoots();
     const records = new Map();
     for (const root of roots) {
       const card = extractCard(root);
@@ -74,7 +90,7 @@
 
   function preview(id) {
     // Ignore our own clone, and prefer a laid-out card over hidden duplicates.
-    const candidates = [...document.querySelectorAll('.cardfront_content')]
+    const candidates = cardRoots()
       .filter(node => extractCard(node)?.id === id);
     const root = candidates.sort((a, b) =>
       Number(b.getBoundingClientRect().width > 0) - Number(a.getBoundingClientRect().width > 0))[0];
@@ -167,6 +183,10 @@
   }
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type === 'DBCD_CONTEXT') {
+      sendResponse({ok:true,editor:editorPresent()});
+      return;
+    }
     if (message?.type !== 'DBCD_SCAN' && message?.type !== 'DBCD_PREVIEW') return;
     try {sendResponse(message.type==='DBCD_SCAN' ? {ok:true,...scan()} : preview(message.id));}
     catch(error){sendResponse({ok:false,error:String(error)});}
