@@ -8,7 +8,8 @@ An unofficial Chrome extension prototype to import custom and official Yu-Gi-Oh!
 - **v0.2.0** — Experimental full-card previews (not yet verified by user).
 - **v0.3.0** — Mixed official/custom-card import and full-card previews.
 - **v0.4.0** — Cube JSON restore, manual section editing and deck-editor imports.
-- **v0.4.1** — Fix constructor detection for class-named deck/side containers (pending user verification).
+- **v0.4.1** — Fixed constructor detection for class-named containers; user confirmed working.
+- **v0.5.0** — Reliable XML ID matching and per-card result reporting (pending user verification).
 
 ## Install / update
 
@@ -51,6 +52,14 @@ Same-name cards with different IDs remain separate.
 See [Cube management behavior and manual checks](docs/cube-management.md) for
 validation details, exact-restore instructions and remaining limitations.
 
+## Match DuelingBook XML IDs
+
+Use **Match card IDs from XML** with an exported DuelingBook deck. Known IDs match
+first; otherwise an official card must have a unique normalized name. Conflicting
+bindings, ambiguous names and unmatched cards appear in the results panel. Matching
+never creates cards or changes copies. Cards appearing in several XML sections
+keep their current Cube section. See [XML matching rules and manual checks](docs/xml-matching.md).
+
 ## Development and automated checks
 
 No application build or runtime dependencies are required. Load this directory as
@@ -61,7 +70,7 @@ npm ci
 CHROMIUM_PATH=/usr/bin/chromium npm test
 ```
 
-Set `CHROMIUM_PATH` to your Chromium/Chrome executable if it is elsewhere. Tests
-use Playwright with an isolated browser and synthetic page fixtures; they do not
-contact DuelingBook. They cover backup restore, collection edits and preview
-rendering. See [preview review and manual checks](docs/preview-review.md).
+Set `CHROMIUM_PATH` to your Chromium/Chrome executable if it is elsewhere. Browser
+tests use Playwright with isolated synthetic fixtures; pure matcher tests run in
+Node. They cover backup restore, collection edits, previews and XML matching
+without contacting DuelingBook. See [preview review and manual checks](docs/preview-review.md).

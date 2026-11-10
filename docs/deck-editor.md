@@ -46,7 +46,7 @@ search/hover nodes, hidden cards, a single container, empty containers, changing
 the editor after script injection, preview scoping, popup-to-content import from
 the root and an app URL, duplicate reimport/storage preservation, lobby gating,
 origin checks and missing content scripts. These run alongside the existing 30
-checks (46 total).
+checks (46 checks), plus 43 v0.5 XML checks (89 total).
 
 Tests use synthetic DOM fixtures based on the supplied container names (both ID and class forms) and the
 existing `.cardfront_content` card markup. Live DuelingBook rendering and timing

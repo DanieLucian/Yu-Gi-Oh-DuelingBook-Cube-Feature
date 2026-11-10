@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DuelingBook Cube Draft (Prototype)",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Import official and custom cards from the DuelingBook deck editor and deck/card pages into a local Cube collection.",
   "permissions": [
     "storage",

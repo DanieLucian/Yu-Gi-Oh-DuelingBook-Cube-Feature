@@ -9,14 +9,16 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&'
 function notice(value, error=false) { $('message').textContent = value; $('message').className = 'message' + (error?' error':''); }
 // Serialize writes in this popup and publish UI state only after storage succeeds.
 let pendingWrite = Promise.resolve();
-function updateCollection(edit) {
+function updateCollection(edit, shouldWrite = () => true) {
   const write = pendingWrite.then(async () => {
     await collectionLoaded;
     const next = structuredClone(collection);
     const result = edit(next);
-    await chrome.storage.local.set({[STORE_KEY]: next});
-    collection = next;
-    render();
+    if (shouldWrite(result)) {
+      await chrome.storage.local.set({[STORE_KEY]: next});
+      collection = next;
+      render();
+    }
     return result;
   });
   pendingWrite = write.catch(() => {});
@@ -108,31 +110,39 @@ async function importJson(file) {
   });
   notice(`Imported ${added} cards; kept ${skipped} existing cards unchanged. Copies were not added together.`);
 }
+function clearXmlReport() {
+  $('xml-report').hidden=true;
+  $('xml-summary').textContent='';
+  $('xml-results').replaceChildren();
+}
+function showXmlReport(report) {
+  const s=report.summary;
+  const matched=s.byId+s.byName;
+  const skipped=s.ambiguous+s.conflict+s.unmatched+s.invalid;
+  const summary=`XML matched ${matched} distinct ID${matched===1?'':'s'} (${s.byId} by ID, ${s.byName} by name). Skipped: ${skipped}. Conflicts: ${s.conflict}; ambiguous: ${s.ambiguous}; unmatched: ${s.unmatched}; invalid: ${s.invalid}.`;
+  notice(summary);
+  $('xml-summary').textContent=`${s.entries} XML card ${s.entries===1?'entry':'entries'} processed. ${summary} Copy counts unchanged; no cards added. Existing Cube sections kept for multi-section matches: ${s.multiSection}.`;
+  const labels={matched:'Matched',ambiguous:'Ambiguous',conflict:'Conflict',unmatched:'Unmatched',invalid:'Invalid'};
+  $('xml-results').innerHTML=report.results.map(row=>`<li class="xml-result xml-${row.status}">
+    <h3><span>${labels[row.status]}</span> ${escapeHtml(row.name || '(unnamed card)')}</h3>
+    <p>XML ID: ${escapeHtml(row.id || '(missing)')} · Sections: ${escapeHtml(row.sections.join(', ') || '(none)')} · Entries: ${row.occurrences}</p>
+    <p>${escapeHtml(row.reason)}</p>
+  </li>`).join('');
+  $('xml-report').hidden=false;
+  $('xml-report').open=true;
+}
 async function annotateXml(file) {
-  const data=await file.text();const doc=new DOMParser().parseFromString(data,'application/xml');
-  if(doc.querySelector('parsererror')) return notice('Invalid XML file.',true);
-  const {found, matchedByName, ambiguous} = await updateCollection(next => {
-    let found=0, matchedByName=0, ambiguous=0;
-    for (const section of ['main','extra','side']) {
-      for (const card of doc.querySelectorAll(`deck > ${section} > card`)) {
-        const id=card.getAttribute('id');
-        if (next[id]) { next[id].section=section; next[id].duelingbookId=id; found++; continue; }
-        // Match official cards only when the visible card name is unique in the collection.
-        // Do not guess a match for two distinct card records sharing the same name.
-        const name = (card.textContent || '').trim().replace(/\s+/g,' ').toLowerCase();
-        const candidates = Object.values(next).filter(c=>c.origin==='official' && c.name.trim().replace(/\s+/g,' ').toLowerCase()===name);
-        if (candidates.length===1) {
-          const candidate=candidates[0];
-          if (candidate.duelingbookId && candidate.duelingbookId!==id) { ambiguous++; continue; }
-          candidate.duelingbookId=id;
-          candidate.section=section;
-          matchedByName++;
-        } else if (candidates.length>1) ambiguous++;
-      }
+  const entries=CubeXml.parseXml(await file.text());
+  const report=await updateCollection(next=>{
+    const plan=CubeXml.planMatches(next,entries);
+    for (const update of plan.updates) {
+      const card=next[update.key];
+      card.duelingbookId=update.duelingbookId;
+      if (update.section !== undefined) card.section=update.section;
     }
-    return {found, matchedByName, ambiguous};
-  });
-  notice(`XML matched ${found} IDs and ${matchedByName} official names; ${ambiguous} ambiguous matches skipped. No new cards added.`);
+    return plan;
+  }, plan=>plan.updates.length>0);
+  showXmlReport(report);
 }
 async function initialize() {
   await collectionLoaded;
@@ -175,7 +185,15 @@ $('json-file').addEventListener('change',async e=>{
   finally { input.value=''; $('import').disabled=false; }
 });
 $('xml').addEventListener('click',()=>$('xml-file').click());
-$('xml-file').addEventListener('change',async e=>{if(e.target.files[0]){try{await annotateXml(e.target.files[0]);}catch(err){notice(err.message,true);}}e.target.value='';});
+$('xml-file').addEventListener('change',async e=>{
+  const input=e.target;
+  if (!input.files[0]) return;
+  clearXmlReport();
+  $('xml').disabled=true;
+  try { await annotateXml(input.files[0]); }
+  catch (error) { notice('XML matching failed: '+error.message,true); }
+  finally { input.value=''; $('xml').disabled=false; }
+});
 $('cards').addEventListener('change',async e=>{
   const action=e.target.dataset.action;
   if (action!=='copies' && action!=='section') return;

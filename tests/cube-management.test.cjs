@@ -14,7 +14,7 @@ const backup = cards => ({schema:'dbcd-cube-v1',exportedAt:'2026-11-09',cards});
 async function fixture(cards=[custom,official]) {
   const page=await browser.newPage({viewport:{width:464,height:650},acceptDownloads:true});
   await page.route('**/*', route => route.abort());
-  await page.setContent(fs.readFileSync('popup.html','utf8').replace('<script src="popup.js"></script>',''));
+  await page.setContent(fs.readFileSync('popup.html','utf8').replace(/<script src="[^"]+"><\/script>/g,''));
   await page.addStyleTag({path:path.resolve('popup.css')});
   await page.evaluate(cards => {
     window.saved={dbcd_cards_v1:Object.fromEntries(cards.map(c=>[c.id,c]))};
@@ -30,6 +30,7 @@ async function fixture(cards=[custom,official]) {
       }
     }},tabs:{query:async()=>[{id:1,url:'https://www.duelingbook.com/deck?id=1'}],sendMessage:async()=>({ok:true,rendered:window.scanCards.length,cards:window.scanCards})}};
   },cards);
+  await page.addScriptTag({path:path.resolve('xml-matching.js')});
   await page.addScriptTag({path:path.resolve('popup.js')});
   await page.waitForFunction(()=>document.querySelector('#site-state').textContent==='DuelingBook page detected');
   return page;
