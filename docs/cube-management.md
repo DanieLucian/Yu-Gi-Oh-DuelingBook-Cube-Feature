@@ -31,8 +31,9 @@ do not implement draft selection, legality checks or multiplayer behavior.
 
 Page reimport refreshes extracted card fields but keeps copies, an assigned
 section, reconciled DuelingBook ID, original import date and unknown metadata.
-XML matching still assigns sections for its matched cards, so it can replace a
-manual section assignment. It does not alter quantities.
+XML matching assigns a section when all matched occurrences agree, so it can
+replace a manual section assignment. In v0.5, multi-section IDs keep their current
+section. It does not alter quantities. See [XML matching](xml-matching.md).
 
 Writes are queued within the popup and operate on a clone of the last saved
 collection. The displayed collection changes only after Chrome storage accepts
@@ -52,7 +53,7 @@ isolated fixture data. The 20 Cube-management checks cover:
 - Failed writes, recovery, XML annotation compatibility and rapid edits/export.
 
 The existing 10 preview/storage checks and 16 [deck-editor checks](deck-editor.md)
-also remain in the suite (46 total). A popup fixture
+also remain in the suite (46 checks), with 43 XML checks added in v0.5 (89 total). A popup fixture
 was visually inspected at its 464 px width. This is not an installed-extension
 or live DuelingBook test. This environment's Chromium did not load the unpacked
 extension through command-line flags, and its extension-loading CDP method was
@@ -85,5 +86,5 @@ unavailable, so real extension storage verification remains a manual check.
   create a new entry. No automatic variant consolidation is attempted.
 - Restoring stored card data does not make its full preview available offline.
   Preview still needs the matching card rendered on the active DuelingBook page.
-- XML ambiguity handling and import DOM selectors are unchanged. Deck XML export
-  and multiplayer remain later work.
+- XML matching reports ambiguity/conflicts and does not offer a manual ID override.
+  Deck XML export and multiplayer remain later work.

@@ -24,12 +24,13 @@ function send(page,message) {
 async function popup(content,url='https://www.duelingbook.com/',cards={}) {
   const page=await browser.newPage();
   await page.route('**/*',route=>route.abort());
-  await page.setContent(fs.readFileSync('popup.html','utf8').replace('<script src="popup.js"></script>',''));
+  await page.setContent(fs.readFileSync('popup.html','utf8').replace(/<script src="[^"]+"><\/script>/g,''));
   await page.exposeFunction('sendToTab',message=>send(content,message));
   await page.evaluate(({url,cards})=>{
     window.saved={dbcd_cards_v1:cards};window.sent=[];
     window.chrome={storage:{local:{get:async()=>structuredClone(window.saved),set:async value=>{window.saved=structuredClone(value);}}},tabs:{query:async()=>[{id:1,url}],sendMessage:async(_id,message)=>{window.sent.push(message.type);return window.sendToTab(message);}}};
   },{url,cards});
+  await page.addScriptTag({path:path.resolve('xml-matching.js')});
   await page.addScriptTag({path:path.resolve('popup.js')});
   await page.waitForFunction(()=>document.querySelector('#site-state').textContent!=='Checking page…');
   return page;

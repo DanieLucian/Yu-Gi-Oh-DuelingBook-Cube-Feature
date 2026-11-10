@@ -2,7 +2,7 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DuelingBook Cube Draft</title><link rel="stylesheet" href="popup.css"></head>
 <body>
-<header><div class="brand"><span class="symbol">▣</span><div><h1>Cube Draft</h1><p>DuelingBook companion · Prototype v0.4.1</p></div></div></header>
+<header><div class="brand"><span class="symbol">▣</span><div><h1>Cube Draft</h1><p>DuelingBook companion · Prototype v0.5.0</p></div></div></header>
 <main>
   <section class="panel">
     <div class="spread"><h2>Deck importer</h2><span id="site-state" class="status">Checking page…</span></div>
@@ -24,10 +24,16 @@
     <p class="hint">Import adds missing cards from a Cube backup. Existing cards and their copies stay unchanged.</p>
     <button id="xml">Match card IDs from XML</button>
     <input type="file" id="xml-file" accept=".xml,text/xml,application/xml" hidden>
-    <p class="hint">XML matching can identify official DuelingBook IDs by unique card name, and classify Main/Extra Deck cards. Ambiguous names are skipped.</p>
+    <p class="hint">Match known IDs first, then unique official-card names. Conflicts and unmatched cards are reported. Copy counts stay unchanged.</p>
     <button id="clear" class="danger">Clear local collection</button>
   </section>
+  <details id="xml-report" class="panel xml-report" hidden>
+    <summary>XML matching results</summary>
+    <p id="xml-summary" class="hint" aria-live="polite"></p>
+    <ol id="xml-results" class="xml-results" aria-label="XML card matching results"></ol>
+  </details>
   <footer>Stored locally in this Chrome profile. No drafting server yet.</footer>
 </main>
+<script src="xml-matching.js"></script>
 <script src="popup.js"></script>
 </body></html>

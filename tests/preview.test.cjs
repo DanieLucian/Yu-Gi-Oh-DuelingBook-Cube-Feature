@@ -68,12 +68,13 @@ test('v0.3 collection survives load and reimport with identity and annotations i
   const page=await browser.newPage();
   const fs=require('node:fs');
   try {
-    await page.setContent(fs.readFileSync('popup.html','utf8').replace('<script src="popup.js"></script>',''));
+    await page.setContent(fs.readFileSync('popup.html','utf8').replace(/<script src="[^"]+"><\/script>/g,''));
     await page.evaluate(()=>{
       const old={id:'42',name:'Old',artwork:'',copies:7,section:'extra',duelingbookId:'42',importedAt:'2025-01-01',origin:'custom'};
       window.saved={dbcd_cards_v1:{42:old}};
       window.chrome={storage:{local:{get:async()=>saved,set:async value=>{window.saved=value;}}},tabs:{query:async()=>[{id:1,url:'https://www.duelingbook.com/deck?id=1'}],sendMessage:async()=>({ok:true,rendered:1,cards:[{...old,name:'New',copies:1,section:'unknown',importedAt:'new'}]})}};
     });
+    await page.addScriptTag({path:path.resolve('xml-matching.js')});
     await page.addScriptTag({path:path.resolve('popup.js')});
     await page.waitForFunction(()=>document.querySelector('#unique').textContent==='1');
     await page.locator('#scan').click();
