@@ -24,9 +24,10 @@ Use Chrome's `chrome://extensions` → **Developer mode** → **Load unpacked** 
 
 This project is unofficial and not affiliated with DuelingBook. Only import cards you have rights to access and use.
 
-Windows users can download the [ready-to-run ZIP updater](docs/windows-update.md),
-right-click it and select **Run with PowerShell**, then choose the ZIP. The target
-folder is prefilled, and replaced runtime files are backed up automatically.
+Windows users can download the [ZIP updater and launcher](docs/windows-update.md)
+into the same folder and double-click **run-update.cmd**, then choose the ZIP. The
+target folder is prefilled, replaced runtime files are backed up, and startup
+errors stay visible in the console.
 
 ## Import from the deck editor
 

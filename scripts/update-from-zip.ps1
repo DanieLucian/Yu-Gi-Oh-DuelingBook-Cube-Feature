@@ -1,16 +1,17 @@
 ﻿# DuelingBook Cube Draft v0.5.0 updater -- ready to run on Windows.
-# Right-click this file and select Run with PowerShell. Select the v0.5.0 ZIP.
+# Start run-update.cmd to keep startup errors visible. Select the v0.5.0 ZIP.
 # Destination is prefilled; no command-line arguments or admin rights needed.
 [CmdletBinding()]
 param(
     [string] $TargetDirectory = 'D:\YGO Custom Card Pics\Duelingbook Cube Feature',
-    [string] $ArchivePath
+    [string] $ArchivePath,
+    [switch] $NoDialogs
 )
 
 $ErrorActionPreference = 'Stop'
 
 function Invoke-CubeFileUpdate {
-    param([string] $TargetDirectory, [string] $ArchivePath)
+    param([string] $TargetDirectory, [string] $ArchivePath, [switch] $NoDialogs)
     $ErrorActionPreference = 'Stop'
     $expectedName = 'DuelingBook Cube Draft (Prototype)'
     $hashes = [ordered]@{
@@ -22,6 +23,10 @@ function Invoke-CubeFileUpdate {
         'popup.js' = '448486a628f85f2a04aa510e72c33af4125ff69de90df40ea86e8d84d849962f'
     }
 
+    if ($NoDialogs -and -not $ArchivePath) {
+        throw '-NoDialogs requires -ArchivePath.'
+    }
+    Write-Host ('Checking extension folder: ' + $TargetDirectory)
     if (-not (Test-Path -LiteralPath $TargetDirectory -PathType Container)) {
         throw 'The target directory does not exist. Choose the folder currently loaded in Chrome.'
     }
@@ -36,14 +41,32 @@ function Invoke-CubeFileUpdate {
     }
 
     if (-not $ArchivePath) {
+        if ([System.Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') {
+            throw 'The ZIP picker requires STA mode. Start run-update.cmd from the same folder as this script.'
+        }
         Add-Type -AssemblyName System.Windows.Forms
+        Write-Host 'Opening ZIP picker. Select the downloaded v0.5.0 ZIP.'
         $picker = New-Object System.Windows.Forms.OpenFileDialog
         $picker.Title = 'Select the downloaded DuelingBook Cube Draft ZIP'
         $picker.Filter = 'ZIP archives (*.zip)|*.zip'
+        $owner = New-Object System.Windows.Forms.Form
+        $owner.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+        $owner.ShowInTaskbar = $false
+        $owner.TopMost = $true
+        $owner.Size = [System.Drawing.Size]::new(1, 1)
+        $owner.Opacity = 0
         try {
-            if ($picker.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { return $null }
+            $owner.Show()
+            $owner.Activate()
+            if ($picker.ShowDialog($owner) -ne [System.Windows.Forms.DialogResult]::OK) {
+                Write-Host 'Canceled. No files were changed.'
+                return $null
+            }
             $ArchivePath = $picker.FileName
-        } finally { $picker.Dispose() }
+        } finally {
+            $picker.Dispose()
+            $owner.Dispose()
+        }
     }
     $archive = (Get-Item -LiteralPath $ArchivePath).FullName
     $staging = Join-Path ([System.IO.Path]::GetTempPath()) ('dbcd-update-' + [guid]::NewGuid().ToString('N'))
@@ -104,9 +127,10 @@ function Invoke-CubeFileUpdate {
 }
 
 try {
-    Add-Type -AssemblyName System.Windows.Forms
-    $result = Invoke-CubeFileUpdate -TargetDirectory $TargetDirectory -ArchivePath $ArchivePath
-    if ($null -ne $result) {
+    Write-Host 'DuelingBook Cube Draft v0.5.0 updater'
+    if (-not $NoDialogs) { Add-Type -AssemblyName System.Windows.Forms }
+    $result = Invoke-CubeFileUpdate -TargetDirectory $TargetDirectory -ArchivePath $ArchivePath -NoDialogs:$NoDialogs
+    if ($null -ne $result -and -not $NoDialogs) {
         $message = "Updated the six extension files in:`r`n" + $result.Target +
             "`r`n`r`nBackup of previous files:`r`n" + $result.Backup +
             "`r`n`r`nNow click Reload in chrome://extensions and refresh your DuelingBook tab."
@@ -118,16 +142,17 @@ try {
     }
 } catch {
     $message = $_.Exception.Message
-    Write-Host $message -ForegroundColor Red
-    try {
-        [void][System.Windows.Forms.MessageBox]::Show(
-            $message, 'DuelingBook Cube Draft update failed',
-            [System.Windows.Forms.MessageBoxButtons]::OK,
-            [System.Windows.Forms.MessageBoxIcon]::Error
-        )
-    } catch {
-        Write-Host 'Press Enter to close.'
-        [void](Read-Host)
+    Write-Host ('Update failed: ' + $message) -ForegroundColor Red
+    if (-not $NoDialogs) {
+        try {
+            [void][System.Windows.Forms.MessageBox]::Show(
+                $message, 'DuelingBook Cube Draft update failed',
+                [System.Windows.Forms.MessageBoxButtons]::OK,
+                [System.Windows.Forms.MessageBoxIcon]::Error
+            )
+        } catch {
+            Write-Host 'Start run-update.cmd to keep this error visible.'
+        }
     }
     exit 1
 }
