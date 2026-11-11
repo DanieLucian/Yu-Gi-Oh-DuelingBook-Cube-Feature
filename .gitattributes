@@ -1,0 +1,1 @@
+scripts/Replace-Folder-From-Zip.bat -text whitespace=cr-at-eol

@@ -34,7 +34,7 @@ function Install-Zip([string]$zip,[string]$dest) {
         $top=@(Get-ChildItem -LiteralPath $stage -Force);
         if($top.Count -eq 1 -and $top[0].PSIsContainer -and (Test-Path -LiteralPath (Join-Path $top[0].FullName 'manifest.json') -PathType Leaf)) {$payload=$top[0].FullName};
         Move-Item -LiteralPath $dest -Destination $backup;
-        try {Move-Item -LiteralPath $payload -Destination $dest} catch {
+        try {[IO.Directory]::Move($payload,$dest)} catch {
             $failure=$_;
             if(Test-Path -LiteralPath $dest) {Remove-Item -LiteralPath $dest -Recurse -Force};
             try {Move-Item -LiteralPath $backup -Destination $dest} catch {throw ('Update failed and automatic restore failed. Your original folder is at '+$backup)};

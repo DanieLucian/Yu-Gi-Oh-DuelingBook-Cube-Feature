@@ -21,8 +21,10 @@ functions=payload[:payload.index("\ntry {\n    Add-Type -AssemblyName System.Win
 script.write_text(functions+r"""
 function Move-Item {
     param([string]$LiteralPath,[string]$Destination)
-    if($env:TEST_FAIL_INSTALL -and $LiteralPath.Contains('.zip-update-')) {throw 'Simulated replacement failure'}
     Microsoft.PowerShell.Management\Move-Item -LiteralPath $LiteralPath -Destination $Destination
+    if($env:TEST_FAIL_INSTALL -and $LiteralPath -eq $env:TEST_DEST) {
+        [void][IO.Directory]::CreateDirectory($env:TEST_DEST)
+    }
 }
 try {
     $b=Install-Zip $env:TEST_ZIP $env:TEST_DEST
