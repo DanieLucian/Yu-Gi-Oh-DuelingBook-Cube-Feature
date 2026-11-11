@@ -27,6 +27,14 @@ Windows users can use the [ZIP updater](docs/windows-update.md) to extract a
 verified update, back up the files it replaces and copy the runtime files into
 the existing extension directory.
 
+## One-file ZIP updater on Windows
+
+For a ZIP picker followed by a destination picker, download
+[`Replace-Folder-From-Zip.bat`](scripts/Replace-Folder-From-Zip.bat), keep it outside
+the destination and double-click it. It replaces the destination after extracting
+the ZIP and keeps the previous folder as a backup. No companion PS1 is needed.
+See [usage, backup behavior and verification](docs/zip-folder-replacer.md).
+
 ## Import from the deck editor
 
 Reload the extension and refresh your DuelingBook tab after updating. Open the
