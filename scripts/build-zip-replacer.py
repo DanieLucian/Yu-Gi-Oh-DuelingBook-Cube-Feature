@@ -5,11 +5,18 @@ from pathlib import Path
 
 POWERSHELL = r'''
 $ErrorActionPreference='Stop';
+function Get-Destination([string]$selection) {
+    if(Test-Path -LiteralPath $selection -PathType Container) {return $selection};
+    $parent=[IO.Path]::GetDirectoryName($selection);
+    if(!$parent -or !(Test-Path -LiteralPath $parent -PathType Container)) {throw 'Open the destination folder and leave Use this folder in the file-name box.'};
+    return $parent;
+};
 function Install-Zip([string]$zip,[string]$dest) {
     $dest=[IO.Path]::GetFullPath($dest).TrimEnd([IO.Path]::DirectorySeparatorChar);
     if (!$dest -or $dest -eq [IO.Path]::GetPathRoot($dest).TrimEnd([IO.Path]::DirectorySeparatorChar)) {throw 'A drive root cannot be replaced.'};
     $item=Get-Item -LiteralPath $dest -Force;
-    if (!$item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {throw 'Choose a normal project folder, not a link or junction.'};
+    if (!$item.PSIsContainer) {throw 'Choose a project folder.'};
+    for($cursor=$item; $cursor; $cursor=$cursor.Parent) {if($cursor.Attributes -band [IO.FileAttributes]::ReparsePoint) {throw 'The destination or one of its parent folders is a link or junction.'}};
     $exact=@([Environment]::GetFolderPath('UserProfile'),[Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('MyDocuments'),[IO.Path]::GetTempPath(),(Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Downloads'));
     $system=@($env:windir,$env:ProgramFiles,${env:ProgramFiles(x86)},[Environment]::GetFolderPath('LocalApplicationData'),[Environment]::GetFolderPath('ApplicationData'),[Environment]::GetFolderPath('CommonApplicationData'));
     foreach($p in $exact) {if($p -and ($dest -eq $p.TrimEnd([IO.Path]::DirectorySeparatorChar) -or $p.TrimEnd([IO.Path]::DirectorySeparatorChar).StartsWith($dest+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase))) {throw 'Choose a project subfolder, not a personal or temporary root folder.'}};
@@ -36,9 +43,12 @@ function Install-Zip([string]$zip,[string]$dest) {
         Move-Item -LiteralPath $dest -Destination $backup;
         try {[IO.Directory]::Move($payload,$dest)} catch {
             $failure=$_;
-            if(Test-Path -LiteralPath $dest) {Remove-Item -LiteralPath $dest -Recurse -Force};
-            try {Move-Item -LiteralPath $backup -Destination $dest} catch {throw ('Update failed and automatic restore failed. Your original folder is at '+$backup)};
-            throw $failure;
+            $recovery='none';
+            try {
+                if(Test-Path -LiteralPath $dest) {$recovery=$dest+'.recovered-'+[guid]::NewGuid().ToString('N'); Move-Item -LiteralPath $dest -Destination $recovery};
+                [IO.Directory]::Move($backup,$dest);
+            } catch {throw ('Restore failed. Original backup: '+$backup+'; conflict path: '+$recovery+'; destination: '+$dest)};
+            throw ('Update failed; original folder restored. Concurrent files: '+$recovery+'. '+$failure.Exception.Message);
         };
         return $backup;
     } finally {if(Test-Path -LiteralPath $stage) {Remove-Item -LiteralPath $stage -Recurse -Force}};
@@ -50,12 +60,16 @@ try {
     $owner.Show(); $owner.Activate();
     $pick=New-Object System.Windows.Forms.OpenFileDialog;
     $pick.Title='Select the ZIP to extract'; $pick.Filter='ZIP archives (*.zip)|*.zip';
-    $folder=New-Object System.Windows.Forms.FolderBrowserDialog;
-    $folder.Description='Select the folder to REPLACE. Its old contents will be backed up.';
+    $folder=New-Object System.Windows.Forms.OpenFileDialog;
+    $folder.Title='Open the destination folder, then click Open to use it';
+    $folder.ValidateNames=$false; $folder.CheckFileExists=$false; $folder.CheckPathExists=$true;
+    $folder.Filter='Folder selection|*.folder-selection'; $folder.AddExtension=$false;
+    $folder.FileName='Use this folder';
     try {
         if($pick.ShowDialog($owner) -ne 'OK') {Write-Host 'Canceled. No changes.'; exit 0};
         if($folder.ShowDialog($owner) -ne 'OK') {Write-Host 'Canceled. No changes.'; exit 0};
-        $zip=$pick.FileName; $dest=$folder.SelectedPath;
+        $zip=$pick.FileName;
+        $dest=Get-Destination $folder.FileName;
         if([Windows.Forms.MessageBox]::Show($owner,('Replace all contents of '+$dest+'? A backup will be kept beside it.'),'Confirm replacement','YesNo','Warning') -ne 'Yes') {Write-Host 'Canceled. No changes.'; exit 0};
     } finally {$pick.Dispose();$folder.Dispose();$owner.Dispose()};
     $backup=Install-Zip $zip $dest;

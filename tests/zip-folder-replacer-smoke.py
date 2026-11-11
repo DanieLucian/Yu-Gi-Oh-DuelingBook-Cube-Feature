@@ -22,8 +22,10 @@ script.write_text(functions+r"""
 function Move-Item {
     param([string]$LiteralPath,[string]$Destination)
     Microsoft.PowerShell.Management\Move-Item -LiteralPath $LiteralPath -Destination $Destination
-    if($env:TEST_FAIL_INSTALL -and $LiteralPath -eq $env:TEST_DEST) {
+    if($env:TEST_FAIL_INSTALL -and $LiteralPath -eq $env:TEST_DEST -and -not $script:CollisionCreated) {
+        $script:CollisionCreated=$true
         [void][IO.Directory]::CreateDirectory($env:TEST_DEST)
+        [IO.File]::WriteAllText((Join-Path $env:TEST_DEST 'new-work.txt'),'concurrent data')
     }
 }
 try {
@@ -56,6 +58,9 @@ def run(name,files,ok=True,wrapper=False,self_inside=False,source_inside=False,s
  else:
   assert (dest/'old.txt').read_text()=='original'
   assert not list(case.glob('*.backup-*'))
+  if fail_install:
+   recovered=list(case.glob('*.recovered-*'));assert len(recovered)==1
+   assert (recovered[0]/'new-work.txt').read_text()=='concurrent data'
  assert not list(case.glob('.zip-update-*'))
  print(name,'PASS')
 run('generic',{'new.txt':'new','nested/a.txt':'a','.hidden':'hidden'})
@@ -73,4 +78,23 @@ run('rollback',{'new.txt':'new'},ok=False,fail_install=True)
 r=subprocess.run([pwsh,'-NoProfile','-File',str(script)],env={**env,'TEST_ZIP':'missing.zip','TEST_DEST':'/'},capture_output=True,text=True)
 assert r.returncode!=0 and 'drive root' in r.stdout,r.stdout+r.stderr
 print('drive-root PASS')
+# A linked parent must not hide a protected physical destination.
+case=root/'linked-parent';case.mkdir();protected=case/'simulated-system';protected.mkdir()
+actual=protected/'project';actual.mkdir();(actual/'old.txt').write_text('protected')
+alias=case/'innocent-alias';alias.symlink_to(protected,target_is_directory=True)
+archive=case/'source.zip'
+with zipfile.ZipFile(archive,'w') as z:z.writestr('replacement.txt','new')
+r=subprocess.run([pwsh,'-NoProfile','-File',str(script)],env={**env,'windir':str(protected),'TEST_ZIP':str(archive),'TEST_DEST':str(alias/'project')},capture_output=True,text=True)
+assert r.returncode!=0 and 'parent folders' in r.stdout,(r.stdout,r.stderr)
+assert (actual/'old.txt').read_text()=='protected' and not(actual/'replacement.txt').exists()
+assert not list(protected.glob('*.backup-*')) and not list(protected.glob('.zip-update-*'))
+print('linked-parent PASS')
+# The Explorer-style picker returns a placeholder filename in the chosen folder.
+folder=case/'picker target';folder.mkdir()
+choice=root/'choice.ps1';choice.write_text(functions+"\nGet-Destination $env:TEST_SELECTION")
+for selection in [str(folder),str(folder/'Use this folder')]:
+ r=subprocess.run([pwsh,'-NoProfile','-File',str(choice)],env={**env,'TEST_SELECTION':selection},capture_output=True,text=True)
+ assert r.returncode==0 and r.stdout.strip()==str(folder),(r.stdout,r.stderr)
+assert not list(folder.iterdir())
+print('picker-folder-resolution PASS')
 print('Fixture directory:',root)

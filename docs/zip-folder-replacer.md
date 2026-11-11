@@ -5,7 +5,9 @@ button. Save the actual `.bat`, not the GitHub HTML page, somewhere **outside th
 folder you will replace**, then double-click it.
 
 1. Select a `.zip` file.
-2. Select the destination folder.
+2. In the second Explorer-style picker, navigate **inside** the destination folder
+   or press **Alt+D**, paste its full path, and press Enter. Leave **Use this
+   folder** in the file-name box and click **Open**. No placeholder file is created.
 3. Confirm the destination shown in the replacement dialog.
 
 The BAT extracts the ZIP to a staging directory beside the destination first.
@@ -14,7 +16,10 @@ named sibling backup and move the extracted folder into its place. The destinati
 keeps the same path and contains only the extracted contents. Old files, including
 hidden/untracked files, are kept in the backup rather than mixed with the update.
 The original directory can be restored from that backup if needed. A failed swap
-attempts to restore the old folder automatically. Backups are not auto-deleted.
+attempts to restore the old folder automatically. If another process has recreated
+that destination, its contents are first moved to a sibling `.recovered-...`
+folder, never deleted. If recovery cannot complete, the error reports the original
+backup and conflict locations. Backups and recovered folders are not auto-deleted.
 
 If the ZIP has one outer folder containing `manifest.json` (as GitHub extension
 source ZIPs do), that wrapper is removed so Chrome still sees `manifest.json`
@@ -23,7 +28,7 @@ The ZIP can even be inside the destination: it is extracted before the old folde
 is moved, and the ZIP is then retained in the backup.
 
 Drive roots, personal root folders and their ancestors, system/application-data
-folders, destination links/junctions, and a folder containing the running BAT are
+folders, links/junctions anywhere in the destination ancestry, and a folder containing the running BAT are
 rejected. ZIP traversal paths, absolute paths, alternate data streams and symbolic
 link entries are rejected before replacement. Canceling either picker or the
 confirmation changes nothing. Errors stay visible in the console.
@@ -50,5 +55,6 @@ Run `python3 tests/zip-folder-replacer-smoke.py --pwsh /path/to/pwsh` for the
 PowerShell parser and filesystem checks. Tested in official PowerShell 7.6.9 on
 Linux: generic ZIP replacement, GitHub wrapper removal, exact backup retention,
 empty/unsafe archive rejection, a ZIP inside the destination, self-location and
-drive-root guards, and simulated install-failure rollback. The actual cmd.exe
+drive-root guards, linked-parent rejection, Explorer picker path resolution, and
+simulated rollback preserving concurrent files. The actual cmd.exe
 launcher and Windows Forms dialogs require a Windows-side check.
