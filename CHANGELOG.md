@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Permission review
+- Removed redundant `activeTab`; retained local storage and the exact HTTPS DuelingBook host.
+- Added permission regression checks and Chrome Web Store justifications.
+
 ## v0.4.1 — Pending user verification
 - Fixed constructor detection, scanning and previews for `deck_cards`/`side_cards` containers identified by CSS class as well as ID.
 - Added five regression tests, including the disabled-button case, empty class containers and overlapping selectors.

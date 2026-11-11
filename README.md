@@ -65,3 +65,10 @@ Set `CHROMIUM_PATH` to your Chromium/Chrome executable if it is elsewhere. Tests
 use Playwright with an isolated browser and synthetic page fixtures; they do not
 contact DuelingBook. They cover backup restore, collection edits and preview
 rendering. See [preview review and manual checks](docs/preview-review.md).
+
+## Chrome Web Store permissions
+
+The extension requests local storage and access to `https://www.duelingbook.com/*`.
+It does not require `activeTab`. See the [API audit and Web Store permission
+justifications](docs/chrome-web-store-permissions.md), including the remaining
+installed-extension validation step.

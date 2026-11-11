@@ -4,8 +4,7 @@
   "version": "0.4.1",
   "description": "Import official and custom cards from the DuelingBook deck editor and deck/card pages into a local Cube collection.",
   "permissions": [
-    "storage",
-    "activeTab"
+    "storage"
   ],
   "host_permissions": [
     "https://www.duelingbook.com/*"

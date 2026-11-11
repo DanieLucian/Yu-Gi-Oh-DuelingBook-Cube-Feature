@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $expectedName = 'DuelingBook Cube Draft (Prototype)'
 $hashes = [ordered]@{
-    'manifest.json' = '712caf1b45d8f5a3f5b7517c8b47687a9ac6fb9984252153b0e550b5fda0efa3'
+    'manifest.json' = 'fd90d93a95dab9cf60367d6775c73c78c8a0150d5ba9defaa02c34cb5487f216'
     'content.js' = 'bb208f16d3b9e0688af23d632d25298ecd928cb89e96c1fce1969a478d282b5a'
     'popup.html' = '2657da85385bcf1bb8b26820d6468a6b07f5972b7680fa2a5aeab60fbae02794'
     'popup.css' = 'b9dae710a2d268acf144421eaa5899dbe7c79736b4bac6127be4f2d3e730a9d3'
