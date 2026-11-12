@@ -1,0 +1,3 @@
+/data/
+/assets/*
+!/assets/manifest.example.json

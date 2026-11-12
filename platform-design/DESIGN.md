@@ -86,17 +86,41 @@ A provisional upload limit is 10 MB / 10,000 unique records; this is an operatio
 limit, not a draft rule, and can be configured. Store files under generated UUIDs,
 never a supplied filename. Parse/validate before adding a library record.
 
-Current JSON contains artwork and metadata, not a complete rendered-card image.
-Render available frame/name/type/effect/stats as a web card. A future optional
-full-card image field could provide a closer match when supplied. Pendulum scales, Link arrows and exact DuelingBook
-fonts/layout cannot be guaranteed from the current fields. The prototype uses
-fictional examples to review interaction and spacing. Exact full-card rendering
-needs representative Monster/Spell/Trap/Extra/Pendulum/Link data during development.
+### Server-rendered cards and local visual assets
 
-Initially let browsers load original artwork URLs; do not have the PC server fetch
-arbitrary uploaded URLs. Render names/effects as text, retain HTTPS image URLs,
-and show an artwork placeholder if a host blocks loading. A controlled asset cache
-can be designed later if real artwork hosts require it.
+The PC server owns card rendering. It combines the JSON with a local visual asset
+pack: border, normal/effect/ritual/Extra Deck/Spell/Trap backgrounds, Pendulum
+variants, Spell/Trap subtype icons, monster attributes, separate Level and Rank
+icons, Link arrows, fonts and artwork. Each Pendulum background combines its
+underlying monster frame with a Pendulum layout.
+
+The renderer produces a self-contained image, cached by visual content, asset
+content and renderer version. The pack and left spotlight use the same rendered
+image at different sizes, so their appearance stays consistent. The server does
+not compose an image again for every hover or for each physical copy of a card.
+A first proof of concept composes SVG on the server; raster thumbnails can follow
+when pack performance is measured.
+
+See [renderer/README.md](renderer/README.md) for a working local rendering gallery,
+asset manifest and optional `visual` metadata contract. This gallery is separate
+from the single-file drafting simulation; its HTTP process is not the multiplayer
+server. Original frames, icons, fonts and artwork are not bundled. Missing assets
+have explicit diagnostics and schematic fallbacks until a real pack is installed.
+
+Existing exports retain the `dbcd-cube-v1` schema and current fields. They do not
+reliably describe Pendulum scales, Link arrows, Spell/Trap subtype icons or an
+explicit Xyz Rank. Add optional visual metadata without changing IDs/copies or
+requiring old collections to migrate. Existing records can render with known
+fields and missing-detail diagnostics. Do not infer Normal Spell from a generic
+`[ SPELL CARD ]` label or invent Link arrows from its rating.
+
+Artwork is also stored locally, with an explicit map from the original URL to a
+server asset file. The experiment performs no URL fetching; a later ingestion
+step must restrict artwork downloads to supported sources and validated images.
+Uploaded JSON cannot select arbitrary server paths or trigger arbitrary network
+requests. Retain original records and render names/effects as escaped text. Exact
+DuelingBook layout, font metrics, long effects and all card families need visual
+comparison once the original asset pack is installed.
 
 ## PC server architecture
 
@@ -111,7 +135,9 @@ Guest browsers ── HTTP + WebSocket ── Your Windows PC
                                       ├─ authoritative draft engine / timer
                                       └─ data/
                                          ├─ platform.sqlite
-                                         └─ cubes/<generated UUID>.json
+                                         ├─ cubes/<generated UUID>.json
+                                         ├─ assets/ (frames, icons, fonts, artwork)
+                                         └─ render-cache/ (derived card images)
 ```
 
 Back up the whole data directory. Anonymous guest sessions have reconnect tokens
@@ -193,7 +219,8 @@ a platform-specific privacy policy before a public launch.
 ## Implementation order and acceptance checks
 
 1. **Design review:** approve the screen and interaction prototype in this branch.
-2. **Server/library:** Windows start/stop instructions, shared JSON upload/list,
+2. **Render assets and server/library:** validate the local rendering gallery
+   with real frames/icons/fonts/artwork, then Windows start/stop and JSON upload/list,
    SQLite persistence and restart test. Two browsers must see the same upload.
 3. **Lobby and engine:** 2–6 independent browser sessions, capacity/readiness
    checks, immutable snapshots, copy conservation and left/right round passing.
@@ -210,3 +237,8 @@ copy-respecting pack passing, timeout picks, deck sections and XML serialization
 It does not implement shared PC persistence, real rooms, network multiplayer,
 authentication, reconnects or direct DuelingBook import. Its random generator and
 client timer are demonstration behavior, not the production authority model.
+
+The separate renderer gallery implements a local HTTP process, asset manifest,
+SVG composition, missing-detail diagnostics and disk cache. It does not yet feed
+rendered images into the draft simulation. Original visual assets and accurate
+font-metric text fitting remain required for faithful reproduction.

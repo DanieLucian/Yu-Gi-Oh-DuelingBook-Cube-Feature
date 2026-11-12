@@ -6,6 +6,15 @@ privacy, the current extension JSON contract and implementation milestones.
 
 ![Draft table with on-card confirmation](preview.jpg)
 
+## Server-rendered card images
+
+The rendering proof of concept generates card images on the PC server from JSON
+and locally stored backgrounds, border, icons, fonts and artwork. See the
+[renderer proof of concept](renderer/README.md) for its Node.js start command,
+local asset manifest, visual metadata contract and sample gallery. It caches
+self-contained SVGs; original visual assets must still be installed and validated.
+This gallery is separate from the single-file draft simulation below.
+
 ## Try the interface
 
 Download **index.html** using GitHub's **Download raw file** button and open the
@@ -39,7 +48,7 @@ Try these interactions:
 From the repository root, with its existing Playwright dependency installed:
 
 ```sh
-node --test platform-design/prototype.test.cjs
+node --test platform-design/prototype.test.cjs platform-design/renderer/*.test.cjs
 npm test
 ```
 
