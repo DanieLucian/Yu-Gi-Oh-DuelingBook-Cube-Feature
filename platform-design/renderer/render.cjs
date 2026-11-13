@@ -257,17 +257,71 @@ function loadAssets(root, manifest) {
     assets.set(key, read(file, key));
   for (const [url, file] of Object.entries(manifest.artworks))
     artworks.set(url, read(file, "artwork"));
-  return { assets, artworks };
+  if (
+    manifest.profile != null &&
+    !["schematic", "tcg-813-v1"].includes(manifest.profile)
+  )
+    throw Error("Unknown card layout profile.");
+  const compositeSpecs = manifest.composites ?? {};
+  if (
+    !compositeSpecs ||
+    typeof compositeSpecs !== "object" ||
+    Array.isArray(compositeSpecs) ||
+    Object.keys(compositeSpecs).length > 100
+  )
+    throw Error("Invalid asset composites.");
+  const composites = new Map();
+  const dimension = (value) =>
+    Number.isFinite(value) && value > 0 && value <= 4096;
+  for (const [key, spec] of Object.entries(compositeSpecs)) {
+    if (
+      !spec ||
+      !dimension(spec.width) ||
+      !dimension(spec.height) ||
+      !Array.isArray(spec.layers) ||
+      !spec.layers.length ||
+      spec.layers.length > 8
+    )
+      throw Error("Invalid composite dimensions or layer count.");
+    const layers = spec.layers.map((layer) => {
+      if (
+        !layer ||
+        typeof layer.key !== "string" ||
+        !assets.get(layer.key) ||
+        layer.key.startsWith("font.") ||
+        !Number.isFinite(layer.x) ||
+        !Number.isFinite(layer.y) ||
+        Math.abs(layer.x) > 4096 ||
+        Math.abs(layer.y) > 4096 ||
+        !dimension(layer.width) ||
+        !dimension(layer.height)
+      )
+        throw Error(
+          "Composite must reference local raster layers and finite coordinates.",
+        );
+      return { ...layer, data: assets.get(layer.key) };
+    });
+    composites.set(key, { width: spec.width, height: spec.height, layers });
+  }
+  return {
+    assets,
+    artworks,
+    composites,
+    profile: manifest.profile ?? "schematic",
+  };
 }
 function renderCard(card, registry) {
   const c = normalizeCard(card),
     diagnostics = [...c.warnings];
+  const textured = registry.profile === "tcg-813-v1";
   function asset(key) {
-    const data = registry.assets.get(key);
+    const data = registry.assets.get(key) || registry.composites?.get(key);
     if (!data) diagnostics.push(`missing-asset:${key}`);
     return data;
   }
   function image(data, x, y, width, height, extra = "") {
+    if (data && typeof data === "object")
+      return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="0 0 ${data.width} ${data.height}" ${extra}>${data.layers.map((layer) => image(layer.data, layer.x, layer.y, layer.width, layer.height)).join("")}</svg>`;
     return data
       ? `<image x="${x}" y="${y}" width="${width}" height="${height}" href="${data}" ${extra}/>`
       : "";
@@ -328,14 +382,18 @@ function renderCard(card, registry) {
     (bodyFont ? `@font-face{font-family:CardBody;src:url('${bodyFont}')}` : "");
   let body = `<rect width="813" height="1185" rx="24" fill="#3d3530"/><rect x="25" y="25" width="763" height="1135" rx="10" fill="${colors[c.frame]}"/>`;
   body += image(background, 0, 0, 813, 1185);
-  body += `<rect x="50" y="48" width="713" height="75" fill="#fff" fill-opacity=".35"/>`;
+  if (!textured || !background)
+    body += `<rect x="50" y="48" width="713" height="75" fill="#fff" fill-opacity=".35"/>`;
   body += label(
     c.name,
     65,
-    100,
-    Math.min(38, Math.max(15, 1050 / Array.from(c.name).length)),
-    'font-family="CardName, Georgia, serif"' +
-      (Array.from(c.name).length > 28
+    textured ? 117 : 100,
+    Math.min(
+      textured ? 52 : 38,
+      Math.max(15, (textured ? 1600 : 1050) / Array.from(c.name).length),
+    ),
+    `font-family="CardName, Georgia, serif" fill="${textured && ["xyz", "link"].includes(c.frame) ? "#fff" : "#171b20"}"` +
+      (Array.from(c.name).length > (textured ? 21 : 28)
         ? ' textLength="600" lengthAdjust="spacingAndGlyphs"'
         : ""),
   );
@@ -344,7 +402,13 @@ function renderCard(card, registry) {
       ? asset(`attribute.${c.attribute}`)
       : null;
     body += attribute
-      ? image(attribute, 693, 54, 65, 65)
+      ? image(
+          attribute,
+          textured ? 680 : 693,
+          54,
+          textured ? 76 : 65,
+          textured ? 76 : 65,
+        )
       : `<circle cx="725" cy="87" r="32" fill="#ddd"/>` +
         label(c.attribute || "?", 725, 94, 15, 'text-anchor="middle"');
     if (c.frame !== "link") {
@@ -357,7 +421,7 @@ function renderCard(card, registry) {
             "<defs>" + image(star, 0, 0, size, size, 'id="star"') + "</defs>";
         for (let i = 0; i < c.count; i++)
           body += star
-            ? `<use href="#star" x="${start + i * 49}" y="139"/>`
+            ? `<use href="#star" x="${start + i * 49}" y="${textured ? 148 : 139}"/>`
             : `<g data-star="${c.frame === "xyz" ? "rank" : "level"}"><circle cx="${start + i * 49 + 21}" cy="160" r="21" fill="${c.frame === "xyz" ? "#383838" : "#bc662b"}"/>${label("★", start + i * 49 + 21, 169, 29, 'text-anchor="middle" fill="#ffd85b"')}</g>`;
       } else {
         body += label(
@@ -372,93 +436,127 @@ function renderCard(card, registry) {
       }
     }
   } else {
+    if (textured)
+      body += image(
+        asset(`attribute.${c.frame.toUpperCase()}`),
+        680,
+        54,
+        76,
+        76,
+      );
     body += label(
       c.frame === "spell" ? "[ SPELL CARD ]" : "[ TRAP CARD ]",
       675,
-      172,
+      textured ? 185 : 172,
       30,
       'text-anchor="end"',
     );
     if (c.icon && c.icon !== "normal") {
       const icon = asset(`icon.${c.icon}`);
       body += icon
-        ? image(icon, 695, 133, 54, 54)
+        ? image(icon, 695, textured ? 145 : 133, 54, 54)
         : label(c.icon, 718, 165, 14, 'text-anchor="middle"');
     } else if (!c.icon) body += label("?", 720, 171, 30);
   }
   const art = registry.artworks.get(c.artwork);
   if (!art)
     diagnostics.push("missing-artwork: local source URL mapping required");
-  body += `<rect x="65" y="205" width="683" height="515" fill="#273544"/>`;
-  body += image(art, 70, 210, 673, 505, 'preserveAspectRatio="xMidYMid meet"');
+  const artBox = textured
+    ? c.pendulum
+      ? [56, 213, 702, 530]
+      : [100, 219, 614, 614]
+    : [70, 210, 673, 505];
+  body += `<rect x="${artBox[0]}" y="${artBox[1]}" width="${artBox[2]}" height="${artBox[3]}" fill="#273544"/>`;
+  body += image(art, ...artBox, 'preserveAspectRatio="xMidYMid meet"');
   if (!art)
     body += label(
       "Artwork unavailable locally",
       406,
-      465,
+      textured ? artBox[1] + artBox[3] / 2 : 465,
       26,
       'text-anchor="middle" fill="#e2e8f0"',
     );
   if (c.frame === "link") {
     const arrow = c.linkArrows.length ? asset("icon.link-arrow") : null;
-    const positions = [
-      [406, 220, 0],
-      [715, 225, 45],
-      [735, 462, 90],
-      [715, 700, 135],
-      [406, 705, 180],
-      [95, 700, 225],
-      [77, 462, 270],
-      [95, 225, 315],
-    ];
+    const positions = textured
+      ? [
+          [407, 220, 0],
+          [710, 222, 45],
+          [720, 526, 90],
+          [710, 827, 135],
+          [407, 831, 180],
+          [103, 827, 225],
+          [97, 526, 270],
+          [103, 222, 315],
+        ]
+      : [
+          [406, 220, 0],
+          [715, 225, 45],
+          [735, 462, 90],
+          [715, 700, 135],
+          [406, 705, 180],
+          [95, 700, 225],
+          [77, 462, 270],
+          [95, 225, 315],
+        ];
     for (const direction of c.linkArrows) {
       const [x, y, angle] = positions[ARROWS.indexOf(direction)];
       body += `<g transform="translate(${x} ${y}) rotate(${angle})">${arrow ? image(arrow, -23, -23, 46, 46) : '<path d="M0 -22 L21 18 L0 9 L-21 18Z" fill="#df563e"/>'}</g>`;
     }
   }
   if (c.pendulum) {
-    body += `<rect x="55" y="740" width="703" height="140" fill="#e2efe6" stroke="#3f6b76" stroke-width="3"/>`;
+    if (textured) body += image(asset("overlay.pendulum"), 0, 0, 813, 1185);
+    if (!textured || !background)
+      body += `<rect x="55" y="740" width="703" height="140" fill="#e2efe6" stroke="#3f6b76" stroke-width="3"/>`;
     body +=
       label(
         c.scaleLeft ?? "?",
-        80,
-        815,
-        32,
+        textured ? 84.4 : 80,
+        textured ? 792 : 815,
+        textured ? 56.5 : 32,
         'text-anchor="middle" fill="#326ca5"',
       ) +
       label(
         c.scaleRight ?? "?",
-        733,
-        815,
-        32,
+        textured ? 728 : 733,
+        textured ? 792 : 815,
+        textured ? 56.5 : 32,
         'text-anchor="middle" fill="#b64949"',
       );
     body += lines(
       c.pendulumEffect || "Pendulum text unavailable",
-      110,
+      textured ? 129 : 110,
       773,
-      49,
+      textured ? 45 : 49,
       4,
     );
   }
-  const boxY = c.pendulum ? 905 : 765,
-    textY = boxY + 69;
-  body += `<rect x="55" y="${boxY}" width="703" height="${1100 - boxY}" fill="#f2e9d6" stroke="#655b50" stroke-width="3"/>`;
-  body += label(
-    c.type || "Type unavailable",
+  const boxY = textured ? 885 : c.pendulum ? 905 : 765,
+    textY = textured ? (c.monster ? 947 : 919) : boxY + 69;
+  if (!textured || !background)
+    body += `<rect x="55" y="${boxY}" width="703" height="${1100 - boxY}" fill="#f2e9d6" stroke="#655b50" stroke-width="3"/>`;
+  if (c.monster || !textured)
+    body += label(
+      c.type || "Type unavailable",
+      72,
+      boxY + 33,
+      24,
+      'font-weight="bold"',
+    );
+  body += lines(
+    c.effect,
     72,
-    boxY + 33,
-    24,
-    'font-weight="bold"',
+    textY,
+    58,
+    textured ? (c.monster ? 6 : 7) : c.pendulum ? 4 : 10,
   );
-  body += lines(c.effect, 72, textY, 58, c.pendulum ? 4 : 10);
   if (c.monster)
     body += label(
       `ATK / ${c.atk || "?"}   ${c.frame === "link" ? c.link || "LINK-?" : "DEF / " + (c.def || "?")}`,
       742,
-      1130,
+      textured ? 1098 : 1130,
       26,
-      `text-anchor="end" font-weight="bold" fill="${["xyz", "link"].includes(c.frame) ? "#f8f5eb" : "#171b20"}"`,
+      `text-anchor="end" font-weight="bold" fill="${!textured && ["xyz", "link"].includes(c.frame) ? "#f8f5eb" : "#171b20"}"`,
     );
   body += image(border, 0, 0, 813, 1185);
   if (diagnostics.length)

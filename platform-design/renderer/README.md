@@ -6,11 +6,19 @@ they do not rebuild the card or contact DuelingBook. Rendered images are cached
 on disk, with identity based on visual content, embedded asset bytes and renderer
 version. Changes to copies/sections do not regenerate an identical card image.
 
-**Original visual assets are not included in this repository.** Missing files
-produce schematic fallbacks and diagnostics. The current coordinates, text
-wrapping and font sizing are a starting layout, not a reproduction verified
-against DuelingBook. This is a local rendering experiment, not a multiplayer
-server or an integrated replacement for the standalone drafting prototype.
+A **bundled template pack** now supplies 67 unchanged PNG/WOFF2 files from
+[YGO Carder](https://github.com/lauqerm/ygocarder). See the
+[original authors and source notice](packs/ygocarder/NOTICE.md) and per-file
+checksums in `packs/ygocarder/provenance.json`. These files came from GitHub,
+not the wiki. Card illustrations remain separate.
+
+The local gallery uses this pack automatically unless `assets/manifest.json`
+is present. Missing files/details produce diagnostics. Coordinates follow the
+pack's 813 × 1185 layout; typography, long-text fitting and exact matching still
+need comparison with DuelingBook. This is a rendering experiment, separate from
+the draft simulation and multiplayer server.
+
+![Bundled frame and icons in the server rendering gallery](template-preview.jpg)
 
 ## Run on your PC
 
@@ -34,10 +42,25 @@ Cube library. The gallery does not save Cubes, change the JSON, or perform a dra
 A separate [wiki asset importer](WIKI-ASSETS.md) can discover and install selected
 frames/icons through the Yu-Gi-Oh! Wiki or Yugipedia API, retaining source credits
 and converting self-contained SVG icons to PNG. Its offline tests pass; live
-collection is currently blocked by this cloud environment's network policy.
-No wiki assets are bundled or verified yet.
+collection remains unavailable: after the domain grants became active, Fandom
+and its image CDN returned HTTP 402 with “Please contact the site owner for
+access.” No wiki files are bundled or verified. The working bundled pack uses
+the separately credited GitHub source above.
 
-## Install the visual asset pack
+## Use or customize the asset pack
+
+The bundled pack is ready to use with the start command above. It contains nine
+base frame families, separate Pendulum layers, attributes, subtype/Level/Rank
+icons, Link arrow layers and two fonts. Its manifest composes these original
+layers without changing their bytes. Template originals are stored and served
+from your PC, with no runtime request to GitHub or the wiki.
+
+To customize it, copy the **whole** `packs/ygocarder/` directory into `assets/`,
+including its notice and provenance, then edit `assets/manifest.json`. This lets
+you add `artworks` mappings while retaining the supplied frames and fonts. An
+existing custom manifest takes precedence and is not overwritten automatically.
+
+For an independent pack with your own files:
 
 1. Copy `assets/manifest.example.json` to `assets/manifest.json`.
 2. Put the frame, border, icon, artwork and font files under `assets/`.
@@ -79,7 +102,7 @@ The manifest covers:
 | Border | Full 813 × 1185 canvas, transparent except for the outer border; painted last |
 | Background | Full 813 × 1185 canvas; normal, effect, ritual, fusion, synchro, xyz, link, spell, trap |
 | Pendulum background | Separate `<monster frame>-pendulum` variants, including Extra Deck variants |
-| Attributes | DARK, LIGHT, EARTH, WATER, FIRE, WIND, DIVINE |
+| Attributes / badges | DARK, LIGHT, EARTH, WATER, FIRE, WIND, DIVINE; Spell/Trap header badges |
 | Level/Rank | Separate transparent icons; repeated by the known Level/Rank |
 | Spell/Trap subtype | continuous, counter, equip, field, quick-play, ritual; Normal has no subtype icon |
 | Link arrows | One transparent upward arrow, rotated to the selected compass directions |
@@ -91,7 +114,14 @@ be WOFF2. Files must stay inside the assets directory, including symlink targets
 The loader checks file signatures/size, not pixel dimensions or full image/font
 integrity: check those visually in the gallery. Limits are 10 MB/file and 256 MB
 loaded asset bytes for this experiment. Original source geometry may require
-adjusting the current coordinates after the real pack is available.
+adjusting coordinates for a different pack. The optional `tcg-813-v1` profile
+uses the bundled geometry; omit it for the original schematic layout.
+
+A manifest can also define `composites`: each composite has a `width`, `height`
+and up to eight `layers`, each specifying a local raster key, `x`, `y`, `width`
+and `height`. Font references, nested composites, missing layers and non-finite
+coordinates are rejected. See the bundled manifest for complete examples.
+Changing layers, placements, profile or file bytes changes the rendered cache key.
 
 ## Compatible JSON and missing visual metadata
 
@@ -174,6 +204,8 @@ legacy JSON preservation, text escaping, missing metadata, local asset resolutio
 cache invalidation/restart, HTTP limits and Chromium SVG decoding for all examples.
 Browser tests use the existing Playwright dependency and `CHROMIUM_PATH` option.
 
-Still required: real asset-pack/font installation, comparison of all card families
-against DuelingBook, long-text and non-Latin font fitting, image crops and custom
-frame variants. Exact reproduction depends on these checks as well as the files.
+Still required: card illustration ingestion/mapping, comparison of every card
+family with DuelingBook, long-text and non-Latin font fitting, image crops and
+custom frame variants. Server-generated SVGs embed the templates/fonts and are
+currently about 1–2 MB each; thumbnail delivery and cache eviction need work
+before integrating this experiment with real drafts.

@@ -104,9 +104,10 @@
       spotlight can use the same image.
     </p>
     <p class="warning">
-      Rendering proof of concept. Original frames, icons, artwork and fonts are
-      not bundled. Missing assets use labeled schematic fallbacks. Layout and
-      typography still need comparison with DuelingBook.
+      Rendering proof of concept. The default local template pack includes
+      frames, icons and fonts credited to YGO Carder and its template authors.
+      Card illustrations are separate. Missing data appears in the diagnostics;
+      layout and typography still need comparison with DuelingBook.
     </p>
     <main>
       <div class="panel card">
@@ -127,9 +128,12 @@
         <h2>Card JSON</h2>
         <pre id="json"></pre>
         <p>
-          Assets are loaded from the server's <code>assets/manifest.json</code>.
-          Restart the process after changing assets. Rendered SVGs embed local
-          images and never fetch uploaded URLs.
+          Uses the bundled template pack unless you supply
+          <code>assets/manifest.json</code>. Restart after changing assets.
+          Rendered SVGs embed local images. Templates: Grezar, 9558able,
+          SlackerMagician, icycatelf; asset collection by
+          <a href="https://github.com/lauqerm/ygocarder">lauqerm / YGO Carder</a
+          >.
         </p>
       </div>
     </main>

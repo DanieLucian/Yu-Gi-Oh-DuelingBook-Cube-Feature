@@ -1,0 +1,826 @@
+{
+  "version": 1,
+  "source": "https://github.com/lauqerm/ygocarder",
+  "commit": "975387bc89a917e4422add3ece85f48170182ce6",
+  "readme": "https://github.com/lauqerm/ygocarder/blob/975387bc89a917e4422add3ece85f48170182ce6/README.md",
+  "templateAuthors": [
+    {
+      "name": "Grezar",
+      "url": "https://www.deviantart.com/grezar"
+    },
+    {
+      "name": "9558able",
+      "url": "https://www.deviantart.com/9558able"
+    },
+    {
+      "name": "SlackerMagician",
+      "url": "https://www.deviantart.com/slackermagician"
+    },
+    {
+      "name": "icycatelf",
+      "url": "https://www.deviantart.com/icycatelf"
+    }
+  ],
+  "projectAuthor": "lauqerm",
+  "filesUnmodified": true,
+  "files": [
+    {
+      "file": "frame-normal.png",
+      "upstreamPath": "public/asset/image/frame/frame-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-normal.png",
+      "gitBlobSha1": "fedadf29c209f77db070655b18951509e8efdb82",
+      "sha256": "eeed8ae1318aefc382280f35983b89a809de0b7549040e024e1afeb7c575393b",
+      "bytes": 324636,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-normal.png",
+      "upstreamPath": "public/asset/image/background/background-name-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-normal.png",
+      "gitBlobSha1": "0f6d22ba826c53bd5a3f01b96830ff9c4c2fd470",
+      "sha256": "36c9159821f98b6e508f31ad03b7631ca356df513292bc8e0d0b507c03b1572b",
+      "bytes": 55821,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-normal.png",
+      "upstreamPath": "public/asset/image/background/background-text-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-normal.png",
+      "gitBlobSha1": "ab9d1f28f8cc136d5a5eae60513be0b20a3237f4",
+      "sha256": "0e2acce7ead805984ef8398b8870904bdb65d988fbca30aacf62a05a46b21d50",
+      "bytes": 96079,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-effect.png",
+      "upstreamPath": "public/asset/image/frame/frame-effect.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-effect.png",
+      "gitBlobSha1": "4348528b31a896f5f7c7072a7c601c9d6b2b7be3",
+      "sha256": "00ff29b1728e022c6643b6c05caf9199e0a65886eb563e6bc2ce4308b02b02d4",
+      "bytes": 376366,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-effect.png",
+      "upstreamPath": "public/asset/image/background/background-name-effect.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-effect.png",
+      "gitBlobSha1": "6dd7f8b907fb6264dda46a18eff895d6e4a880b7",
+      "sha256": "3062bc417c817df99f5de7907171e97d8c3cc146220dd07615a5188772614465",
+      "bytes": 74174,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-effect.png",
+      "upstreamPath": "public/asset/image/background/background-text-effect.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-effect.png",
+      "gitBlobSha1": "38534046b5e3bb64edeb7bdf44a35bdee54a0676",
+      "sha256": "204482a41f54a48bc405b92d60ee168cde206ba0d84ed28e1e3c42319a257dd4",
+      "bytes": 150824,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-ritual.png",
+      "upstreamPath": "public/asset/image/frame/frame-ritual.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-ritual.png",
+      "gitBlobSha1": "6d173efb36e9a78cf4cc34433252abfcf07565da",
+      "sha256": "94e9a562fc7617815448873ce3500e99b008b8e6b7be07eba804b0076b3cd963",
+      "bytes": 316696,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-ritual.png",
+      "upstreamPath": "public/asset/image/background/background-name-ritual.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-ritual.png",
+      "gitBlobSha1": "567a6573db9dae45567d74b5735d851a695bd69b",
+      "sha256": "ae33d597981dad8c8a7f273fd9a63114da84b6b439b34a62e8c4b9ccf2deff1e",
+      "bytes": 53080,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-ritual.png",
+      "upstreamPath": "public/asset/image/background/background-text-ritual.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-ritual.png",
+      "gitBlobSha1": "b03ac48ce5681cb4e0aacacd05d0e5215f9b462c",
+      "sha256": "cc7ed169a7a21af18663684d3310ddb89baf6d37a4a47e716a9d3d4f2edf0a66",
+      "bytes": 100796,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-fusion.png",
+      "upstreamPath": "public/asset/image/frame/frame-fusion.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-fusion.png",
+      "gitBlobSha1": "518cd2183e68aafdd54ad3f57a6db01672d7f468",
+      "sha256": "98be7e36e79a30504ddd9ea8c6b0f4630e732d65952e6f9d238e7ef91814d3fc",
+      "bytes": 316420,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-fusion.png",
+      "upstreamPath": "public/asset/image/background/background-name-fusion.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-fusion.png",
+      "gitBlobSha1": "9dda296d14c700e4c7a7d332147bc4cb5b91c7d9",
+      "sha256": "8b280537d518e91e73fc1932d7d3e91bee5e02cee8d9e99101c0d7380b268648",
+      "bytes": 54098,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-fusion.png",
+      "upstreamPath": "public/asset/image/background/background-text-fusion.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-fusion.png",
+      "gitBlobSha1": "005366f6f5d9896aa609100a2c40ba5aaf7fe954",
+      "sha256": "2bc9878ed9ff35ccb6c3b538f5630a24173c4f3e918684b28e8138867c4792a3",
+      "bytes": 115201,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-synchro.png",
+      "upstreamPath": "public/asset/image/frame/frame-synchro.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-synchro.png",
+      "gitBlobSha1": "a6f454fc9904e9df6febd8449aad9abd06452d74",
+      "sha256": "bd89d1952ecdbfd6de5e369f6df44516f02f159cb51923d5f8315e7d75a47899",
+      "bytes": 181268,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-synchro.png",
+      "upstreamPath": "public/asset/image/background/background-name-synchro.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-synchro.png",
+      "gitBlobSha1": "8cf419c39364989e7f9852267774a9881dfdf5cc",
+      "sha256": "b71c4024b67bd53c48d7df481eb98ec053b5b613ac2e6c0d11271d876e55eb41",
+      "bytes": 33578,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-synchro.png",
+      "upstreamPath": "public/asset/image/background/background-text-synchro.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-synchro.png",
+      "gitBlobSha1": "53febb03a98e7bd9b1b6a4d96ffc56b992003899",
+      "sha256": "ff80c88218f68a47c3ee3e87c3d6f42be26ed14bef208fb85ff39b23d46ff868",
+      "bytes": 64531,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-xyz.png",
+      "upstreamPath": "public/asset/image/frame/frame-xyz.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-xyz.png",
+      "gitBlobSha1": "bf5d9366ac15e1d0f2cbc33c972ac4648313be00",
+      "sha256": "fda3ea36fd1b8e7d5781bc7cd275ca65c486d0dbe9264d754a52c069a716d99e",
+      "bytes": 369337,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-xyz.png",
+      "upstreamPath": "public/asset/image/background/background-name-xyz.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-xyz.png",
+      "gitBlobSha1": "13c2f19094514217915b5c4660d66aa90b140e55",
+      "sha256": "2859c3a180ecd36f3154dffb878225023fc9109b0d2409fdfe20d9c6e48dbd21",
+      "bytes": 51284,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-xyz.png",
+      "upstreamPath": "public/asset/image/background/background-text-xyz.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-xyz.png",
+      "gitBlobSha1": "b2f0ea0534f5c85a277d4b18f7a74abaa497b7e6",
+      "sha256": "bb84b2ed5e4177aa07d76c1cd11f5703fd0d55e4ecdf290d7fb8fcb19d4882ed",
+      "bytes": 117480,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-link.png",
+      "upstreamPath": "public/asset/image/frame/frame-link.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-link.png",
+      "gitBlobSha1": "bc1e843551c1f918571ccdf0c2196012dda23744",
+      "sha256": "fdd6d8ebe74ea9b644116bed2e0c13e32faf693741cba16a15516571ecb7806a",
+      "bytes": 401021,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-link.png",
+      "upstreamPath": "public/asset/image/background/background-name-link.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-link.png",
+      "gitBlobSha1": "33b7cd83ba8f1e44c5b8f4aefda4b1f8d2bdbe70",
+      "sha256": "df5608ce02750e370a70d10d9eadf95eec173f8c33cc778bec36d4b6a493e335",
+      "bytes": 72433,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-link.png",
+      "upstreamPath": "public/asset/image/background/background-text-link.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-link.png",
+      "gitBlobSha1": "012fd99f8fd1793957332b2bf67d38efdf8e2d81",
+      "sha256": "cd9776c9167f2ebe5bf302fe43afcad4d8a4d2988a6bd00d8a5c4de997db5137",
+      "bytes": 94782,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-spell.png",
+      "upstreamPath": "public/asset/image/frame/frame-spell.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-spell.png",
+      "gitBlobSha1": "ed3a16752a33251adcaf270f49c0f3d59b57ee44",
+      "sha256": "eac69f463659e5081e547f568bf65793015fa10924bc5e21e2b8c021df2380bd",
+      "bytes": 437869,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-spell.png",
+      "upstreamPath": "public/asset/image/background/background-name-spell.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-spell.png",
+      "gitBlobSha1": "565bcf6db214c9927607e61c7baa5cdc3f690a3b",
+      "sha256": "0ab9dcaf90dea173b48f0255f700c5c92db31607ad1f5eed9d7661954946c072",
+      "bytes": 84695,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-spell.png",
+      "upstreamPath": "public/asset/image/background/background-text-spell.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-spell.png",
+      "gitBlobSha1": "69b8bf203ca9eca4da3cf6e197b06f907dc287e1",
+      "sha256": "64e9cdf2fb8bf25dd665bbf1883c9e45c2a28ac8ddc03a84b6f945d7b43af6c0",
+      "bytes": 141127,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "frame-trap.png",
+      "upstreamPath": "public/asset/image/frame/frame-trap.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/frame-trap.png",
+      "gitBlobSha1": "746cc565e0e4d13c590b630598849687c77e31f7",
+      "sha256": "45b77a0740a7a87bf27e6f63245f4f1a8f01a1c4dda79b44a696d4d71d60fab6",
+      "bytes": 349403,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-name-trap.png",
+      "upstreamPath": "public/asset/image/background/background-name-trap.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-name-trap.png",
+      "gitBlobSha1": "ca004c05fb12be065bf255150f639a4bab0746ee",
+      "sha256": "450d6826ee2f3ed4738e684cb6dd52d4ba08ee21f1ada69d40d32583aef24184",
+      "bytes": 60449,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "background-text-trap.png",
+      "upstreamPath": "public/asset/image/background/background-text-trap.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-text-trap.png",
+      "gitBlobSha1": "20263faaf805a7ba1814f77ad20399e8d6c45605",
+      "sha256": "3ad60a627fd143000e4ba68d76efd96d820e7b9366025318626ea92b5571cf5e",
+      "bytes": 93840,
+      "dimensions": [
+        705,
+        231
+      ]
+    },
+    {
+      "file": "name-border-normal.png",
+      "upstreamPath": "public/asset/image/frame/name-border-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/name-border-normal.png",
+      "gitBlobSha1": "3564525a85a71fdff87f47893b6c419173fd2d58",
+      "sha256": "1b052a9f1b971bb98941ab40c085ab5bdb77060dec44a4d4dd473b6cfe840c64",
+      "bytes": 1071,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "name-border-xyz.png",
+      "upstreamPath": "public/asset/image/frame/name-border-xyz.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/name-border-xyz.png",
+      "gitBlobSha1": "c68f9747b577ad6e7b5badb53001ce4860d7c0e0",
+      "sha256": "f41007e039b4f18b00cbd2b3d14f111609dea14b341ccdd945e9fb6a167166b4",
+      "bytes": 1074,
+      "dimensions": [
+        813,
+        170
+      ]
+    },
+    {
+      "file": "card-border-normal.png",
+      "upstreamPath": "public/asset/image/frame/card-border-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame/card-border-normal.png",
+      "gitBlobSha1": "2f674274eebda5611d305e644fb52f34f12b2ac4",
+      "sha256": "f41c55b826950b0e3e100d7c3aff809820e849d2164eccd632e2d007c5bad930",
+      "bytes": 202205,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "border-pendulum-medium-base.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/border-pendulum-medium-base.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/border-pendulum-medium-base.png",
+      "gitBlobSha1": "b7f7a4edfac44ccc1dd76035279bf3b20d268a04",
+      "sha256": "a9b836bd47e0ea56e49aeede056a6ace94a798b85844db548c49369af1b260f6",
+      "bytes": 43189,
+      "dimensions": [
+        753,
+        553
+      ]
+    },
+    {
+      "file": "frame-pendulum-normal.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-normal.png",
+      "gitBlobSha1": "3f029f93f9f605a94a0dc463a054fbf6fda6e5e7",
+      "sha256": "5344762b8815e8eb2ecda9a788be2463d0ad1ede2c3cac57e8c3f9e5b8117933",
+      "bytes": 209104,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-normal.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-normal.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-normal.png",
+      "gitBlobSha1": "de40b49740a5ba64e0306a08ce042a44da062f59",
+      "sha256": "aaf5e3b478710aebc2f74d4b667257f4c0aefe198ef0c636c2faa9db8d3270ff",
+      "bytes": 58569,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "frame-pendulum-effect.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-effect.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-effect.png",
+      "gitBlobSha1": "d449113de96512df8c45060665fe8e5d85b38cee",
+      "sha256": "9a794ef55c2815314566fa7cceb3a85ac91f9bc540e1489a34f8733e9bf09977",
+      "bytes": 238775,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-effect.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-effect.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-effect.png",
+      "gitBlobSha1": "1d243d8e5aafb321f8caac5e538f2e1505efd223",
+      "sha256": "8d37febc07b01323eb3f1939bd500ff30ac6461fc0625215e88746308c6c5283",
+      "bytes": 94568,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "frame-pendulum-ritual.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-ritual.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-ritual.png",
+      "gitBlobSha1": "a55713c00096ef70206823baeca3b2d0ca2dede0",
+      "sha256": "b8e3a421906c385ede45d7b276000a5d783982ba9cca6f0273b11d68962a14bb",
+      "bytes": 207549,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-ritual.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-ritual.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-ritual.png",
+      "gitBlobSha1": "e103d1fae0bf76fdb66fcff6877310dc0f0e43ef",
+      "sha256": "a6b030de2a44a0fc256723a10d5a340394ef4d3065a10c52afe61aa0d4ba44df",
+      "bytes": 62289,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "frame-pendulum-fusion.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-fusion.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-fusion.png",
+      "gitBlobSha1": "94c2d59a965ab91b78dd60bacec00ead734719a0",
+      "sha256": "c28dda51ceffaa13c17e7681a492750e4022d0b1c015f6e1a2e7d45f5dc89ff3",
+      "bytes": 206025,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-fusion.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-fusion.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-fusion.png",
+      "gitBlobSha1": "6c2e3c00118c9b1b0b927b866f319b9cef3299b9",
+      "sha256": "f6aa0b26b3c5e0c444aaefebd0d09d0c0e59b3ffb678b091f43db6d7a288a664",
+      "bytes": 69755,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "frame-pendulum-synchro.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-synchro.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-synchro.png",
+      "gitBlobSha1": "be869e6a6a99e9e7f6115d3b189c63a3d4f620c7",
+      "sha256": "ef165db7b8e0b5a32fb516d735afca194b953bc32a17598adc4388340be02000",
+      "bytes": 135820,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-synchro.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-synchro.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-synchro.png",
+      "gitBlobSha1": "476a0c94a5d317df64edfaa0e074307218e0af73",
+      "sha256": "fbe1647eb8a7920fb5828bdc398d1468f1006fafeb7bea16b17f9653e4edf05b",
+      "bytes": 39753,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "frame-pendulum-xyz.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-xyz.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-xyz.png",
+      "gitBlobSha1": "df3a37dc6dfaf2f575e3e4bc43690899cde47100",
+      "sha256": "6f70d7afc9a54e85a8e5089abe9ee909d126afe77575c0ca800a51ed9b9fe6d2",
+      "bytes": 232355,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-xyz.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-xyz.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-xyz.png",
+      "gitBlobSha1": "2425ff4d0c42f6a2ae2543ffef8e94ff0d4e0712",
+      "sha256": "34ab84a725b36ada9371f6b15c9e0884fc0265993b2047f95932f7c6cad7eb74",
+      "bytes": 73834,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "attr-tcg-dark.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-dark.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-dark.png",
+      "gitBlobSha1": "3c4398382cc262aba6155e1e6d6ecf817ba8cb4e",
+      "sha256": "be26da4743867d786a182c0c3b29f10736553a428a58e86644bdd92a895f8dc4",
+      "bytes": 33684,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-light.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-light.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-light.png",
+      "gitBlobSha1": "7a299e59114404fd91381c825e9b22216ae3f221",
+      "sha256": "a035e8c5f7505ec7f74390012f500044307cccc12adea275100836f3a1ebcd30",
+      "bytes": 32409,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-earth.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-earth.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-earth.png",
+      "gitBlobSha1": "fc66969fbdd564e87925f80c0dde299d329b46aa",
+      "sha256": "3c3906c634b3be2c90a9b2ad17e337595e0edf6d43213cbd665b4f929734a416",
+      "bytes": 34422,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-water.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-water.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-water.png",
+      "gitBlobSha1": "59c9ca9bf4074f7b2d8dbfba0be1e36f075965a5",
+      "sha256": "cfb9fe1f04a7d52e738781894a3e66d13b73366c56aeecdfb3c060c9c4ab7cec",
+      "bytes": 33601,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-fire.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-fire.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-fire.png",
+      "gitBlobSha1": "021b3823fbe0350a9be8c6f038195f7491687cf4",
+      "sha256": "fee088122150a5bbddf3fd5d18813c7498082e781ba66ad2e402e45fdd3248bf",
+      "bytes": 31663,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-wind.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-wind.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-wind.png",
+      "gitBlobSha1": "fc54667b63749231b9fbd9631d1393ec5a895e7e",
+      "sha256": "6b5cd8836e48fa1901d183447bd7ee2ed4d104008f9e2488dc822e4ee7e97425",
+      "bytes": 34108,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-divine.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-divine.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-divine.png",
+      "gitBlobSha1": "4d175c800eb6a4aea6025afea07a71e0de4a11da",
+      "sha256": "98622fdc522c57ccb49b914cad87f0cd3068b4d038bc14a559387fb1e42bef39",
+      "bytes": 31105,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "subfamily-level.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-level.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-level.png",
+      "gitBlobSha1": "e4c0735210b97e56d623d7cb7a0b25f2a6c1b1a1",
+      "sha256": "42590318ae37da6bfa911971fb7448e5c6402317a6dfc1262eaa154167f2c1d2",
+      "bytes": 18994,
+      "dimensions": [
+        50,
+        50
+      ]
+    },
+    {
+      "file": "subfamily-rank.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-rank.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-rank.png",
+      "gitBlobSha1": "0d2a598008a7e99b226d77e9b9fba4c0f00bb8c5",
+      "sha256": "48bf468b27a9d06bdef617c05b27e6675b3b383cbb40bad469f301eb6e488dd4",
+      "bytes": 17887,
+      "dimensions": [
+        50,
+        50
+      ]
+    },
+    {
+      "file": "subfamily-continuous.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-continuous.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-continuous.png",
+      "gitBlobSha1": "19da13e6a8b503ba8cccae1de1cef911af0ad52b",
+      "sha256": "31064d19ee1599b152cd23a990e67f4e0b8c495dc4bb17fd89d0ecdd0c0bd3c0",
+      "bytes": 29604,
+      "dimensions": [
+        43,
+        44
+      ]
+    },
+    {
+      "file": "subfamily-counter.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-counter.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-counter.png",
+      "gitBlobSha1": "1c0ceb2d8cde5fcd94477c628f44cba903cd4c86",
+      "sha256": "bc16e61e0968d835675d6cab76835536b3aa820fac5af2a4c76a253eaa8b1646",
+      "bytes": 28765,
+      "dimensions": [
+        43,
+        44
+      ]
+    },
+    {
+      "file": "subfamily-equip.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-equip.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-equip.png",
+      "gitBlobSha1": "626b6f115e5663b1406eb54bb400396329a3ce98",
+      "sha256": "11706e1291e1fac20d676dd22a538291ba789ed808485874e5340130e7f0909a",
+      "bytes": 26936,
+      "dimensions": [
+        43,
+        44
+      ]
+    },
+    {
+      "file": "subfamily-field.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-field.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-field.png",
+      "gitBlobSha1": "927510d1e6f394f393c5ec1afbd35765c8fc1457",
+      "sha256": "626b3d899c79c37363486d2f960450707fb31f13e13e7524a829b04672a7a82e",
+      "bytes": 29652,
+      "dimensions": [
+        43,
+        44
+      ]
+    },
+    {
+      "file": "subfamily-quick-play.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-quick-play.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-quick-play.png",
+      "gitBlobSha1": "3c98c22c098612bab7f3fd6c4dae4099e15fba82",
+      "sha256": "7e418068f691ae9e16a63464920e7cd570cb272312afea14048f9e4067152cfb",
+      "bytes": 28656,
+      "dimensions": [
+        43,
+        44
+      ]
+    },
+    {
+      "file": "subfamily-ritual.png",
+      "upstreamPath": "public/asset/image/subfamily/subfamily-ritual.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/subfamily/subfamily-ritual.png",
+      "gitBlobSha1": "b715bc9394dbc0b90e2132fec68b5ca589ed9c09",
+      "sha256": "7033e8cb77944edafc639ac2ea3eca23e54098638a7fa67c04fea6263dc4e8b8",
+      "bytes": 28261,
+      "dimensions": [
+        43,
+        44
+      ]
+    },
+    {
+      "file": "link-active-8-base.png",
+      "upstreamPath": "public/asset/image/link/link-active-8-base.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/link/link-active-8-base.png",
+      "gitBlobSha1": "c2ec3e3296bffca9cb453d2b11abd9b54bbf95e1",
+      "sha256": "f3e965c7ceae901393998b6794883f7a9eafc74bb962d6d0d26adbb0f1aa0220",
+      "bytes": 10155,
+      "dimensions": [
+        170,
+        80
+      ]
+    },
+    {
+      "file": "link-active-8-core.png",
+      "upstreamPath": "public/asset/image/link/link-active-8-core.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/link/link-active-8-core.png",
+      "gitBlobSha1": "86ce537da342fbf5064b7bb03981855796508c65",
+      "sha256": "ba52a8c4f2881b321ce4392472db49db1204d5625048088772065f85738a1e29",
+      "bytes": 9827,
+      "dimensions": [
+        170,
+        80
+      ]
+    },
+    {
+      "file": "MatrixBoldSmallCaps.woff2",
+      "upstreamPath": "public/asset/font/MatrixBoldSmallCaps.woff2",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/font/MatrixBoldSmallCaps.woff2",
+      "gitBlobSha1": "70cf24dea2b86059f240efda36e219e2cd5c2c61",
+      "sha256": "0fc956c16f859f11e0e980a0f43362f12b69937ab53e25db90518294878014d5",
+      "bytes": 13804,
+      "dimensions": null
+    },
+    {
+      "file": "stone-serif-regular-webfont.woff2",
+      "upstreamPath": "public/asset/font/stone-serif-regular-webfont.woff2",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/font/stone-serif-regular-webfont.woff2",
+      "gitBlobSha1": "94224cce09d889dc91fea0281d2e1dd619ca1f60",
+      "sha256": "b5ef6c885f06a519f5cdb0d5a90213c87bf17e6a19c96ccd4d216a5b2041eebe",
+      "bytes": 24764,
+      "dimensions": null
+    },
+    {
+      "file": "border-pendulum-medium-base-artless.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/border-pendulum-medium-base-artless.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/border-pendulum-medium-base-artless.png",
+      "gitBlobSha1": "c449f58a686bd1c2beb550df4cd75923e031e986",
+      "sha256": "631763b1315d0ab422510c2b2082699d3acb55903af15062d078b211542ce8dc",
+      "bytes": 63390,
+      "dimensions": [
+        753,
+        955
+      ]
+    },
+    {
+      "file": "frame-pendulum-spell.png",
+      "upstreamPath": "public/asset/image/frame-pendulum/frame-pendulum-spell.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/frame-pendulum/frame-pendulum-spell.png",
+      "gitBlobSha1": "815747443269dadc61a917c1f5a1fd2b4eeb0e94",
+      "sha256": "ebefaeaff2c72fdd5589842efccadb43793af62893ba34af5a99bf8d4febece4",
+      "bytes": 266285,
+      "dimensions": [
+        813,
+        1185
+      ]
+    },
+    {
+      "file": "background-pendulum-spell.png",
+      "upstreamPath": "public/asset/image/background/background-pendulum-spell.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/background/background-pendulum-spell.png",
+      "gitBlobSha1": "ebb38c5a9b2453cb3fedd94e5fac1382db2e2ffb",
+      "sha256": "b86584564d8323492179d9df1b33f9d5b3e9c8c626421512c5cf4053ec42b856",
+      "bytes": 90323,
+      "dimensions": [
+        705,
+        147
+      ]
+    },
+    {
+      "file": "attr-tcg-spell.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-spell.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-spell.png",
+      "gitBlobSha1": "3c35127183ab73d1beb1e2357cf906ecd1c80e97",
+      "sha256": "bac40a8415ded7e13f2106a51aaad72ed4b506218c6a6d784d1deb040944e5dd",
+      "bytes": 36638,
+      "dimensions": [
+        77,
+        77
+      ]
+    },
+    {
+      "file": "attr-tcg-trap.png",
+      "upstreamPath": "public/asset/image/attribute/attr-tcg-trap.png",
+      "url": "https://raw.githubusercontent.com/lauqerm/ygocarder/975387bc89a917e4422add3ece85f48170182ce6/public/asset/image/attribute/attr-tcg-trap.png",
+      "gitBlobSha1": "95f11166ee2ca5c3da5dca35a4e7d1ecfe5b7de9",
+      "sha256": "6b0c184d4fe75ae025ec959eee83d8d8b688300580ac928c9a415abf3828a7ce",
+      "bytes": 30776,
+      "dimensions": [
+        77,
+        77
+      ]
+    }
+  ]
+}

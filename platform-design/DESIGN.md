@@ -104,8 +104,11 @@ when pack performance is measured.
 See [renderer/README.md](renderer/README.md) for a working local rendering gallery,
 asset manifest and optional `visual` metadata contract. This gallery is separate
 from the single-file drafting simulation; its HTTP process is not the multiplayer
-server. Original frames, icons, fonts and artwork are not bundled. Missing assets
-have explicit diagnostics and schematic fallbacks until a real pack is installed.
+server. A bundled, credited YGO Carder pack now supplies frames, icons and fonts
+from a pinned GitHub revision. Original files and checksums are preserved;
+illustrations remain separate. Fandom requests still return HTTP 402 after the
+domain grants became active, so this pack is not described as wiki-sourced.
+Missing assets/details have explicit diagnostics.
 
 Existing exports retain the `dbcd-cube-v1` schema and current fields. They do not
 reliably describe Pendulum scales, Link arrows, Spell/Trap subtype icons or an
@@ -120,7 +123,7 @@ step must restrict artwork downloads to supported sources and validated images.
 Uploaded JSON cannot select arbitrary server paths or trigger arbitrary network
 requests. Retain original records and render names/effects as escaped text. Exact
 DuelingBook layout, font metrics, long effects and all card families need visual
-comparison once the original asset pack is installed.
+comparison with representative real cards.
 
 ## PC server architecture
 
@@ -240,5 +243,6 @@ client timer are demonstration behavior, not the production authority model.
 
 The separate renderer gallery implements a local HTTP process, asset manifest,
 SVG composition, missing-detail diagnostics and disk cache. It does not yet feed
-rendered images into the draft simulation. Original visual assets and accurate
-font-metric text fitting remain required for faithful reproduction.
+rendered images into the draft simulation. The bundled source files and layer
+geometry are checked, while accurate font-metric text fitting and DuelingBook
+comparisons remain required for faithful reproduction.

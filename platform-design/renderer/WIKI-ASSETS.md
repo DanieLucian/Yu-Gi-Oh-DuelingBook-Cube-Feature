@@ -3,9 +3,15 @@
 `wiki-assets.cjs` discovers candidate files through the Yu-Gi-Oh! Wiki or
 Yugipedia MediaWiki API and installs selected assets into the existing server
 manifest. It runs separately from the renderer; a guest's Cube JSON cannot invoke
-it. The current cloud attempt is blocked by network policy, so **no original wiki
-assets have been downloaded or verified yet**. Automated tests use synthetic API
-responses and test images.
+it. **No original wiki assets have been downloaded or verified yet.** After the
+domain grants became active, fresh Fandom API, article and image-host requests
+returned HTTP 402 with “Please contact the site owner for access.” This differs
+from the earlier proxy tunnel denial (403); adding the domains did not establish
+usable wiki access. Automated importer tests use synthetic responses/test images.
+
+The renderer now has a working [bundled YGO Carder pack](packs/ygocarder/NOTICE.md)
+from a separate, reachable GitHub source. Its provenance is recorded separately;
+it is not claimed to be wiki-sourced.
 
 For Yu-Gi-Oh! Wiki, the environment needs access to:
 

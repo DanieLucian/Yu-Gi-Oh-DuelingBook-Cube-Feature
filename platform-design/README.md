@@ -12,7 +12,8 @@ The rendering proof of concept generates card images on the PC server from JSON
 and locally stored backgrounds, border, icons, fonts and artwork. See the
 [renderer proof of concept](renderer/README.md) for its Node.js start command,
 local asset manifest, visual metadata contract and sample gallery. It caches
-self-contained SVGs; original visual assets must still be installed and validated.
+self-contained SVGs and includes a credited frame/icon/font pack. Card artwork
+and exact visual matching still require validation.
 This gallery is separate from the single-file draft simulation below.
 
 ## Try the interface

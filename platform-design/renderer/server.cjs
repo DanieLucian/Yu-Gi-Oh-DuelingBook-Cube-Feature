@@ -5,8 +5,14 @@ const path = require("node:path");
 const { renderCard, loadAssets } = require("./render.cjs");
 const SVG_CSP =
   "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; sandbox";
+function defaultAssetRoot(directory = __dirname) {
+  const custom = path.join(directory, "assets");
+  return fs.existsSync(path.join(custom, "manifest.json"))
+    ? custom
+    : path.join(directory, "packs/ygocarder");
+}
 function createRenderServer({
-  assetRoot = path.join(__dirname, "assets"),
+  assetRoot = defaultAssetRoot(),
   dataRoot = path.join(__dirname, "data"),
   maxCacheBytes = 256 * 1024 * 1024,
 } = {}) {
@@ -146,8 +152,8 @@ if (require.main === module) {
   const server = createRenderServer();
   server.listen(port, "127.0.0.1", () =>
     console.log(
-      `Local card renderer: http://127.0.0.1:${port}\nVisual proof of concept only; original asset files must be installed separately.`,
+      `Local card renderer: http://127.0.0.1:${port}\nVisual proof of concept; bundled template credits are in packs/ygocarder/NOTICE.md.`,
     ),
   );
 }
-module.exports = { createRenderServer };
+module.exports = { createRenderServer, defaultAssetRoot };
