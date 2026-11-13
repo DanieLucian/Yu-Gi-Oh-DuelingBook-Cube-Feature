@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cube Draft · Server card renderer</title>
+    <style>
+      :root {
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        color: #e6edf5;
+        background: #101722;
+      }
+      body {
+        max-width: 1120px;
+        margin: 25px auto;
+        padding: 0 20px;
+      }
+      h1 {
+        font-size: 28px;
+        margin-bottom: 5px;
+      }
+      a {
+        color: #b0e3cf;
+      }
+      p {
+        color: #a9b9ca;
+      }
+      main {
+        display: grid;
+        grid-template-columns: minmax(250px, 400px) 1fr;
+        gap: 30px;
+        align-items: start;
+      }
+      .panel {
+        padding: 20px;
+        background: #192434;
+        border: 1px solid #344456;
+        border-radius: 12px;
+      }
+      label {
+        display: block;
+        margin: 12px 0 5px;
+      }
+      select,
+      input,
+      button {
+        font: inherit;
+        color: inherit;
+        background: #101c2b;
+        border: 1px solid #60778c;
+        padding: 9px;
+        border-radius: 6px;
+        width: 100%;
+      }
+      input {
+        box-sizing: border-box;
+      }
+      button {
+        cursor: pointer;
+        margin: 15px 0;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 12px;
+        max-height: 440px;
+        overflow: auto;
+      }
+      .warning {
+        color: #f2c596;
+      }
+      #status {
+        min-height: 24px;
+      }
+      li {
+        font-size: 13px;
+      }
+      #json {
+        color: #b3d9ce;
+      }
+      @media (max-width: 700px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          max-width: 400px;
+          margin: auto;
+        }
+      }
+    </style>
+    <script src="/gallery.js" defer></script>
+  </head>
+  <body>
+    <h1>Server card renderer</h1>
+    <p>
+      JSON → local visual assets → cached card image. Both the pack and
+      spotlight can use the same image.
+    </p>
+    <p class="warning">
+      Rendering proof of concept. The default local template pack includes
+      frames, icons and fonts credited to YGO Carder and its template authors.
+      Card illustrations are separate. Missing data appears in the diagnostics;
+      layout and typography still need comparison with DuelingBook.
+    </p>
+    <main>
+      <div class="panel card">
+        <img id="card" alt="Rendered card preview" hidden />
+        <div id="status" role="status">Choose a card.</div>
+      </div>
+      <div class="panel">
+        <label for="sample">Example card</label
+        ><select id="sample"></select>
+        <label for="file">Or load an extension Cube JSON</label
+        ><input type="file" id="file" accept=".json,application/json" />
+        <label for="imported">Card in imported Cube</label
+        ><select id="imported" disabled>
+          <option>Load a Cube first</option>
+        </select>
+        <h2>Render diagnostics</h2>
+        <ul id="diagnostics"></ul>
+        <h2>Card JSON</h2>
+        <pre id="json"></pre>
+        <p>
+          Uses the bundled template pack unless you supply
+          <code>assets/manifest.json</code>. Restart after changing assets.
+          Rendered SVGs embed local images. Templates: Grezar, 9558able,
+          SlackerMagician, icycatelf; asset collection by
+          <a href="https://github.com/lauqerm/ygocarder">lauqerm / YGO Carder</a
+          >.
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
