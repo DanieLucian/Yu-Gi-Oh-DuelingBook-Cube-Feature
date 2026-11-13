@@ -29,6 +29,14 @@ Spell and Trap records. You can also select an extension Cube JSON and choose a
 card from it. That sends one selected card to the local renderer, not the whole
 Cube library. The gallery does not save Cubes, change the JSON, or perform a draft.
 
+## Collect assets from a wiki
+
+A separate [wiki asset importer](WIKI-ASSETS.md) can discover and install selected
+frames/icons through the Yu-Gi-Oh! Wiki or Yugipedia API, retaining source credits
+and converting self-contained SVG icons to PNG. Its offline tests pass; live
+collection is currently blocked by this cloud environment's network policy.
+No wiki assets are bundled or verified yet.
+
 ## Install the visual asset pack
 
 1. Copy `assets/manifest.example.json` to `assets/manifest.json`.
