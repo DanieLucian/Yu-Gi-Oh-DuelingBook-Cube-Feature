@@ -121,9 +121,11 @@ Artwork is also stored locally, with an explicit map from the original URL to a
 server asset file. The experiment performs no URL fetching; a later ingestion
 step must restrict artwork downloads to supported sources and validated images.
 Uploaded JSON cannot select arbitrary server paths or trigger arbitrary network
-requests. Retain original records and render names/effects as escaped text. Exact
-DuelingBook layout, font metrics, long effects and all card families need visual
-comparison with representative real cards.
+requests. Retain original records and render names/effects as escaped text.
+The current renderer implements the supplied Torrential Tribute reference's
+name colors, shared gray/gold borders and taller measured text layout. Exact
+DuelingBook geometry, dense effects, fallback fonts and all card families still
+need comparison with representative real cards.
 
 ## PC server architecture
 
@@ -244,5 +246,6 @@ client timer are demonstration behavior, not the production authority model.
 The separate renderer gallery implements a local HTTP process, asset manifest,
 SVG composition, missing-detail diagnostics and disk cache. It does not yet feed
 rendered images into the draft simulation. The bundled source files and layer
-geometry are checked, while accurate font-metric text fitting and DuelingBook
-comparisons remain required for faithful reproduction.
+geometry are checked, and width-aware fitting uses precomputed measurements.
+Real-card DuelingBook comparisons and fallback-font checks remain required for
+faithful reproduction.

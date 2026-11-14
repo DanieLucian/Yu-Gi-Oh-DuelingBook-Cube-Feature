@@ -75,6 +75,13 @@ const samples = [
     effect:
       "Trap cards show their subtype icon and omit monster stars and combat stats.",
   },
+  {
+    id: "reference-torrential-tribute",
+    name: "Torrential Tribute",
+    type: "Normal Trap",
+    effect: "When a monster(s) is Summoned: Destroy all monsters on the field.",
+    artwork: "",
+  },
 ];
 let imported = [],
   sequence = 0;

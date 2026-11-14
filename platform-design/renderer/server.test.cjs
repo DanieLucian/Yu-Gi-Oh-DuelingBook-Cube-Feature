@@ -25,7 +25,7 @@ before(async () => {
 after(async () => browser?.close());
 async function fixture(t, options = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "cube-render-server-"));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const pages = [];
   const assetRoot = path.join(root, "assets"),
     dataRoot = path.join(root, "data");
   fs.mkdirSync(assetRoot);
@@ -35,13 +35,23 @@ async function fixture(t, options = {}) {
   );
   const server = createRenderServer({ assetRoot, dataRoot, ...options });
   await new Promise((r) => server.listen(0, "127.0.0.1", r));
-  t.after(() => new Promise((r) => server.close(r)));
+  t.after(async () => {
+    await Promise.all(pages.map((page) => page.close()));
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+    fs.rmSync(root, { recursive: true, force: true });
+  });
   return {
     server,
     root,
     assetRoot,
     dataRoot,
     url: "http://127.0.0.1:" + server.address().port,
+    page: async (options) => {
+      const page = await browser.newPage(options);
+      pages.push(page);
+      return page;
+    },
   };
 }
 const post = (url, value, headers = {}) =>
@@ -68,7 +78,10 @@ test("HTTP renders persist across restart, repeat requests reuse images and inva
     dataRoot: f.dataRoot,
   });
   await new Promise((r) => restart.listen(0, "127.0.0.1", r));
-  t.after(() => new Promise((r) => restart.close(r)));
+  t.after(() => {
+    restart.closeAllConnections();
+    return new Promise((r) => restart.close(r));
+  });
   assert.equal(
     (
       await (
@@ -102,8 +115,7 @@ test("cache byte limit produces a clear response and writes no partial render", 
 
 test("browser decodes every sample SVG and imported legacy JSON; unsafe names remain text", async (t) => {
   const f = await fixture(t),
-    page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
-  t.after(() => page.close());
+    page = await f.page({ viewport: { width: 1280, height: 1000 } });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(f.url);
@@ -165,8 +177,7 @@ test("browser decodes every sample SVG and imported legacy JSON; unsafe names re
 
 test("embedded local artwork actually paints in the browser without contacting its source URL", async (t) => {
   const f = await fixture(t);
-  const page = await browser.newPage();
-  t.after(() => page.close());
+  const page = await f.page();
   await page.goto(f.url);
   const dataUrl = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
@@ -194,7 +205,10 @@ test("embedded local artwork actually paints in the browser without contacting i
     dataRoot: f.dataRoot,
   });
   await new Promise((resolve) => withArt.listen(0, "127.0.0.1", resolve));
-  t.after(() => new Promise((resolve) => withArt.close(resolve)));
+  t.after(() => {
+    withArt.closeAllConnections();
+    return new Promise((resolve) => withArt.close(resolve));
+  });
   const url = "http://127.0.0.1:" + withArt.address().port;
   const rendered = await (
     await post(url, { ...monster, artwork: source })

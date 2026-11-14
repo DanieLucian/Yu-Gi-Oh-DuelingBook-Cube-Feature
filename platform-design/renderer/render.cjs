@@ -2,8 +2,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { metricsForFont, measureText, fitText } = require("./text-layout.cjs");
 
-const VERSION = "card-svg-v1";
+const VERSION = "card-svg-v2";
 const FRAMES = [
   "normal",
   "effect",
@@ -209,6 +210,8 @@ function loadAssets(root, manifest) {
   const assets = new Map(),
     artworks = new Map(),
     base = fs.realpathSync(root);
+  const fontMetrics = {};
+  const imageSizes = new Map();
   const entries = [
     ...Object.entries(manifest.files),
     ...Object.entries(manifest.artworks),
@@ -251,7 +254,14 @@ function loadAssets(root, manifest) {
       throw Error(
         `Unsupported asset format for ${key}. Use PNG/JPEG/WebP or WOFF2 fonts.`,
       );
-    return `data:${mime};base64,${buffer.toString("base64")}`;
+    if (font) fontMetrics[key.slice(5)] = metricsForFont(buffer, key.slice(5));
+    const data = `data:${mime};base64,${buffer.toString("base64")}`;
+    if (mime === "image/png" && buffer.length >= 24) {
+      const width = buffer.readUInt32BE(16),
+        height = buffer.readUInt32BE(20);
+      if (width && height) imageSizes.set(data, { width, height });
+    }
+    return data;
   }
   for (const [key, file] of Object.entries(manifest.files))
     assets.set(key, read(file, key));
@@ -308,12 +318,15 @@ function loadAssets(root, manifest) {
     artworks,
     composites,
     profile: manifest.profile ?? "schematic",
+    fontMetrics,
+    imageSizes,
   };
 }
 function renderCard(card, registry) {
   const c = normalizeCard(card),
     diagnostics = [...c.warnings];
   const textured = registry.profile === "tcg-813-v1";
+  const rasterDefinitions = new Map();
   function asset(key) {
     const data = registry.assets.get(key) || registry.composites?.get(key);
     if (!data) diagnostics.push(`missing-asset:${key}`);
@@ -322,6 +335,19 @@ function renderCard(card, registry) {
   function image(data, x, y, width, height, extra = "") {
     if (data && typeof data === "object")
       return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="0 0 ${data.width} ${data.height}" ${extra}>${data.layers.map((layer) => image(layer.data, layer.x, layer.y, layer.width, layer.height)).join("")}</svg>`;
+    const size = registry.imageSizes?.get(data);
+    if (size) {
+      let raster = rasterDefinitions.get(data);
+      if (!raster) {
+        const id = "raster-" + rasterDefinitions.size;
+        raster = {
+          id,
+          svg: `<image id="${id}" width="${size.width}" height="${size.height}" href="${data}"/>`,
+        };
+        rasterDefinitions.set(data, raster);
+      }
+      return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="0 0 ${size.width} ${size.height}" ${extra}><use href="#${raster.id}"/></svg>`;
+    }
     return data
       ? `<image x="${x}" y="${y}" width="${width}" height="${height}" href="${data}" ${extra}/>`
       : "";
@@ -329,8 +355,34 @@ function renderCard(card, registry) {
   function label(value, x, y, size = 24, extra = "") {
     return `<text x="${x}" y="${y}" font-size="${size}" ${extra}>${xml(value)}</text>`;
   }
-  // Wrap by code point for deterministic, dependency-free proof-of-concept layout.
-  // Font-metric fitting and exact DuelingBook geometry remain a separate visual check.
+  function fittedLines(value, x, top, width, height, block) {
+    const layout = fitText(value, {
+      font: registry.fontMetrics?.body,
+      width,
+      height,
+    });
+    if (layout.overflow)
+      diagnostics.push("text-overflow: full text retained in SVG description");
+    return `<g data-text-block="${block}" font-family="CardBody, Georgia, serif" font-kerning="normal" font-variant-ligatures="none">${layout.lines.map((line, i) => label(line, x, top + layout.ascent + i * layout.lineHeight, layout.fontSize)).join("")}</g>`;
+  }
+  // Both borders are sampled from the same unchanged, gray/gold Effect frame.
+  // Cropping in the SVG keeps every upstream PNG byte intact.
+  const commonFrame = textured
+    ? registry.assets.get("layer.frame.effect")
+    : null;
+  function artBorder(box) {
+    const [x, y, w, h] = box;
+    if (commonFrame)
+      return `<svg data-card-border="art" x="${x - 14}" y="${y - 14}" width="${w + 28}" height="${h + 28}" viewBox="86 205 642 642" preserveAspectRatio="none" overflow="hidden"><g filter="url(#gray-art-border)"><use href="#common-card-frame"/></g></svg>`;
+    return `<g data-card-border="art"><polygon points="${x - 14},${y - 14} ${x + w + 14},${y - 14} ${x + w},${y} ${x},${y}" fill="#929292"/><polygon points="${x - 14},${y - 14} ${x},${y} ${x},${y + h} ${x - 14},${y + h + 14}" fill="#737373"/><polygon points="${x + w + 14},${y - 14} ${x + w + 14},${y + h + 14} ${x + w},${y + h} ${x + w},${y}" fill="#3f3f3f"/><polygon points="${x - 14},${y + h + 14} ${x},${y + h} ${x + w},${y + h} ${x + w + 14},${y + h + 14}" fill="#575757"/></g>`;
+  }
+  function textBorder() {
+    if (commonFrame)
+      return '<svg data-card-border="effect" x="40" y="876" width="735" height="250" viewBox="45 876 724 250" preserveAspectRatio="none" overflow="hidden"><use href="#common-card-frame"/></svg>';
+    const top = textured ? 885 : c.pendulum ? 905 : 765;
+    return `<rect data-card-border="effect" x="55" y="${top}" width="703" height="${1100 - top}" fill="none" stroke="#b68e3b" stroke-width="4"/>`;
+  }
+  // Keep the original schematic fallback for manifests without a textured layout.
   function lines(value, x, y, width, maxLines) {
     const chunks = [];
     for (const paragraph of value.split(/\r?\n/)) {
@@ -381,19 +433,29 @@ function renderCard(card, registry) {
       : "") +
     (bodyFont ? `@font-face{font-family:CardBody;src:url('${bodyFont}')}` : "");
   let body = `<rect width="813" height="1185" rx="24" fill="#3d3530"/><rect x="25" y="25" width="763" height="1135" rx="10" fill="${colors[c.frame]}"/>`;
+  if (commonFrame)
+    body +=
+      '<defs><filter id="gray-art-border" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/></filter>' +
+      image(commonFrame, 0, 0, 813, 1185, 'id="common-card-frame"') +
+      "</defs>";
+  if (textured && bodyFont && !registry.fontMetrics?.body)
+    diagnostics.push("font-metrics-approximate: custom body font");
   body += image(background, 0, 0, 813, 1185);
   if (!textured || !background)
     body += `<rect x="50" y="48" width="713" height="75" fill="#fff" fill-opacity=".35"/>`;
   body += label(
     c.name,
     65,
-    textured ? 117 : 100,
-    Math.min(
-      textured ? 52 : 38,
-      Math.max(15, (textured ? 1600 : 1050) / Array.from(c.name).length),
-    ),
-    `font-family="CardName, Georgia, serif" fill="${textured && ["xyz", "link"].includes(c.frame) ? "#fff" : "#171b20"}"` +
-      (Array.from(c.name).length > (textured ? 21 : 28)
+    textured ? 120 : 100,
+    textured
+      ? 80
+      : Math.min(38, Math.max(15, 1050 / Array.from(c.name).length)),
+    `data-text-block="name" font-family="CardName, Georgia, serif" fill="${["spell", "trap", "xyz"].includes(c.frame) ? "#fff" : "#000"}"` +
+      ((
+        textured
+          ? measureText(c.name, registry.fontMetrics?.name, 80) > 600
+          : Array.from(c.name).length > 28
+      )
         ? ' textLength="600" lengthAdjust="spacingAndGlyphs"'
         : ""),
   );
@@ -446,10 +508,10 @@ function renderCard(card, registry) {
       );
     body += label(
       c.frame === "spell" ? "[ SPELL CARD ]" : "[ TRAP CARD ]",
-      675,
+      textured && c.icon === "normal" ? 735 : 675,
       textured ? 185 : 172,
-      30,
-      'text-anchor="end"',
+      textured ? 40 : 30,
+      `data-text-block="kind" text-anchor="end"${textured ? ' font-weight="bold"' : ""}`,
     );
     if (c.icon && c.icon !== "normal") {
       const icon = asset(`icon.${c.icon}`);
@@ -466,6 +528,7 @@ function renderCard(card, registry) {
       ? [56, 213, 702, 530]
       : [100, 219, 614, 614]
     : [70, 210, 673, 505];
+  body += artBorder(artBox);
   body += `<rect x="${artBox[0]}" y="${artBox[1]}" width="${artBox[2]}" height="${artBox[3]}" fill="#273544"/>`;
   body += image(art, ...artBox, 'preserveAspectRatio="xMidYMid meet"');
   if (!art)
@@ -506,6 +569,7 @@ function renderCard(card, registry) {
   }
   if (c.pendulum) {
     if (textured) body += image(asset("overlay.pendulum"), 0, 0, 813, 1185);
+    if (textured) body += artBorder(artBox);
     if (!textured || !background)
       body += `<rect x="55" y="740" width="703" height="140" fill="#e2efe6" stroke="#3f6b76" stroke-width="3"/>`;
     body +=
@@ -523,33 +587,56 @@ function renderCard(card, registry) {
         textured ? 56.5 : 32,
         'text-anchor="middle" fill="#b64949"',
       );
-    body += lines(
-      c.pendulumEffect || "Pendulum text unavailable",
-      textured ? 129 : 110,
-      773,
-      textured ? 45 : 49,
-      4,
-    );
+    body += textured
+      ? fittedLines(
+          c.pendulumEffect || "Pendulum text unavailable",
+          129,
+          749,
+          555,
+          122,
+          "pendulum",
+        )
+      : lines(
+          c.pendulumEffect || "Pendulum text unavailable",
+          textured ? 129 : 110,
+          773,
+          textured ? 45 : 49,
+          4,
+        );
   }
   const boxY = textured ? 885 : c.pendulum ? 905 : 765,
     textY = textured ? (c.monster ? 947 : 919) : boxY + 69;
   if (!textured || !background)
     body += `<rect x="55" y="${boxY}" width="703" height="${1100 - boxY}" fill="#f2e9d6" stroke="#655b50" stroke-width="3"/>`;
+  if (textured) {
+    const texture = registry.assets.get(`layer.text.${c.frame}`);
+    if (texture)
+      body += image(texture, 49, 885, 717, 231, 'preserveAspectRatio="none"');
+  }
   if (c.monster || !textured)
     body += label(
       c.type || "Type unavailable",
-      72,
+      textured ? 65 : 72,
       boxY + 33,
-      24,
-      'font-weight="bold"',
+      textured ? 26 : 24,
+      'data-text-block="type" font-weight="bold"',
     );
-  body += lines(
-    c.effect,
-    72,
-    textY,
-    58,
-    textured ? (c.monster ? 6 : 7) : c.pendulum ? 4 : 10,
-  );
+  body += textured
+    ? fittedLines(
+        c.effect,
+        65,
+        c.monster ? 929 : 899,
+        685,
+        c.monster ? 149 : 205,
+        "effect",
+      )
+    : lines(
+        c.effect,
+        72,
+        textY,
+        58,
+        textured ? (c.monster ? 6 : 7) : c.pendulum ? 4 : 10,
+      );
   if (c.monster)
     body += label(
       `ATK / ${c.atk || "?"}   ${c.frame === "link" ? c.link || "LINK-?" : "DEF / " + (c.def || "?")}`,
@@ -558,6 +645,7 @@ function renderCard(card, registry) {
       26,
       `text-anchor="end" font-weight="bold" fill="${!textured && ["xyz", "link"].includes(c.frame) ? "#f8f5eb" : "#171b20"}"`,
     );
+  body += textBorder();
   body += image(border, 0, 0, 813, 1185);
   if (diagnostics.length)
     body += label(
@@ -567,7 +655,7 @@ function renderCard(card, registry) {
       14,
       'text-anchor="middle" fill="#fff" stroke="#333" stroke-width=".3"',
     );
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="813" height="1185" viewBox="0 0 813 1185" role="img"><title>${xml(c.name)}</title><desc>${xml([c.type, c.pendulumEffect, c.effect, ...diagnostics].join("\n"))}</desc><style>${fontCss}</style><g font-family="CardBody, Georgia, serif" fill="#171b20">${body}</g></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="813" height="1185" viewBox="0 0 813 1185" role="img"><title>${xml(c.name)}</title><desc>${xml([c.type, c.pendulumEffect, c.effect, ...diagnostics].join("\n"))}</desc><defs>${[...rasterDefinitions.values()].map((raster) => raster.svg).join("")}</defs><style>${fontCss}</style><g font-family="CardBody, Georgia, serif" fill="#171b20">${body}</g></svg>`;
   const hash = crypto
     .createHash("sha256")
     .update(VERSION)

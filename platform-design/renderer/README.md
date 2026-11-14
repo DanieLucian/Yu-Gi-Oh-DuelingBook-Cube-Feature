@@ -14,8 +14,9 @@ not the wiki. Card illustrations remain separate.
 
 The local gallery uses this pack automatically unless `assets/manifest.json`
 is present. Missing files/details produce diagnostics. Coordinates follow the
-pack's 813 × 1185 layout; typography, long-text fitting and exact matching still
-need comparison with DuelingBook. This is a rendering experiment, separate from
+pack's 813 × 1185 layout with DuelingBook presentation rules. Width-aware text
+fitting is implemented; exact matching and non-Latin fallbacks still need real-card
+comparison. This is a rendering experiment, separate from
 the draft simulation and multiplayer server.
 
 ![Bundled frame and icons in the server rendering gallery](template-preview.jpg)
@@ -36,6 +37,43 @@ The gallery has fictional Normal/Effect/Ritual/Fusion/Synchro/Xyz/Link/Pendulum,
 Spell and Trap records. You can also select an extension Cube JSON and choose a
 card from it. That sends one selected card to the local renderer, not the whole
 Cube library. The gallery does not save Cubes, change the JSON, or perform a draft.
+
+## DuelingBook appearance
+
+The supplied **Torrential Tribute** screenshot is the current style reference.
+The gallery includes a text-only Torrential Tribute sample; its illustration
+remains a placeholder.
+
+![Torrential Tribute appearance reference, without artwork](torrential-preview.png)
+
+- Names are white for Spell, Trap and Xyz frames, including Xyz Pendulum, and
+  black for all other frames, including Link.
+- Names use a taller 80 px size and compress horizontally when necessary.
+- Artwork borders use one neutral gray bevel for all card families. Main text
+  boxes share the reference's gold/bronze outline; their pale type-specific
+  background textures remain distinct.
+- Ordinary effect text starts at 26 px instead of 21 px. Line breaks use measured
+  font widths. Dense effects reduce gradually to 16 px to fit the available area.
+  Pendulum and monster effects keep separate regions, and stats retain their space.
+- Normal Spell/Trap headers align to the right without reserving an empty subtype
+  icon slot. Their subtype icons remain separate when present.
+
+The shared borders reuse crops of the unchanged Effect frame in the generated
+SVG. The artwork bevel is desaturated at render time. Original PNG/WOFF2 files
+and their source checksums are unchanged.
+
+`font-metrics.json` contains precomputed glyph advances and pair adjustments for
+the bundled fonts, tied to their SHA-256 hashes. This keeps rendering independent
+of browser/font-engine installation on the PC server. Only developers regenerating
+the measurements need Playwright:
+
+```sh
+node platform-design/renderer/build-font-metrics.cjs
+```
+
+Custom font files without matching measurements use approximate widths and report
+that in diagnostics. Unsupported glyphs use conservative estimates; validate
+non-Latin and fallback-font cards visually on the target computer.
 
 ## Collect assets from a wiki
 
@@ -169,10 +207,11 @@ field. For Xyz, the renderer can use that legacy value as Rank, but reports that
 it needs comparison with the original. Missing scales/arrows/subtype are reported,
 not guessed. No extractor changes are included while extension work is set aside.
 
-Long text is retained in the SVG description. The demonstration effect box can
-clip visible text and reports overflow; font-metric fitting must be implemented
-before treating generated cards as a complete reading surface. Full JSON text is
-also visible alongside the gallery image.
+Text fitting preserves words, explicit paragraph breaks and long identifiers.
+The server first tries the taller size, then smaller sizes within the bounds.
+Extremely long text that cannot fit at the minimum size still reports overflow;
+the complete text is retained in the SVG description and the gallery JSON. No
+card data is truncated or changed.
 
 ## HTTP and cache
 
@@ -202,10 +241,15 @@ node --test platform-design/renderer/*.test.cjs
 Tests cover card families, rank/level repetition, Pendulum scales, Link arrows,
 legacy JSON preservation, text escaping, missing metadata, local asset resolution,
 cache invalidation/restart, HTTP limits and Chromium SVG decoding for all examples.
+Additional checks verify the requested name colors, border pixels across every
+family, artwork visibility, font-file identity, the reference's two-line effect,
+and measured fitting of denser effects. The title's rendered glyph bounds are
+checked separately from its nominal font size. Repeated PNG layers are embedded
+once per SVG and reused by reference.
 Browser tests use the existing Playwright dependency and `CHROMIUM_PATH` option.
 
 Still required: card illustration ingestion/mapping, comparison of every card
-family with DuelingBook, long-text and non-Latin font fitting, image crops and
+family with DuelingBook, dense-text and non-Latin fitting on real data, image crops and
 custom frame variants. Server-generated SVGs embed the templates/fonts and are
-currently about 1–2 MB each; thumbnail delivery and cache eviction need work
+currently about 1–3 MB each; thumbnail delivery and cache eviction need work
 before integrating this experiment with real drafts.

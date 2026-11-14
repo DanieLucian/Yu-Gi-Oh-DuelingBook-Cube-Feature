@@ -212,6 +212,11 @@ test("server assets embed locally, repeated stars share data and cache identity 
   const registry = loadAssets(root, manifest),
     first = renderCard(monster, registry);
   assert.match(first.svg, /data:image\/png;base64,/);
+  assert.equal(
+    (first.svg.match(/data:image\/png;base64,/g) || []).length,
+    1,
+    "Repeated PNG layers embed the same bytes only once",
+  );
   assert.doesNotMatch(first.svg, /<image[^>]+href="https?:/);
   assert.equal((first.svg.match(/<use href="#star"/g) || []).length, 4);
   assert.equal(
