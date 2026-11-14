@@ -48,7 +48,9 @@ remains a placeholder.
 
 - Names are white for Spell, Trap and Xyz frames, including Xyz Pendulum, and
   black for all other frames, including Link.
-- Names use a taller 80 px size and compress horizontally when necessary.
+- Names use an 80 px small-cap face and compress horizontally when necessary.
+  Their rendered strokes are softened slightly because the bundled font's bold
+  outlines are baked in. Glyph shape, height and spacing stay unchanged.
 - Artwork borders use one neutral gray bevel for all card families. Main text
   boxes share the reference's gold/bronze outline; their pale type-specific
   background textures remain distinct.

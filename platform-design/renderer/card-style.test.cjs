@@ -244,3 +244,71 @@ test("the Torrential Tribute reference has taller readable text, and dense effec
     }
   }
 });
+
+test("name weight is lighter without changing the glyph face, height or spacing", async (t) => {
+  const page = await browser.newPage();
+  t.after(() => page.close());
+  const rendered = renderCard({ ...card, name: "HHHH", artwork }, registry);
+  const samples = await page.evaluate(async (svg) => {
+    const source = new DOMParser().parseFromString(svg, "image/svg+xml");
+    const measure = async (filtered) => {
+      const isolated = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg",
+      );
+      isolated.setAttribute("width", "813");
+      isolated.setAttribute("height", "200");
+      const title = source
+        .querySelector('[data-text-block="name"]')
+        .cloneNode(true);
+      if (!filtered) title.removeAttribute("filter");
+      isolated.append(
+        source.querySelector("style").cloneNode(true),
+        source.querySelector("#card-name-weight").cloneNode(true),
+        title,
+      );
+      const image = new Image();
+      image.src =
+        "data:image/svg+xml;base64," +
+        btoa(
+          unescape(
+            encodeURIComponent(new XMLSerializer().serializeToString(isolated)),
+          ),
+        );
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = 813;
+      canvas.height = 200;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0);
+      const p = context.getImageData(0, 0, 813, 200).data;
+      let ink = 0,
+        top = 200,
+        bottom = 0;
+      for (let y = 0; y < 200; y++)
+        for (let x = 0; x < 813; x++) {
+          const a = p[(y * 813 + x) * 4 + 3];
+          ink += a / 255;
+          if (a > 20) {
+            top = Math.min(top, y);
+            bottom = Math.max(bottom, y);
+          }
+        }
+      return { ink, height: bottom - top + 1 };
+    };
+    return { before: await measure(false), after: await measure(true) };
+  }, rendered.svg);
+  assert.ok(
+    Math.abs(samples.after.height - samples.before.height) <= 1,
+    `Capital height stays stable: ${JSON.stringify(samples)}`,
+  );
+  const ratio = samples.after.ink / samples.before.ink;
+  assert.ok(
+    ratio < 0.95 && ratio > 0.65,
+    `Stroke weight decreases moderately: ${ratio}`,
+  );
+  assert.match(
+    rendered.svg,
+    /<text[^>]+font-size="80"[^>]+filter="url\(#card-name-weight\)"/,
+  );
+});

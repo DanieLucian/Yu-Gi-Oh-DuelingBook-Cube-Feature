@@ -326,6 +326,7 @@ function renderCard(card, registry) {
   const c = normalizeCard(card),
     diagnostics = [...c.warnings];
   const textured = registry.profile === "tcg-813-v1";
+  const lightenName = textured && Boolean(registry.fontMetrics?.name);
   const rasterDefinitions = new Map();
   function asset(key) {
     const data = registry.assets.get(key) || registry.composites?.get(key);
@@ -433,6 +434,11 @@ function renderCard(card, registry) {
       : "") +
     (bodyFont ? `@font-face{font-family:CardBody;src:url('${bodyFont}')}` : "");
   let body = `<rect width="813" height="1185" rx="24" fill="#3d3530"/><rect x="25" y="25" width="763" height="1135" rx="10" fill="${colors[c.frame]}"/>`;
+  // The bundled face has bold strokes baked into its outlines. Retain its
+  // exact glyph geometry, with a solid inner stroke and softer outer coverage.
+  if (lightenName)
+    body +=
+      '<defs><filter id="card-name-weight" x="-5%" y="-10%" width="110%" height="120%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="erode" radius="0.65" result="name-core"/><feComponentTransfer in="SourceAlpha" result="name-edge"><feFuncA type="linear" slope="0.45"/></feComponentTransfer><feMerge result="name-mask"><feMergeNode in="name-edge"/><feMergeNode in="name-core"/></feMerge><feComposite in="SourceGraphic" in2="name-mask" operator="in"/></filter></defs>';
   if (commonFrame)
     body +=
       '<defs><filter id="gray-art-border" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/></filter>' +
@@ -450,7 +456,7 @@ function renderCard(card, registry) {
     textured
       ? 80
       : Math.min(38, Math.max(15, 1050 / Array.from(c.name).length)),
-    `data-text-block="name" font-family="CardName, Georgia, serif" fill="${["spell", "trap", "xyz"].includes(c.frame) ? "#fff" : "#000"}"` +
+    `data-text-block="name" font-family="CardName, Georgia, serif"${lightenName ? ' filter="url(#card-name-weight)"' : ""} fill="${["spell", "trap", "xyz"].includes(c.frame) ? "#fff" : "#000"}"` +
       ((
         textured
           ? measureText(c.name, registry.fontMetrics?.name, 80) > 600
