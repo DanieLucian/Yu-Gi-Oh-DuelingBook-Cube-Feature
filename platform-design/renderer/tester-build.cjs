@@ -16,10 +16,11 @@ function testerRuntime() {
     .join(",\n");
   return `(()=>{const factories={${modules}},cache={};function require(id){if(!factories[id])throw Error('Unknown tester module');if(!cache[id]){const module={exports:{}};cache[id]=module;factories[id](module,module.exports,require);}return cache[id].exports;}window.CardRenderer=require('./card-svg.cjs');window.CardStyles=require('./style-profile.cjs');})();\n${fs.readFileSync(path.join(__dirname, "tester.js"), "utf8")}`;
 }
-function testerState(registry, style) {
+function testerState(registry, style, defaults = style) {
   const keys = new Map([...registry.assets].map(([key, data]) => [data, key]));
   return {
     style: normalizeStyle(style),
+    defaults: normalizeStyle(defaults),
     credits: ["predefined", "ygocarder"].map((pack) => ({
       name: pack,
       notice: fs.readFileSync(
@@ -82,14 +83,17 @@ if (require.main === module) {
       root,
       JSON.parse(fs.readFileSync(path.join(root, "manifest.json"))),
     );
-  const profileFile =
-    process.argv[3] || path.join(__dirname, "style.default.json");
+  const defaultFile = path.join(__dirname, "style.default.json");
+  const defaults = fs.existsSync(defaultFile)
+    ? JSON.parse(fs.readFileSync(defaultFile, "utf8"))
+    : undefined;
+  const profileFile = process.argv[3] || defaultFile;
   const profile = fs.existsSync(profileFile)
     ? JSON.parse(fs.readFileSync(profileFile, "utf8"))
     : undefined;
   const out = path.resolve(
     process.argv[2] || path.join(__dirname, "card-render-tester.html"),
   );
-  fs.writeFileSync(out, testerHtml(testerState(registry, profile)));
+  fs.writeFileSync(out, testerHtml(testerState(registry, profile, defaults)));
   console.log(`Card render tester: ${out}`);
 }

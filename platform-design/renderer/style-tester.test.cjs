@@ -9,6 +9,7 @@ const { normalizeStyle, DEFAULT_STYLE } = require("./style-profile.cjs");
 const { loadAssets, renderCard } = require("./render.cjs");
 const { createRenderServer } = require("./server.cjs");
 const { testerState, testerHtml } = require("./tester-build.cjs");
+const projectStyle = normalizeStyle(require("./style.default.json"));
 const root = path.join(__dirname, "packs");
 const registry = loadAssets(
   root,
@@ -190,6 +191,15 @@ test("Normal Monster flavor text always uses italic while Pendulum effects, Effe
 test("server style saves are validated, preserve the last good profile and persist fonts/layout through restart", async (t) => {
   const f = await fixture(t),
     first = await rendered(f.url);
+  assert.deepEqual(
+    (await (await fetch(f.url + "/api/style")).json()).style,
+    projectStyle,
+  );
+  assert.equal(
+    first.svg,
+    renderCard(card, registry, projectStyle).svg,
+    "A fresh server must render with the selected project style",
+  );
   const style = normalizeStyle({
     version: 1,
     regions: { name: { size: 72 }, stats: { font: "upload-stats" } },
@@ -217,6 +227,13 @@ test("server style saves are validated, preserve the last good profile and persi
   assert.deepEqual(
     (await (await fetch(f.url + "/api/style")).json()).style,
     style,
+  );
+  const editor = await (await fetch(f.url + "/api/tester-state")).json();
+  assert.deepEqual(editor.style, style, "Saved local styles take precedence");
+  assert.deepEqual(
+    editor.defaults,
+    projectStyle,
+    "Reset retains the project style separately",
   );
   const restart = createRenderServer({ dataRoot: f.dataRoot });
   await new Promise((resolve) => restart.listen(0, "127.0.0.1", resolve));
@@ -279,11 +296,15 @@ test(
         def: doc.querySelector('[data-text-block="def"]').getAttribute("x"),
       };
     }, live);
-    assert.deepEqual(geometry, { step: 53, atk: "605", def: "754" });
+    assert.deepEqual(geometry, {
+      step: projectStyle.stars.size + 11,
+      atk: "605",
+      def: "754",
+    });
     assert.equal(
       (await (await fetch(f.url + "/api/style")).json()).style.regions.name
         .size,
-      80,
+      projectStyle.regions.name.size,
       "Previewing must not change server defaults",
     );
     const downloadPromise = page.waitForEvent("download");
@@ -311,7 +332,16 @@ test(
     );
     await page.locator("#reset").click();
     await page.locator("#region").selectOption("name");
-    assert.equal(await page.locator("#size").inputValue(), "80");
+    assert.equal(
+      await page.locator("#size").inputValue(),
+      String(projectStyle.regions.name.size),
+    );
+    assert.equal(
+      (await (await fetch(f.url + "/api/style")).json()).style.regions.name
+        .size,
+      74,
+      "Resetting the preview must not change the saved local style",
+    );
     await page.locator("#profile-file").setInputFiles({
       name: "style.json",
       mimeType: "application/json",

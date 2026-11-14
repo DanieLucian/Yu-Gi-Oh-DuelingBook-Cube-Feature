@@ -36,13 +36,14 @@ function createRenderServer({
   fs.mkdirSync(cacheDir, { recursive: true });
   const styleFile = path.join(dataRoot, "render-style.json");
   const defaultStyleFile = path.join(__dirname, "style.default.json");
-  let activeStyle = normalizeStyle(
-    fs.existsSync(styleFile)
-      ? JSON.parse(fs.readFileSync(styleFile, "utf8"))
-      : fs.existsSync(defaultStyleFile)
-        ? JSON.parse(fs.readFileSync(defaultStyleFile, "utf8"))
-        : undefined,
+  const projectStyle = normalizeStyle(
+    fs.existsSync(defaultStyleFile)
+      ? JSON.parse(fs.readFileSync(defaultStyleFile, "utf8"))
+      : undefined,
   );
+  let activeStyle = fs.existsSync(styleFile)
+    ? normalizeStyle(JSON.parse(fs.readFileSync(styleFile, "utf8")))
+    : projectStyle;
   let cacheBytes = fs
     .readdirSync(cacheDir)
     .filter((f) => /^[a-f0-9]{64}\.svg$/.test(f))
@@ -85,7 +86,11 @@ function createRenderServer({
           "text/javascript; charset=utf-8",
         );
       if (req.method === "GET" && req.url === "/api/tester-state")
-        return respond(res, 200, testerState(registry, activeStyle));
+        return respond(
+          res,
+          200,
+          testerState(registry, activeStyle, projectStyle),
+        );
       if (req.method === "GET" && req.url === "/api/style")
         return respond(res, 200, { style: activeStyle });
       if (req.method === "PUT" && req.url === "/api/style") {

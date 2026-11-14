@@ -1,7 +1,7 @@
 "use strict";
 (async () => {
   const $ = (id) => document.getElementById(id);
-  const { DEFAULT_STYLE, normalizeStyle } = window.CardStyles;
+  const { normalizeStyle } = window.CardStyles;
   const { composeCard } = window.CardRenderer;
   const standalone = Boolean($("tester-data"));
   const state = standalone
@@ -263,7 +263,7 @@
     $("card").closest(".preview").style.maxWidth = $("zoom").value + "px";
   };
   $("reset").onclick = () => {
-    style = normalizeStyle(DEFAULT_STYLE);
+    style = normalizeStyle(state.defaults || state.style);
     generation++;
     allControls();
     render();

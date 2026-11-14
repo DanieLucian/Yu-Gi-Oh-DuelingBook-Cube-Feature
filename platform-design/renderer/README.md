@@ -68,7 +68,8 @@ move controls.
 - **Export style + fonts** produces a portable `card-render-style.json`. Import
   it on another server, then save, or send it back in the chat to update the
   project's defaults in `style.default.json`. A saved local profile takes
-  precedence over project defaults. **Reset controls** is preview-only until saved.
+  precedence over project defaults. **Reset controls** restores the project
+  defaults in the preview; save to apply them to the server.
 
 You can also generate a **single-file offline tester**, with all default frames,
 icons, fonts and rendering code embedded:
@@ -108,9 +109,9 @@ remains a placeholder.
 
 - Names are white for Spell, Trap and Xyz frames, including Xyz Pendulum, and
   black for all other frames, including Link.
-- Names use an 80 px small-cap face and compress horizontally when necessary.
-  Their rendered strokes are softened slightly because the bundled font's bold
-  outlines are baked in. Glyph shape, height and spacing stay unchanged.
+- The selected project profile in `style.default.json` uses the bundled small-cap
+  name face at 95 px, with −2 px letter spacing and stroke coverage set to 1.
+  Long names still compress horizontally when necessary.
 - The supplied frames provide the artwork bevels, text boxes, backgrounds and
   outer borders directly. No recoloring, border reconstruction or extra text-box
   texture is applied. The large transparent Pendulum overlay preserves the
@@ -119,9 +120,13 @@ remains a placeholder.
 - Normal Monster flavor text is always italic, including the main text of Normal
   Pendulum Monsters. Pendulum effects keep their separate typography. This rule
   also applies to the earlier layered and schematic profiles.
-- Ordinary effect text starts at 26 px instead of 21 px. Line breaks use measured
-  font widths. Dense effects reduce gradually to 16 px to fit the available area.
-  Pendulum and monster effects keep separate regions, and stats retain their space.
+- Main text starts at 25 px with −1 px letter spacing and reduces to 17 px for
+  dense effects. Pendulum text retains 26 px with a 16 px minimum. Line breaks use
+  measured font widths. Pendulum and monster effects keep separate regions.
+- Stars use 50 px icons with 4 px gaps. Stat values use 29 px text, anchored at
+  ATK x=577 and DEF/Link x=744, with baseline y=1105.5. Spell/Trap type uses
+  40.5 px text. All settings match the supplied `card-render-style (1).json`;
+  the existing bundled fonts are retained.
 - Normal Spell/Trap headers align to the right without reserving an empty subtype
   icon slot. Their subtype icons remain separate when present.
 
