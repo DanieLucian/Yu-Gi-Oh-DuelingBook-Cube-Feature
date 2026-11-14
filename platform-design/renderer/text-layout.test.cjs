@@ -66,3 +66,39 @@ test("wrapping retains paragraphs and handles long words, diacritics and unknown
   );
   assert.equal(fitText("", { font, width: 685, height: 100 }).lines.length, 0);
 });
+
+test("uploaded font measurements support fractional sizes, letter spacing and adjustable line height without pair data", () => {
+  const captured = {
+    widths: font.widths,
+    ascent: font.ascent,
+    descent: font.descent,
+  };
+  const source = Array(3).fill(effect).join(" ");
+  const width = 685,
+    height = 149,
+    letterSpacing = 0.6,
+    ratio = 1.3;
+  const layout = fitText(source, {
+    font: captured,
+    width,
+    height,
+    preferredSize: 24.5,
+    minSize: 16.5,
+    letterSpacing,
+    lineHeight: ratio,
+  });
+  assert.equal(layout.overflow, false);
+  assert.equal(layout.lines.join(" "), source);
+  assert.ok(layout.fontSize >= 16.5 && layout.fontSize <= 24.5);
+  assert.equal(layout.lineHeight, Math.ceil(layout.fontSize * ratio));
+  for (const line of layout.lines)
+    assert.ok(
+      measureText(line, captured, layout.fontSize, letterSpacing) <= width,
+    );
+  assert.ok(
+    layout.ascent +
+      (layout.lines.length - 1) * layout.lineHeight +
+      captured.descent * layout.fontSize <=
+      height,
+  );
+});

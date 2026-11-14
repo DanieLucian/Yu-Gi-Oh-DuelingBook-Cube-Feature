@@ -15,6 +15,9 @@ local asset manifest, visual metadata contract and sample gallery. It caches
 self-contained SVGs and includes a credited frame/icon/font pack. Card artwork
 and exact visual matching still require validation.
 This gallery is separate from the single-file draft simulation below.
+Its [typography tester](renderer/README.md#typography-and-spacing-tester) adjusts
+fonts, star gaps and ATK/DEF spacing, and saves the chosen style to the renderer.
+It can also be generated as a single HTML file to open without a server.
 
 ## Try the interface
 

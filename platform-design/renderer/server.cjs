@@ -3,6 +3,12 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const { renderCard, loadAssets } = require("./render.cjs");
+const { normalizeStyle } = require("./style-profile.cjs");
+const {
+  testerRuntime,
+  testerState,
+  testerHtml,
+} = require("./tester-build.cjs");
 const SVG_CSP =
   "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; sandbox";
 function defaultAssetRoot(directory = __dirname) {
@@ -28,6 +34,15 @@ function createRenderServer({
   const registry = loadAssets(assetRoot, manifest),
     cacheDir = path.join(dataRoot, "render-cache");
   fs.mkdirSync(cacheDir, { recursive: true });
+  const styleFile = path.join(dataRoot, "render-style.json");
+  const defaultStyleFile = path.join(__dirname, "style.default.json");
+  let activeStyle = normalizeStyle(
+    fs.existsSync(styleFile)
+      ? JSON.parse(fs.readFileSync(styleFile, "utf8"))
+      : fs.existsSync(defaultStyleFile)
+        ? JSON.parse(fs.readFileSync(defaultStyleFile, "utf8"))
+        : undefined,
+  );
   let cacheBytes = fs
     .readdirSync(cacheDir)
     .filter((f) => /^[a-f0-9]{64}\.svg$/.test(f))
@@ -53,6 +68,62 @@ function createRenderServer({
   }
   const server = http.createServer(async (req, res) => {
     try {
+      if (req.method === "GET" && req.url === "/tester") {
+        return respond(
+          res,
+          200,
+          testerHtml(),
+          "text/html; charset=utf-8",
+          "default-src 'self'; connect-src 'self' blob:; img-src 'self' blob: data:; font-src data:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        );
+      }
+      if (req.method === "GET" && req.url === "/tester-runtime.js")
+        return respond(
+          res,
+          200,
+          testerRuntime(),
+          "text/javascript; charset=utf-8",
+        );
+      if (req.method === "GET" && req.url === "/api/tester-state")
+        return respond(res, 200, testerState(registry, activeStyle));
+      if (req.method === "GET" && req.url === "/api/style")
+        return respond(res, 200, { style: activeStyle });
+      if (req.method === "PUT" && req.url === "/api/style") {
+        if (req.headers.origin !== `http://${req.headers.host}`)
+          return respond(res, 403, {
+            error: "Save styles from the local tester page.",
+          });
+        if (
+          !/^application\/json(?:;|$)/i.test(req.headers["content-type"] || "")
+        )
+          return respond(res, 415, { error: "Expected application/json." });
+        let bytes = 0,
+          chunks = [];
+        for await (const chunk of req) {
+          bytes += chunk.length;
+          if (bytes <= 8 * 1024 * 1024) chunks.push(chunk);
+          else chunks = [];
+        }
+        if (bytes > 8 * 1024 * 1024)
+          return respond(res, 413, { error: "Style profile limit: 8 MB." });
+        let next;
+        try {
+          next = normalizeStyle(
+            JSON.parse(Buffer.concat(chunks).toString("utf8")),
+          );
+        } catch (error) {
+          return respond(res, 400, { error: error.message });
+        }
+        const temporary = styleFile + ".tmp";
+        try {
+          fs.writeFileSync(temporary, JSON.stringify(next, null, 2));
+          fs.renameSync(temporary, styleFile);
+        } finally {
+          if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+        }
+        activeStyle = next;
+        return respond(res, 200, { saved: true });
+      }
       if (req.method === "GET" && ["/", "/gallery.js"].includes(req.url)) {
         return respond(
           res,
@@ -107,6 +178,7 @@ function createRenderServer({
           rendered = renderCard(
             JSON.parse(Buffer.concat(chunks).toString("utf8")),
             registry,
+            activeStyle,
           );
         } catch {
           return respond(res, 400, {

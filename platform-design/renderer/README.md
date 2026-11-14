@@ -1,8 +1,8 @@
 # Server-side card rendering proof of concept
 
 The PC server combines card JSON with **local** backgrounds, border, icons, fonts
-and artwork into one self-contained SVG. Browsers display the generated image;
-they do not rebuild the card or contact DuelingBook. Rendered images are cached
+and artwork into one self-contained SVG. The gallery displays the generated image
+without contacting DuelingBook. Rendered images are cached
 on disk, with identity based on visual content, embedded asset bytes and renderer
 version. Changes to copies/sections do not regenerate an identical card image.
 
@@ -42,6 +42,62 @@ Spell and Trap records. You can also select an extension Cube JSON and choose a
 card from it. That sends one selected card to the local renderer, not the whole
 Cube library. The gallery does not save Cubes, change the JSON, or perform a draft.
 
+## Typography and spacing tester
+
+Start the server as above, then open **http://127.0.0.1:3210/tester** or follow
+the gallery's tester link. Select a sample or your Cube JSON. The tester shares
+the server's SVG compositor, text fitting and style validation; its live preview
+runs locally in the browser and does not fill the server render cache while you
+move controls.
+
+- Select a region: card name, main effect/flavor text, Pendulum effect,
+  Spell/Trap type, monster type line, or ATK/DEF values.
+- Choose a bundled font or load a **WOFF2** file. Adjust size, weight, italic,
+  letter spacing and horizontal/vertical offsets. Effect regions also have
+  minimum fitted size and line height. The bundled name face has baked-in bold
+  outlines; its separate stroke-coverage control softens them.
+- Adjust star size/gap, ATK and DEF/Link value positions, and the stat baseline.
+  Measurements use the 813 × 1185 canvas. Printed ATK/DEF/LINK labels are part of
+  the supplied PNGs; these controls change the overlaid values. Oversized star
+  rows fall back to a numeric Level/Rank with a diagnostic.
+- **Save to server** applies the profile immediately to subsequent renders,
+  including the gallery, and retains it in `data/render-style.json` across
+  restarts. Uploaded fonts are stored inside that JSON and embedded into the SVG.
+  Invalid saves leave the previous profile intact. New visual output receives a
+  new cache key; older cached images remain available.
+- **Export style + fonts** produces a portable `card-render-style.json`. Import
+  it on another server, then save, or send it back in the chat to update the
+  project's defaults in `style.default.json`. A saved local profile takes
+  precedence over project defaults. **Reset controls** is preview-only until saved.
+
+You can also generate a **single-file offline tester**, with all default frames,
+icons, fonts and rendering code embedded:
+
+```sh
+node platform-design/renderer/tester-build.cjs
+```
+
+Open the generated `platform-design/renderer/card-render-tester.html` in Chrome
+or Edge. No server or internet connection is required. Its Save button uses
+browser storage; export the JSON and import it at `/tester` to apply it to the
+server. Optional arguments select an output path and a starting style JSON:
+
+```sh
+node platform-design/renderer/tester-build.cjs card-render-tester.html platform-design/renderer/data/render-style.json
+```
+
+The tester targets the supplied `predefined-813-v1` geometry. Earlier schematic
+and layered custom packs retain their earlier typography. Font uploads are
+limited to 2 MB each, six fonts and 5 MB decoded font data per profile; profile
+files/requests are capped at 8 MB. The tester decodes each font and measures
+character advances locally, including loaded Cube text; custom-font kerning is
+disabled to match those measurements. Bold/italic synthesis, unsupported glyphs
+and fallback fonts still need visual checks on the target PC. Prefer embedded
+fonts for consistent results across devices. Local artwork and edited sample
+text are preview-only and are not included in the exported style.
+
+![Typography tester with italic Normal Monster flavor text](tester-preview.jpg)
+
 ## DuelingBook appearance
 
 The supplied **Torrential Tribute** screenshot is the current style reference.
@@ -60,6 +116,9 @@ remains a placeholder.
   texture is applied. The large transparent Pendulum overlay preserves the
   selected monster frame's header.
 - Main and Pendulum effect text use pure black (`#000000`).
+- Normal Monster flavor text is always italic, including the main text of Normal
+  Pendulum Monsters. Pendulum effects keep their separate typography. This rule
+  also applies to the earlier layered and schematic profiles.
 - Ordinary effect text starts at 26 px instead of 21 px. Line breaks use measured
   font widths. Dense effects reduce gradually to 16 px to fit the available area.
   Pendulum and monster effects keep separate regions, and stats retain their space.
@@ -229,6 +288,11 @@ card data is truncated or changed.
 
 ## HTTP and cache
 
+- `GET /tester`: local typography/spacing editor; `GET /api/tester-state` supplies
+  the active local assets and style. `GET /api/style` returns the active profile.
+- `PUT /api/style`: validated style and embedded WOFF2 fonts, at most 8 MB.
+  Requires a same-origin request from the local tester. Saves atomically to
+  `data/render-style.json`; this is independent of Cube storage and draft rules.
 - `POST /api/render`: one card object, at most 128 KB; returns `{url, diagnostics,
   cacheHit}`. No caller-provided asset paths, remote URL fetching or executable
   markup is accepted.
@@ -265,6 +329,13 @@ and measured fitting of denser effects. The title's rendered glyph bounds are
 checked separately from its nominal font size. Repeated PNG layers are embedded
 once per SVG and reused by reference.
 Browser tests use the existing Playwright dependency and `CHROMIUM_PATH` option.
+Tester checks cover profile/font validation, mandatory italic flavor text,
+control changes, export/import, font-byte preservation, saved-style persistence,
+cache invalidation, responsive layout and exact equality between the browser
+preview SVG and server SVG. The standalone document runs with no HTTP requests.
+Managed cloud Chromium blocks `file://` navigation, so its offline runtime is
+tested as an embedded document; double-click launch on Windows still needs a
+manual check.
 
 Still required: card illustration ingestion/mapping, comparison of every card
 family with DuelingBook, dense-text and non-Latin fitting on real data, image crops and

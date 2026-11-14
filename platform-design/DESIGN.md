@@ -111,6 +111,14 @@ illustrations remain separate. Fandom requests still return HTTP 402 after the
 domain grants became active, so this pack is not described as wiki-sourced.
 Missing assets/details have explicit diagnostics.
 
+The typography tester at `/tester` shares the server's SVG compositor and text
+layout code, so its browser preview and saved server render use the same logic.
+It adjusts fonts per region, Level/Rank gaps and stat values; same-origin saves
+persist the style and uploaded WOFF2 bytes in `data/render-style.json`. A generated
+single HTML tester works offline and exports a portable style/font JSON. This
+editing preview is separate from server-rendered card delivery in the gallery.
+Normal Monster flavor text is always italic; Pendulum effects keep separate styles.
+
 Existing exports retain the `dbcd-cube-v1` schema and current fields. They do not
 reliably describe Pendulum scales, Link arrows, Spell/Trap subtype icons or an
 explicit Xyz Rank. Add optional visual metadata without changing IDs/copies or
