@@ -5,6 +5,9 @@ const crypto = require("node:crypto");
 const { metricsForFont, measureText, fitText } = require("./text-layout.cjs");
 
 const VERSION = "card-svg-v2";
+// Uploaded frame coordinates are measured in their original 549 × 800 canvas.
+const FRAME_SCALE_X = 813 / 549;
+const FRAME_SCALE_Y = 1185 / 800;
 const FRAMES = [
   "normal",
   "effect",
@@ -269,7 +272,7 @@ function loadAssets(root, manifest) {
     artworks.set(url, read(file, "artwork"));
   if (
     manifest.profile != null &&
-    !["schematic", "tcg-813-v1"].includes(manifest.profile)
+    !["schematic", "tcg-813-v1", "predefined-813-v1"].includes(manifest.profile)
   )
     throw Error("Unknown card layout profile.");
   const compositeSpecs = manifest.composites ?? {};
@@ -325,7 +328,8 @@ function loadAssets(root, manifest) {
 function renderCard(card, registry) {
   const c = normalizeCard(card),
     diagnostics = [...c.warnings];
-  const textured = registry.profile === "tcg-813-v1";
+  const predefined = registry.profile === "predefined-813-v1";
+  const textured = predefined || registry.profile === "tcg-813-v1";
   const lightenName = textured && Boolean(registry.fontMetrics?.name);
   const rasterDefinitions = new Map();
   function asset(key) {
@@ -368,9 +372,8 @@ function renderCard(card, registry) {
   }
   // Both borders are sampled from the same unchanged, gray/gold Effect frame.
   // Cropping in the SVG keeps every upstream PNG byte intact.
-  const commonFrame = textured
-    ? registry.assets.get("layer.frame.effect")
-    : null;
+  const commonFrame =
+    textured && !predefined ? registry.assets.get("layer.frame.effect") : null;
   function artBorder(box) {
     const [x, y, w, h] = box;
     if (commonFrame)
@@ -429,9 +432,9 @@ function renderCard(card, registry) {
     unknown: "#9ca5b5",
   };
   const background = asset(
-      `background.${c.frame}${c.pendulum ? "-pendulum" : ""}`,
+      `background.${c.frame}${c.pendulum && !predefined ? "-pendulum" : ""}`,
     ),
-    border = asset("border");
+    border = predefined ? null : asset("border");
   const nameFont = asset("font.name"),
     bodyFont = asset("font.body");
   const fontCss =
@@ -439,7 +442,10 @@ function renderCard(card, registry) {
       ? `@font-face{font-family:CardName;src:url('${nameFont}')} `
       : "") +
     (bodyFont ? `@font-face{font-family:CardBody;src:url('${bodyFont}')}` : "");
-  let body = `<rect width="813" height="1185" rx="24" fill="#3d3530"/><rect x="25" y="25" width="763" height="1135" rx="10" fill="${colors[c.frame]}"/>`;
+  let body =
+    predefined && background
+      ? ""
+      : `<rect width="813" height="1185" rx="24" fill="#3d3530"/><rect x="25" y="25" width="763" height="1135" rx="10" fill="${colors[c.frame]}"/>`;
   // The bundled face has bold strokes baked into its outlines. Retain its
   // exact glyph geometry, with a solid inner stroke and softer outer coverage.
   if (lightenName)
@@ -452,7 +458,25 @@ function renderCard(card, registry) {
       "</defs>";
   if (textured && bodyFont && !registry.fontMetrics?.body)
     diagnostics.push("font-metrics-approximate: custom body font");
-  body += image(background, 0, 0, 813, 1185);
+  body += image(
+    background,
+    0,
+    0,
+    813,
+    1185,
+    predefined ? 'preserveAspectRatio="none" data-card-frame="base"' : "",
+  );
+  // These complete frames already contain all bevels, text boxes and stat labels.
+  // The large Pendulum image is transparent over the underlying monster header.
+  if (predefined && c.pendulum)
+    body += image(
+      asset("overlay.pendulum"),
+      0,
+      0,
+      813,
+      1185,
+      'preserveAspectRatio="none" data-card-frame="pendulum"',
+    );
   if (!textured || !background)
     body += `<rect x="50" y="48" width="713" height="75" fill="#fff" fill-opacity=".35"/>`;
   body += label(
@@ -535,15 +559,45 @@ function renderCard(card, registry) {
   const art = registry.artworks.get(c.artwork);
   if (!art)
     diagnostics.push("missing-artwork: local source URL mapping required");
-  const artBox = textured
+  const artBox = predefined
     ? c.pendulum
-      ? [56, 213, 702, 530]
-      : [100, 219, 614, 614]
-    : [70, 210, 673, 505];
-  body += artBorder(artBox);
-  body += `<rect x="${artBox[0]}" y="${artBox[1]}" width="${artBox[2]}" height="${artBox[3]}" fill="#273544"/>`;
-  body += image(art, ...artBox, 'preserveAspectRatio="xMidYMid meet"');
-  if (!art)
+      ? [
+          38 * FRAME_SCALE_X,
+          145 * FRAME_SCALE_Y,
+          472 * FRAME_SCALE_X,
+          352 * FRAME_SCALE_Y,
+        ]
+      : [
+          68 * FRAME_SCALE_X,
+          148 * FRAME_SCALE_Y,
+          414 * FRAME_SCALE_X,
+          415 * FRAME_SCALE_Y,
+        ]
+    : textured
+      ? c.pendulum
+        ? [56, 213, 702, 530]
+        : [100, 219, 614, 614]
+      : [70, 210, 673, 505];
+  if (!predefined) {
+    body += artBorder(artBox);
+    body += `<rect x="${artBox[0]}" y="${artBox[1]}" width="${artBox[2]}" height="${artBox[3]}" fill="#273544"/>`;
+  }
+  // Preserve Link sockets and the Pendulum aperture's bottom corner hardware.
+  const artAperture =
+    predefined && c.pendulum
+      ? "38,145 510,145 510,491 504,497 44,497 38,491"
+      : predefined && c.frame === "link"
+        ? "97,148 451,148 482,179 482,532 451,563 97,563 68,534 68,177"
+        : null;
+  if (artAperture)
+    body += `<defs><clipPath id="art-aperture"><polygon transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" points="${artAperture}"/></clipPath></defs><g clip-path="url(#art-aperture)">`;
+  body += image(
+    art,
+    ...artBox,
+    'preserveAspectRatio="xMidYMid meet" data-card-artwork="true"',
+  );
+  if (artAperture) body += "</g>";
+  if (!art && !predefined)
     body += label(
       "Artwork unavailable locally",
       406,
@@ -551,7 +605,21 @@ function renderCard(card, registry) {
       26,
       'text-anchor="middle" fill="#e2e8f0"',
     );
-  if (c.frame === "link") {
+  if (c.frame === "link" && predefined) {
+    // Highlight only the selected, preprinted sockets; never paint over the frame.
+    const points = [
+      "248,140 274,124 300,140",
+      "464,134 495,134 495,165",
+      "490,334 504,355 490,376",
+      "495,544 495,575 464,575",
+      "248,570 274,586 300,570",
+      "54,544 54,575 85,575",
+      "59,334 45,355 59,376",
+      "54,134 85,134 54,165",
+    ];
+    for (const direction of c.linkArrows)
+      body += `<polygon data-link-arrow="${direction}" transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" points="${points[ARROWS.indexOf(direction)]}" fill="#e84b36"/>`;
+  } else if (c.frame === "link") {
     const arrow = c.linkArrows.length ? asset("icon.link-arrow") : null;
     const positions = textured
       ? [
@@ -580,22 +648,23 @@ function renderCard(card, registry) {
     }
   }
   if (c.pendulum) {
-    if (textured) body += image(asset("overlay.pendulum"), 0, 0, 813, 1185);
-    if (textured) body += artBorder(artBox);
+    if (textured && !predefined)
+      body += image(asset("overlay.pendulum"), 0, 0, 813, 1185);
+    if (textured && !predefined) body += artBorder(artBox);
     if (!textured || !background)
       body += `<rect x="55" y="740" width="703" height="140" fill="#e2efe6" stroke="#3f6b76" stroke-width="3"/>`;
     body +=
       label(
         c.scaleLeft ?? "?",
         textured ? 84.4 : 80,
-        textured ? 792 : 815,
+        predefined ? 884 : textured ? 792 : 815,
         textured ? 56.5 : 32,
         'text-anchor="middle" fill="#326ca5"',
       ) +
       label(
         c.scaleRight ?? "?",
         textured ? 728 : 733,
-        textured ? 792 : 815,
+        predefined ? 884 : textured ? 792 : 815,
         textured ? 56.5 : 32,
         'text-anchor="middle" fill="#b64949"',
       );
@@ -603,9 +672,9 @@ function renderCard(card, registry) {
       ? fittedLines(
           c.pendulumEffect || "Pendulum text unavailable",
           129,
-          749,
+          predefined ? 754 : 749,
           555,
-          122,
+          predefined ? 151 : 122,
           "pendulum",
         )
       : lines(
@@ -616,11 +685,12 @@ function renderCard(card, registry) {
           4,
         );
   }
-  const boxY = textured ? 885 : c.pendulum ? 905 : 765,
+  const boxY =
+      predefined && c.pendulum ? 919 : textured ? 885 : c.pendulum ? 905 : 765,
     textY = textured ? (c.monster ? 947 : 919) : boxY + 69;
   if (!textured || !background)
     body += `<rect x="55" y="${boxY}" width="703" height="${1100 - boxY}" fill="#f2e9d6" stroke="#655b50" stroke-width="3"/>`;
-  if (textured) {
+  if (textured && !predefined) {
     const texture = registry.assets.get(`layer.text.${c.frame}`);
     if (texture)
       body += image(texture, 49, 885, 717, 231, 'preserveAspectRatio="none"');
@@ -637,9 +707,9 @@ function renderCard(card, registry) {
     ? fittedLines(
         c.effect,
         65,
-        c.monster ? 929 : 899,
+        c.monster ? boxY + 44 : 899,
         685,
-        c.monster ? 149 : 205,
+        c.monster ? (predefined ? 1070 - (boxY + 44) : 149) : 205,
         "effect",
       )
     : lines(
@@ -649,7 +719,29 @@ function renderCard(card, registry) {
         58,
         textured ? (c.monster ? 6 : 7) : c.pendulum ? 4 : 10,
       );
-  if (c.monster)
+  if (c.monster && predefined) {
+    const stat = 'text-anchor="end" fill="#000000"';
+    const value = (text, x, width, block) =>
+      label(
+        text,
+        x,
+        1107,
+        28,
+        `data-text-block="${block}" ${stat}` +
+          (measureText(text, registry.fontMetrics?.body, 28) > width
+            ? ` textLength="${width}" lengthAdjust="spacingAndGlyphs"`
+            : ""),
+      );
+    body += value(c.atk || "?", 593, 83, "atk");
+    body += value(
+      c.frame === "link"
+        ? c.link.replace(/^LINK\s*[-/]?\s*/i, "") || "?"
+        : c.def || "?",
+      747,
+      c.frame === "link" ? 28 : 73,
+      c.frame === "link" ? "link" : "def",
+    );
+  } else if (c.monster)
     body += label(
       `ATK / ${c.atk || "?"}   ${c.frame === "link" ? c.link || "LINK-?" : "DEF / " + (c.def || "?")}`,
       742,
@@ -657,9 +749,9 @@ function renderCard(card, registry) {
       26,
       `text-anchor="end" font-weight="bold" fill="${!textured && ["xyz", "link"].includes(c.frame) ? "#f8f5eb" : "#171b20"}"`,
     );
-  body += textBorder();
+  if (!predefined) body += textBorder();
   body += image(border, 0, 0, 813, 1185);
-  if (diagnostics.length)
+  if (diagnostics.length && !predefined)
     body += label(
       "RENDER PREVIEW · see diagnostics",
       406,

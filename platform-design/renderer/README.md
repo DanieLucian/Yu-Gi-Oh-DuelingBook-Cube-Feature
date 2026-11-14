@@ -6,16 +6,20 @@ they do not rebuild the card or contact DuelingBook. Rendered images are cached
 on disk, with identity based on visual content, embedded asset bytes and renderer
 version. Changes to copies/sections do not regenerate an identical card image.
 
-A **bundled template pack** now supplies 67 unchanged PNG/WOFF2 files from
-[YGO Carder](https://github.com/lauqerm/ygocarder). See the
-[original authors and source notice](packs/ygocarder/NOTICE.md) and per-file
-checksums in `packs/ygocarder/provenance.json`. These files came from GitHub,
-not the wiki. Card illustrations remain separate.
+The default pack uses the **ten predefined PNG frames supplied in
+`ygo-renderer-card-frames.zip`**, stored byte for byte at their original
+549 × 800 dimensions. See the [frame source record](packs/predefined/NOTICE.md)
+and checksums in `packs/predefined/provenance.json`. Fonts, attributes and
+subtype/Level/Rank icons still come from the separately credited
+[YGO Carder pack](packs/ygocarder/NOTICE.md). The earlier 67-file layered pack
+remains available, with its pinned upstream checksums intact. No bundled assets
+came from the wiki. Card illustrations remain separate.
 
 The local gallery uses this pack automatically unless `assets/manifest.json`
 is present. Missing files/details produce diagnostics. Coordinates follow the
-pack's 813 × 1185 layout with DuelingBook presentation rules. Width-aware text
-fitting is implemented; exact matching and non-Latin fallbacks still need real-card
+813 × 1185 SVG canvas, scaled from the original frames, with DuelingBook
+presentation rules. Width-aware text fitting is implemented; exact matching and
+non-Latin fallbacks still need real-card
 comparison. This is a rendering experiment, separate from
 the draft simulation and multiplayer server.
 
@@ -51,9 +55,10 @@ remains a placeholder.
 - Names use an 80 px small-cap face and compress horizontally when necessary.
   Their rendered strokes are softened slightly because the bundled font's bold
   outlines are baked in. Glyph shape, height and spacing stay unchanged.
-- Artwork borders use one neutral gray bevel for all card families. Main text
-  boxes share the reference's gold/bronze outline; their pale type-specific
-  background textures remain distinct.
+- The supplied frames provide the artwork bevels, text boxes, backgrounds and
+  outer borders directly. No recoloring, border reconstruction or extra text-box
+  texture is applied. The large transparent Pendulum overlay preserves the
+  selected monster frame's header.
 - Main and Pendulum effect text use pure black (`#000000`).
 - Ordinary effect text starts at 26 px instead of 21 px. Line breaks use measured
   font widths. Dense effects reduce gradually to 16 px to fit the available area.
@@ -61,9 +66,12 @@ remains a placeholder.
 - Normal Spell/Trap headers align to the right without reserving an empty subtype
   icon slot. Their subtype icons remain separate when present.
 
-The shared borders reuse crops of the unchanged Effect frame in the generated
-SVG. The artwork bevel is desaturated at render time. Original PNG/WOFF2 files
-and their source checksums are unchanged.
+The frames already contain ATK/DEF/LINK labels and separators, so the renderer
+adds only their values. Artwork stays inside the original aperture, including
+Link corner sockets and Pendulum corner hardware. Active Link arrows highlight
+only the selected sockets. Without mapped artwork, the original white aperture
+remains visible and the gallery reports the missing artwork in diagnostics.
+The old `tcg-813-v1` profile retains its earlier layered rendering behavior.
 
 `font-metrics.json` contains precomputed glyph advances and pair adjustments for
 the bundled fonts, tied to their SHA-256 hashes. This keeps rendering independent
@@ -86,19 +94,20 @@ and converting self-contained SVG icons to PNG. Its offline tests pass; live
 collection remains unavailable: after the domain grants became active, Fandom
 and its image CDN returned HTTP 402 with “Please contact the site owner for
 access.” No wiki files are bundled or verified. The working bundled pack uses
-the separately credited GitHub source above.
+the supplied frames and separately credited GitHub icons/fonts above.
 
 ## Use or customize the asset pack
 
-The bundled pack is ready to use with the start command above. It contains nine
-base frame families, separate Pendulum layers, attributes, subtype/Level/Rank
-icons, Link arrow layers and two fonts. Its manifest composes these original
-layers without changing their bytes. Template originals are stored and served
-from your PC, with no runtime request to GitHub or the wiki.
+The bundled pack is ready to use with the start command above. `packs/manifest.json`
+uses the `predefined-813-v1` profile and nine complete frames plus the large
+Pendulum overlay. Its paths reference `predefined/` for frames and `ygocarder/`
+for icons/fonts. Template originals are stored and served from your PC, with no
+runtime request to GitHub or the wiki.
 
-To customize it, copy the **whole** `packs/ygocarder/` directory into `assets/`,
-including its notice and provenance, then edit `assets/manifest.json`. This lets
-you add `artworks` mappings while retaining the supplied frames and fonts. An
+To customize it, copy the **contents of the whole `packs/` directory** into
+`assets/`, retaining both subdirectories and their notices/provenance, then edit
+`assets/manifest.json`. This lets you add `artworks` mappings while retaining
+the supplied frames and fonts. An
 existing custom manifest takes precedence and is not overwritten automatically.
 
 For an independent pack with your own files:
@@ -136,7 +145,7 @@ any query string. This makes asset resolution explicit. An uploaded URL is never
 treated as a server file path or fetched over the network. Automated artwork
 acquisition is not implemented; the original files must be placed locally first.
 
-The manifest covers:
+For the original schematic/layered profiles, the manifest covers:
 
 | Asset | Convention |
 | --- | --- |
@@ -156,7 +165,9 @@ The loader checks file signatures/size, not pixel dimensions or full image/font
 integrity: check those visually in the gallery. Limits are 10 MB/file and 256 MB
 loaded asset bytes for this experiment. Original source geometry may require
 adjusting coordinates for a different pack. The optional `tcg-813-v1` profile
-uses the bundled geometry; omit it for the original schematic layout.
+uses the earlier layered pack's geometry; `predefined-813-v1` uses the supplied
+complete frames with their printed stat labels. Omit the profile for the original
+schematic layout. These profiles require matching frame geometry.
 
 A manifest can also define `composites`: each composite has a `width`, `height`
 and up to eight `layers`, each specifying a local raster key, `x`, `y`, `width`
@@ -244,6 +255,10 @@ node --test platform-design/renderer/*.test.cjs
 Tests cover card families, rank/level repetition, Pendulum scales, Link arrows,
 legacy JSON preservation, text escaping, missing metadata, local asset resolution,
 cache invalidation/restart, HTTP limits and Chromium SVG decoding for all examples.
+The predefined-frame tests verify all ten original hashes and dimensions, compare
+rendered pixels with the source frames (including transparent Pendulum headers
+and printed stat labels), and check that mapped artwork preserves Link sockets
+and Pendulum corner hardware. Only values are overlaid on the printed stat labels.
 Additional checks verify the requested name colors, border pixels across every
 family, artwork visibility, font-file identity, the reference's two-line effect,
 and measured fitting of denser effects. The title's rendered glyph bounds are

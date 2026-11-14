@@ -121,7 +121,7 @@ test("server defaults to bundled templates and preserves an explicitly selected 
   t.after(() => fs.rmSync(dataRoot, { force: true, recursive: true }));
   assert.equal(
     defaultAssetRoot(dataRoot),
-    path.join(dataRoot, "packs/ygocarder"),
+    path.join(dataRoot, "packs"),
   );
   const server = createRenderServer({ assetRoot: root, dataRoot });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -168,7 +168,7 @@ test(
     const dataRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "cube-template-browser-"),
     );
-    const server = createRenderServer({ assetRoot: root, dataRoot });
+    const server = createRenderServer({ dataRoot });
     let browser;
     t.after(async () => {
       await browser?.close();

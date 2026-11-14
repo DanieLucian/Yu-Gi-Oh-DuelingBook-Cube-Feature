@@ -9,7 +9,7 @@ function defaultAssetRoot(directory = __dirname) {
   const custom = path.join(directory, "assets");
   return fs.existsSync(path.join(custom, "manifest.json"))
     ? custom
-    : path.join(directory, "packs/ygocarder");
+    : path.join(directory, "packs");
 }
 function createRenderServer({
   assetRoot = defaultAssetRoot(),
@@ -152,7 +152,7 @@ if (require.main === module) {
   const server = createRenderServer();
   server.listen(port, "127.0.0.1", () =>
     console.log(
-      `Local card renderer: http://127.0.0.1:${port}\nVisual proof of concept; bundled template credits are in packs/ygocarder/NOTICE.md.`,
+      `Local card renderer: http://127.0.0.1:${port}\nVisual proof of concept; bundled template credits are in packs/predefined/NOTICE.md and packs/ygocarder/NOTICE.md.`,
     ),
   );
 }

@@ -104,8 +104,9 @@ when pack performance is measured.
 See [renderer/README.md](renderer/README.md) for a working local rendering gallery,
 asset manifest and optional `visual` metadata contract. This gallery is separate
 from the single-file drafting simulation; its HTTP process is not the multiplayer
-server. A bundled, credited YGO Carder pack now supplies frames, icons and fonts
-from a pinned GitHub revision. Original files and checksums are preserved;
+server. The default renderer uses ten user-supplied predefined PNG frames;
+attributes, subtype/Level/Rank icons and fonts come from the separately credited
+YGO Carder pack at a pinned GitHub revision. Original files and checksums are preserved;
 illustrations remain separate. Fandom requests still return HTTP 402 after the
 domain grants became active, so this pack is not described as wiki-sourced.
 Missing assets/details have explicit diagnostics.
@@ -122,8 +123,11 @@ server asset file. The experiment performs no URL fetching; a later ingestion
 step must restrict artwork downloads to supported sources and validated images.
 Uploaded JSON cannot select arbitrary server paths or trigger arbitrary network
 requests. Retain original records and render names/effects as escaped text.
-The current renderer implements the supplied Torrential Tribute reference's
-name colors, shared gray/gold borders and taller measured text layout. Exact
+The current renderer uses the supplied complete frames without rebuilding or
+recoloring their borders/text boxes. It implements the Torrential Tribute
+reference's name colors, lighter name strokes and pure-black measured effect
+text. Pendulum overlays preserve the base header; stat values fill the original
+printed labels. Exact
 DuelingBook geometry, dense effects, fallback fonts and all card families still
 need comparison with representative real cards.
 
