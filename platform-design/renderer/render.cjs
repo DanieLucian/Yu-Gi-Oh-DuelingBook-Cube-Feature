@@ -364,7 +364,7 @@ function renderCard(card, registry) {
     });
     if (layout.overflow)
       diagnostics.push("text-overflow: full text retained in SVG description");
-    return `<g data-text-block="${block}" font-family="CardBody, Georgia, serif" font-kerning="normal" font-variant-ligatures="none">${layout.lines.map((line, i) => label(line, x, top + layout.ascent + i * layout.lineHeight, layout.fontSize)).join("")}</g>`;
+    return `<g data-text-block="${block}" fill="#000000" font-family="CardBody, Georgia, serif" font-kerning="normal" font-variant-ligatures="none">${layout.lines.map((line, i) => label(line, x, top + layout.ascent + i * layout.lineHeight, layout.fontSize)).join("")}</g>`;
   }
   // Both borders are sampled from the same unchanged, gray/gold Effect frame.
   // Cropping in the SVG keeps every upstream PNG byte intact.
@@ -406,7 +406,13 @@ function renderCard(card, registry) {
     return chunks
       .slice(0, maxLines)
       .map((l, i) =>
-        label(l, x, y + i * 25, 21, 'font-family="CardBody, Georgia, serif"'),
+        label(
+          l,
+          x,
+          y + i * 25,
+          21,
+          'font-family="CardBody, Georgia, serif" fill="#000000"',
+        ),
       )
       .join("");
   }

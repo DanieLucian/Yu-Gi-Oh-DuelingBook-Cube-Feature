@@ -312,3 +312,26 @@ test("name weight is lighter without changing the glyph face, height or spacing"
     /<text[^>]+font-size="80"[^>]+filter="url\(#card-name-weight\)"/,
   );
 });
+
+test("main and Pendulum effects are pure black in textured and schematic layouts", async (t) => {
+  const page = await browser.newPage();
+  t.after(() => page.close());
+  const value = {
+    ...card,
+    effect: "Main effect text.",
+    pendulumEffect: "Pendulum effect text.",
+    visual: { frame: "effect", pendulum: true, scaleLeft: 2, scaleRight: 8 },
+  };
+  for (const assets of [registry, { assets: new Map(), artworks: new Map() }]) {
+    await page.setContent(renderCard(value, assets).svg);
+    const colors = await page.evaluate(() =>
+      ["Main effect text.", "Pendulum effect text."].map((value) => {
+        const node = [...document.querySelectorAll("svg text")].find(
+          (node) => node.textContent === value,
+        );
+        return node ? getComputedStyle(node).fill : null;
+      }),
+    );
+    assert.deepEqual(colors, ["rgb(0, 0, 0)", "rgb(0, 0, 0)"]);
+  }
+});

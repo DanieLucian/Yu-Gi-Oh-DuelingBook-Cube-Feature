@@ -54,6 +54,7 @@ remains a placeholder.
 - Artwork borders use one neutral gray bevel for all card families. Main text
   boxes share the reference's gold/bronze outline; their pale type-specific
   background textures remain distinct.
+- Main and Pendulum effect text use pure black (`#000000`).
 - Ordinary effect text starts at 26 px instead of 21 px. Line breaks use measured
   font widths. Dense effects reduce gradually to 16 px to fit the available area.
   Pendulum and monster effects keep separate regions, and stats retain their space.
