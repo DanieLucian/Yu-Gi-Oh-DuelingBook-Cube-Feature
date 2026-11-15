@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "regions": {
+    "name": {
+      "font": "name",
+      "size": 95,
+      "weight": 400,
+      "italic": false,
+      "letterSpacing": -2,
+      "offsetX": 0,
+      "offsetY": 0,
+      "edgeOpacity": 1
+    },
+    "effect": {
+      "font": "body",
+      "size": 25,
+      "weight": 100,
+      "italic": false,
+      "letterSpacing": -1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "minSize": 17,
+      "lineHeight": 1.12
+    },
+    "pendulum": {
+      "font": "body",
+      "size": 26,
+      "weight": 400,
+      "italic": false,
+      "letterSpacing": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "minSize": 16,
+      "lineHeight": 1.12
+    },
+    "kind": {
+      "font": "body",
+      "size": 40.5,
+      "weight": 900,
+      "italic": false,
+      "letterSpacing": -1,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    "type": {
+      "font": "body",
+      "size": 26,
+      "weight": 900,
+      "italic": false,
+      "letterSpacing": 0,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    "stats": {
+      "font": "body",
+      "size": 29,
+      "weight": 600,
+      "italic": false,
+      "letterSpacing": 0,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "stars": {
+    "size": 50,
+    "gap": 4
+  },
+  "stats": {
+    "atkX": 577,
+    "defX": 744,
+    "baseline": 1105.5
+  },
+  "fonts": {}
+}

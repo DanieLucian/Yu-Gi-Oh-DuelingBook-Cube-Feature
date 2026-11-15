@@ -9,6 +9,22 @@
   const src = (node) => node?.currentSrc || node?.getAttribute('src') || '';
   const asset = (node) => src(node).split('/').pop()?.split('?')[0] || '';
   const normalize = (s) => s.replace(/\s+/g, ' ').trim();
+  const SPELL_TRAP_ICONS = ['normal', 'continuous', 'counter', 'equip', 'field', 'quick-play', 'ritual'];
+  function spellTrapIcon(node, role, type) {
+    if (!['spell', 'trap'].includes(role) && (role || !/\b(?:spell|trap)\b/i.test(type))) return null;
+    const icon = node.querySelector('img.type_icon');
+    if (display(icon)) {
+      const value = asset(icon).split('#')[0].replace(/\.(?:webp|png|jpe?g|svg)$/i, '').toLowerCase();
+      // An unknown visible icon must not silently become a Normal card.
+      return SPELL_TRAP_ICONS.includes(value) ? value : null;
+    }
+    const explicit = SPELL_TRAP_ICONS.find(value =>
+      new RegExp(`\\b${value === 'quick-play' ? 'quick[- ]play' : value}\\b`, 'i').test(type));
+    if (explicit) return explicit;
+    // DuelingBook keeps a hidden continuous.webp placeholder on Normal cards.
+    // Require the actual icon element and active Spell/Trap header as evidence.
+    return icon && display(node.querySelector('.spell_type_txt')) ? 'normal' : null;
+  }
   // Deterministic local key for official cards. This is NOT a DuelingBook card ID.
   // Prefer the artwork URL (without its cache-busting query) and card name.
   function officialKey(name, url) {
@@ -33,7 +49,9 @@
     const attrNode = node.querySelector('img.attribute');
     const levels = [...node.querySelectorAll('.level')].filter(display).length;
     const role = asset(node.querySelector('.card_color')).replace(/_front\d*\.webp$/i, '').replace(/\.webp$/i, '');
-    const typeText = normalize(text(node.querySelector('.type_txt')) || text(node.querySelector('.spell_type_txt')));
+    const typeNodes = [node.querySelector('.type_txt'), node.querySelector('.spell_type_txt')];
+    const typeText = normalize(text(typeNodes.find(el => display(el) && text(el))) || typeNodes.map(text).find(Boolean) || '');
+    const icon = spellTrapIcon(node, role, typeText);
     const record = {
       id: isCustom ? idMatch[1] : officialKey(name, artwork), name, artwork,
       origin: isCustom ? 'custom' : 'official',
@@ -42,6 +60,7 @@
       attribute: asset(attrNode).replace(/_attribute\.webp$/i, '').toUpperCase(),
       level: levels || null,
       type: typeText,
+      ...(icon ? {visual: {version: 1, spellTrapIcon: icon}} : {}),
       effect: display(effectNode) ? text(effectNode) : '',
       pendulumEffect: display(pendulumNode) ? text(pendulumNode) : '',
       atk: display(node.querySelector('.card_atk_txt')) ? text(node.querySelector('.card_atk_txt')) : '',
@@ -81,7 +100,8 @@
       // The page may contain a duplicate preview element. Prefer the record with the most information.
       const old = records.get(card.id);
       const score = (v) => [v.name, v.effect, v.type, v.frame, v.atk].filter(Boolean).join('').length;
-      if (!old || score(card) > score(old)) records.set(card.id, card);
+      const iconScore = Number(Boolean(card.visual?.spellTrapIcon)) - Number(Boolean(old?.visual?.spellTrapIcon));
+      if (!old || iconScore > 0 || (iconScore === 0 && score(card) > score(old))) records.set(card.id, card);
     }
     return { cards: [...records.values()], rendered: roots.length, page: location.href };
   }

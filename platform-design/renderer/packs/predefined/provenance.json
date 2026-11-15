@@ -1,0 +1,97 @@
+{
+  "source": "User-supplied ygo-renderer-card-frames.zip",
+  "archiveSha256": "274da14b13be7d2615a5533196d4cb47c843257d9077a5ea311ddf59df7135eb",
+  "filesUnmodified": true,
+  "files": [
+    {
+      "file": "frame-effect.png",
+      "bytes": 308952,
+      "sha256": "9b9fa065fba0a5fc82ebe694bb89bca523213ef8c17973e963b5a0cae10fc567",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-fusion.png",
+      "bytes": 273475,
+      "sha256": "97401247607cad23b01ea5756e16ce3602a54aa3bfe22c344aba5ede2e0f0331",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-link.png",
+      "bytes": 385096,
+      "sha256": "0fe43ba41d367860304a1ac5c94aa59bfcfb73e699c732a8ab3d3560d9420605",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-normal.png",
+      "bytes": 275481,
+      "sha256": "c434f383a4480f5f75ec494189d52b3c280f57fabcd190120913727969e39e9f",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-pendulum-large.png",
+      "bytes": 161185,
+      "sha256": "3a0ea59db639650024972affb18808d08c8d73e6fd1c47d135918bcb734ac3a9",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-ritual.png",
+      "bytes": 293776,
+      "sha256": "28689dc64895bd72cb165618d783caf593eeb8af272fabd121b11890949b86b7",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-spell.png",
+      "bytes": 283753,
+      "sha256": "42787d1bf905fcf30065d66b9b2ba417b9ea2cdd2a57d85546b25475c71da00d",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-synchro.png",
+      "bytes": 278611,
+      "sha256": "8355d26cf101c40bfd1b948a502c34677c0b6d63f1b484f0cdd1a9db1fd00cec",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-trap.png",
+      "bytes": 296970,
+      "sha256": "c357580f205762b5f6be13a84c8610deb4f2c246d7c2f6ad9db3cfe6ebf29e6e",
+      "dimensions": [
+        549,
+        800
+      ]
+    },
+    {
+      "file": "frame-xyz.png",
+      "bytes": 323406,
+      "sha256": "a9866a3092e3b39d5ba53eeea2262cbc6d0ab5e3b0f5856d006eb7dcfe6cc47e",
+      "dimensions": [
+        549,
+        800
+      ]
+    }
+  ]
+}

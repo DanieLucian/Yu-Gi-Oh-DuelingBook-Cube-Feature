@@ -1,0 +1,1363 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cube Draft · Platform design</title>
+    <style>
+      :root {
+        font-family:
+          Inter,
+          Segoe UI,
+          Arial,
+          sans-serif;
+        color: #e8edf5;
+        background: #0c111a;
+        font-size: 14px;
+        --line: #293344;
+        --muted: #96a4b9;
+        --accent: #a8e3cf;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        border: 1px solid #3b495d;
+        color: inherit;
+        background: #243248;
+        border-radius: 7px;
+        padding: 9px 13px;
+      }
+      button:hover {
+        background: #31415b;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .primary {
+        background: #a8e3cf;
+        color: #0a3025;
+        border: 0;
+        font-weight: 700;
+      }
+      .primary:hover {
+        background: #cef5e8;
+      }
+      header {
+        height: 80px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        background: #111924;
+        gap: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand b {
+        letter-spacing: 2px;
+        font-size: 17px;
+      }
+      .mark {
+        color: var(--accent);
+        font-size: 32px;
+      }
+      .sub {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+      nav {
+        display: flex;
+        gap: 8px;
+      }
+      .notice {
+        background: #172234;
+        color: #a9bad1;
+        text-align: center;
+        font-size: 12px;
+        padding: 9px;
+      }
+      .notice strong {
+        color: #cce7dd;
+      }
+      main {
+        max-width: 1600px;
+        margin: auto;
+        padding: 24px;
+      }
+      .table-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+      }
+      .eyebrow {
+        color: var(--accent);
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      h1 {
+        font-size: 26px;
+        margin: 7px 0 0;
+      }
+      h2 {
+        font-size: 15px;
+        margin: 0;
+      }
+      p {
+        line-height: 1.5;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 280px minmax(420px, 1fr) 300px;
+        gap: 20px;
+        align-items: start;
+      }
+      .panel {
+        background: #141d2a;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .panel-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      .small {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      #preview {
+        min-height: 485px;
+      }
+      .preview-note {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-top: 13px;
+      }
+      .card {
+        --frame: #b18c64;
+        background: var(--frame);
+        border: 3px solid #4a3830;
+        border-radius: 7px;
+        color: #151b20;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        aspect-ratio: 0.69;
+        box-shadow: 0 4px 8px #0005;
+      }
+      .card-name {
+        font-family: Georgia, serif;
+        font-weight: bold;
+        background: #f8ecd6bb;
+        padding: 5px;
+        font-size: 10px;
+        line-height: 1.2;
+        min-height: 28px;
+      }
+      .art {
+        margin: 5px;
+        background:
+          radial-gradient(circle at 40% 35%, #f4ecc5aa 0, transparent 10%),
+          radial-gradient(ellipse at 65% 65%, #144757 0, #0a182d 70%);
+        flex: 1;
+        min-height: 42px;
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+      }
+      .sigil {
+        width: 60%;
+        aspect-ratio: 1;
+        border: 2px solid #d2eee188;
+        transform: rotate(45deg);
+        box-shadow:
+          0 0 35px #80ceb66b,
+          inset 0 0 30px #3eaf9c44;
+        border-radius: 15%;
+      }
+      .art img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+      }
+      .card-kind {
+        font-size: 8px;
+        text-align: center;
+        padding: 3px;
+        background: #f7ead7a1;
+      }
+      .effect {
+        display: none;
+      }
+      .stats {
+        font-size: 9px;
+        font-weight: 700;
+        padding: 4px;
+        text-align: right;
+        background: #f8ecd6bb;
+      }
+      .large {
+        width: 100%;
+        border-width: 5px;
+        aspect-ratio: auto;
+        min-height: 430px;
+      }
+      .large .card-name {
+        font-size: 19px;
+        min-height: 42px;
+        padding: 9px;
+      }
+      .large .art {
+        flex: none;
+        height: 195px;
+        margin: 8px;
+      }
+      .large .card-kind {
+        font-size: 11px;
+        padding: 6px;
+      }
+      .large .effect {
+        display: block;
+        background: #faf1dc;
+        color: #20232c;
+        margin: 8px;
+        padding: 9px;
+        font:
+          12px/1.5 Georgia,
+          serif;
+        min-height: 90px;
+        max-height: 150px;
+        overflow: auto;
+      }
+      .large .stats {
+        font-size: 12px;
+      }
+      .pack-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .timer {
+        text-align: right;
+        font:
+          28px Consolas,
+          monospace;
+        color: var(--accent);
+      }
+      .timer small {
+        font:
+          10px Segoe UI,
+          sans-serif;
+        color: var(--muted);
+        display: block;
+      }
+      .timer-track {
+        height: 3px;
+        background: #2b3748;
+        border-radius: 3px;
+        margin: 12px 0 17px;
+        overflow: hidden;
+      }
+      .timer-track i {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+        width: 100%;
+        transition: width 0.2s;
+      }
+      .pack-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .pick-card {
+        padding: 0;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        display: block;
+        text-align: left;
+        position: relative;
+        width: 100%;
+      }
+      .pick-card:hover {
+        background: transparent;
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .pick-card:focus-visible {
+        outline: 3px solid #fff;
+        outline-offset: 3px;
+      }
+      .pick-confirm {
+        position: absolute;
+        inset: 0;
+        background: #0c1720ed;
+        color: #fff;
+        border: 2px solid var(--accent);
+        border-radius: 7px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 7px;
+        gap: 10px;
+        z-index: 2;
+      }
+      .pick-confirm strong {
+        font-size: 12px;
+      }
+      .pick-confirm button {
+        padding: 7px 8px;
+        font-size: 11px;
+      }
+      .confirm-actions {
+        display: flex;
+        gap: 5px;
+      }
+      .pack-hint {
+        font-size: 11px;
+        color: var(--muted);
+        margin: 18px 0 0;
+      }
+      .pool-summary {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .pool-summary span {
+        background: #0d1521;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+        flex: 1;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .pool-summary b {
+        display: block;
+        font-size: 20px;
+        color: #fff;
+        margin-bottom: 4px;
+      }
+      .pool-list {
+        max-height: 470px;
+        overflow: auto;
+        display: grid;
+        gap: 6px;
+      }
+      .pool-row {
+        background: #1a2739;
+        border: 1px solid #2e3c50;
+        border-radius: 6px;
+        padding: 8px;
+        display: grid;
+        grid-template-columns: 1fr 66px;
+        gap: 8px;
+        align-items: center;
+      }
+      .pool-name {
+        font-size: 12px;
+        overflow-wrap: anywhere;
+      }
+      .pool-row select {
+        width: 66px;
+        background: #0f1a2b;
+        border: 1px solid #45516a;
+        color: #d5dfed;
+        font-size: 10px;
+        border-radius: 4px;
+        padding: 5px 2px;
+      }
+      .empty {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+        padding: 22px 4px;
+        text-align: center;
+      }
+      .export {
+        width: 100%;
+        margin-top: 14px;
+      }
+      .seats {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+      }
+      .seat {
+        border: 1px solid var(--line);
+        padding: 9px 12px;
+        background: #131d2a;
+        border-radius: 8px;
+        font-size: 11px;
+      }
+      .seat.you {
+        border-color: #86c8b3;
+      }
+      .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        margin-right: 6px;
+      }
+      .status {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+        margin-top: 12px;
+        min-height: 32px;
+      }
+      #toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 20px;
+        background: #d5f1e7;
+        color: #18372c;
+        z-index: 10;
+        border-radius: 9px;
+        max-width: 90%;
+        box-shadow: 0 8px 30px #0008;
+      }
+      #toast[hidden] {
+        display: none;
+      }
+      .library-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      }
+      .cube-tile {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+        align-items: start;
+      }
+      .cube-tile h2 {
+        font-size: 19px;
+      }
+      .cube-numbers {
+        display: flex;
+        gap: 16px;
+        font-size: 13px;
+        color: #c2cddd;
+      }
+      .upload {
+        padding: 24px;
+        margin: 20px 0;
+        border: 1px dashed #73869e;
+        border-radius: 10px;
+        text-align: center;
+        background: #152133;
+      }
+      .upload p {
+        margin: 8px 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .upload label {
+        cursor: pointer;
+        color: var(--accent);
+        text-decoration: underline;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 8;
+        background: #040a12c9;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+      }
+      .overlay[hidden],
+      section[hidden] {
+        display: none;
+      }
+      .dialog {
+        max-width: 510px;
+        width: 100%;
+        padding: 25px;
+        background: #172334;
+        border: 1px solid #4c5d74;
+        border-radius: 14px;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 22px 0;
+      }
+      .field label {
+        display: block;
+        color: #bdc9da;
+        font-size: 12px;
+        margin-bottom: 7px;
+      }
+      .field input,
+      .field select {
+        padding: 10px;
+        border-radius: 6px;
+        background: #0e1724;
+        color: white;
+        border: 1px solid #46556e;
+        width: 100%;
+      }
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .warning {
+        color: #f2cc9d;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .library-meta {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .finished {
+        padding: 60px 12px;
+        text-align: center;
+        grid-column: 1/-1;
+      }
+      .finished h2 {
+        font-size: 24px;
+        margin: 12px;
+      }
+      .badge {
+        background: #263b37;
+        color: #b7e6d4;
+        padding: 6px 10px;
+        border-radius: 30px;
+        font-size: 11px;
+      }
+      .help {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-top: 11px;
+      }
+      @media (max-width: 1150px) {
+        .grid {
+          grid-template-columns: 240px minmax(340px, 1fr);
+        }
+        .pool-panel {
+          grid-column: 1/-1;
+        }
+        .pool-list {
+          grid-template-columns: repeat(3, 1fr);
+          max-height: 230px;
+        }
+        .pack-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        header {
+          padding: 0 18px;
+        }
+      }
+      @media (max-width: 680px) {
+        header {
+          height: auto;
+          padding: 15px;
+          flex-wrap: wrap;
+        }
+        .grid {
+          display: block;
+        }
+        .panel {
+          margin-bottom: 15px;
+        }
+        .preview-panel {
+          max-width: 280px;
+          margin: 0 auto 20px;
+        }
+        .pack-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .pool-list {
+          grid-template-columns: 1fr 1fr;
+        }
+        .table-top {
+          align-items: start;
+        }
+        h1 {
+          font-size: 22px;
+        }
+        main {
+          padding: 15px;
+        }
+        .form-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .notice {
+          line-height: 1.5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="mark">◈</span>
+        <div>
+          <b>CUBE DRAFT</b>
+          <div class="sub">A table for your collection</div>
+        </div>
+      </div>
+      <nav>
+        <button id="library-nav">Cube library</button
+        ><button id="table-nav">Draft table</button
+        ><button id="settings-open">Room settings</button>
+      </nav>
+    </header>
+    <div class="notice">
+      <strong>Interactive design prototype</strong> · Single-browser simulation.
+      Other seats auto-pick. Library storage is browser-local here; the planned
+      server stores it on your PC.
+    </div>
+    <main>
+      <section id="table-view">
+        <div class="table-top">
+          <div>
+            <div class="eyebrow" id="round-label">Round 1 · Pack 1 of 3</div>
+            <h1 id="cube-title">Workshop Cube</h1>
+          </div>
+          <span class="badge" id="direction">← Passing left</span>
+        </div>
+        <div class="grid">
+          <aside class="panel preview-panel">
+            <div class="panel-title">
+              <h2>Card spotlight</h2>
+              <span class="small">Hover to inspect</span>
+            </div>
+            <div id="preview"></div>
+            <div class="preview-note">
+              The selected card stays here while you confirm. Imported previews
+              use the JSON artwork and available metadata.
+            </div>
+          </aside>
+          <section class="panel">
+            <div class="pack-top">
+              <div>
+                <h2 id="pack-title">Choose your card</h2>
+                <div class="small" id="pick-label" style="margin-top: 6px">
+                  Pick 1 of 15
+                </div>
+              </div>
+              <div class="timer">
+                <span id="seconds">30</span><small>SECONDS TO PICK</small>
+              </div>
+            </div>
+            <div class="timer-track"><i id="timer-fill"></i></div>
+            <div class="pack-grid" id="pack"></div>
+            <p class="pack-hint">
+              Hover for a closer look. Click a card, then confirm on its
+              surface. “No”, Escape, or a click outside the prompt cancels.
+            </p>
+            <div id="status" class="status" aria-live="polite"></div>
+          </section>
+          <aside class="panel pool-panel">
+            <div class="panel-title">
+              <h2>Your drafted cards</h2>
+              <span id="pool-count" class="badge">0 cards</span>
+            </div>
+            <div class="pool-summary">
+              <span><b id="main-count">0</b>Main</span
+              ><span><b id="extra-count">0</b>Extra</span
+              ><span><b id="side-count">0</b>Side</span>
+            </div>
+            <div class="pool-list" id="pool"></div>
+            <button id="export" class="export primary" disabled>
+              Export deck XML ↓
+            </button>
+            <div id="export-help" class="help">
+              Draft cards to begin building your deck.
+            </div>
+          </aside>
+        </div>
+        <div id="seats" class="seats"></div>
+        <div class="help">
+          Passing directions alternate each round. Each Cube copy is a separate
+          draftable card; no copies are created during a draft.
+        </div>
+      </section>
+      <section id="library-view" hidden>
+        <div class="table-top">
+          <div>
+            <div class="eyebrow">Shared collection · design preview</div>
+            <h1>Cube library</h1>
+          </div>
+          <button id="back-table">Back to table →</button>
+        </div>
+        <div class="upload" id="drop-zone">
+          <h2>Bring your own Cube</h2>
+          <p>
+            Drop a <code>dbcd-cube-v1</code> JSON file here or
+            <label for="cube-file">browse your computer</label>.
+          </p>
+          <p>
+            The working prototype saves imports in this browser. Production
+            uploads will be shared and persisted on the host PC.
+          </p>
+          <input
+            id="cube-file"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+        <div id="library-error" class="warning" role="alert"></div>
+        <div id="library" class="library-grid"></div>
+      </section>
+    </main>
+    <div id="settings" class="overlay" hidden>
+      <div
+        class="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-title"
+      >
+        <div class="eyebrow">Host controls · preview</div>
+        <h2 id="settings-title" style="font-size: 23px; margin-top: 8px">
+          Set up the table
+        </h2>
+        <p class="small">
+          A new preview resets drafted cards. The real host will set these
+          before players start.
+        </p>
+        <div class="form-grid">
+          <div class="field">
+            <label for="players">Players</label
+            ><select id="players">
+              <option>2</option>
+              <option>3</option>
+              <option selected>4</option>
+              <option>5</option>
+              <option>6</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="rounds">Packs per player</label
+            ><input id="rounds" type="number" min="1" max="12" value="3" />
+          </div>
+          <div class="field">
+            <label for="pack-size">Cards per pack</label
+            ><input id="pack-size" type="number" min="1" max="30" value="15" />
+          </div>
+          <div class="field">
+            <label for="pick-time">Seconds per pick</label
+            ><input id="pick-time" type="number" min="5" max="300" value="30" />
+          </div>
+        </div>
+        <p id="capacity" class="small"></p>
+        <p id="settings-error" class="warning" role="alert"></p>
+        <p class="warning">
+          When the timer expires, a remaining card is picked at random. In this
+          preview, simulated opponents pick at the same time as you.
+        </p>
+        <div class="dialog-actions">
+          <button id="settings-cancel">Cancel</button
+          ><button id="start" class="primary">Start new preview</button>
+        </div>
+      </div>
+    </div>
+    <div id="toast" hidden role="status"></div>
+    <script>
+      "use strict";
+      const $ = (id) => document.getElementById(id),
+        esc = (value) =>
+          String(value ?? "").replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+      const key = "cube-draft-design.library.v1";
+      const sampleNames = [
+        "Ashen Sentinel",
+        "Moonlit Archive",
+        "Crystal Warden",
+        "Echo of the Grove",
+        "Veil of Embers",
+        "Ironbound Guide",
+        "Starfall Invocation",
+        "Forgotten Compass",
+        "Cinder Herald",
+        "Luminous Pact",
+        "Mirror of Tides",
+        "Twilight Falcon",
+        "Crown of Roots",
+        "Silent Observatory",
+        "Violet Revenant",
+        "Dawnkeeper",
+        "Wayfarer’s Lantern",
+        "Prism Guardian",
+        "Thornwoven Shield",
+        "Astral Courier",
+        "Keeper of Hours",
+        "Runic Horizon",
+        "Sea of Whispers",
+        "Copperwing Scout",
+        "Ritual of Rain",
+        "Orchid Enchanter",
+        "Nightglass Dragon",
+        "Solar Artisan",
+        "Ivory Watcher",
+        "Verdant Promise",
+      ];
+      const example = {
+        id: "demo",
+        name: "Workshop Cube",
+        sample: true,
+        cards: sampleNames.map((name, i) => ({
+          id: String(90000000 + i),
+          name,
+          origin: "official",
+          duelingbookId: "",
+          artwork: "",
+          copies: 12,
+          section: i % 7 === 0 ? "extra" : "main",
+          type:
+            i % 7 === 0
+              ? "Dragon / Fusion / Effect"
+              : i % 5 === 0
+                ? "Normal Spell"
+                : i % 4 === 0
+                  ? "Normal Trap"
+                  : "Warrior / Effect",
+          effect:
+            "Illustrative card for the interface design. Real Cubes display the effect text supplied in their JSON.",
+          atk:
+            i % 7 !== 0 && (i % 5 === 0 || i % 4 === 0)
+              ? ""
+              : String(1200 + (i % 8) * 200),
+          def:
+            i % 7 !== 0 && (i % 5 === 0 || i % 4 === 0)
+              ? ""
+              : String(1000 + (i % 6) * 200),
+          attribute: "LIGHT",
+        })),
+      };
+      let library = [example];
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || "[]");
+        if (Array.isArray(saved)) library.push(...saved);
+      } catch {}
+      let config = { players: 4, rounds: 3, size: 15, seconds: 30 },
+        state = null,
+        selected = null,
+        hoverCard = example.cards[0],
+        toastTimer,
+        setupCubeId = null;
+      function uuid() {
+        return crypto.randomUUID();
+      }
+      function shuffled(items) {
+        const a = [...items];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function cube() {
+        return library.find((c) => c.id === state?.cubeId) || library[0];
+      }
+      function total(c) {
+        return c.cards.reduce((n, a) => n + a.copies, 0);
+      }
+      function safeImage(url) {
+        try {
+          const u = new URL(url);
+          return u.protocol === "https:" ? u.href : "";
+        } catch {
+          return "";
+        }
+      }
+      function frame(card) {
+        const t = String(card.type || "").toLowerCase();
+        return t.includes("spell")
+          ? "#6ebbb0"
+          : t.includes("trap")
+            ? "#bd80b4"
+            : t.includes("fusion")
+              ? "#a18ac5"
+              : t.includes("synchro")
+                ? "#dddcd7"
+                : t.includes("xyz")
+                  ? "#8893a7"
+                  : "#c5a276";
+      }
+      function cardHtml(card, large = false) {
+        const image = safeImage(card.artwork);
+        return `<div class="card${large ? " large" : ""}" style="--frame:${frame(card)}"><div class="card-name">${esc(card.name)}</div><div class="art"><div class="sigil"></div>${image ? `<img src="${esc(image)}" alt="${esc(card.name)} artwork" referrerpolicy="no-referrer">` : ""}</div><div class="card-kind">${esc(card.type || "Card")}</div><div class="effect">${esc(card.effect || card.pendulumEffect || "No effect text in this Cube record.")}</div><div class="stats">${card.atk ? "ATK / " + esc(card.atk) : esc(card.attribute || "")} ${card.def ? " · DEF / " + esc(card.def) : ""}</div></div>`;
+      }
+      function preview(card) {
+        hoverCard = card;
+        $("preview").innerHTML = cardHtml(card, true);
+      }
+      function toast(message) {
+        $("toast").textContent = message;
+        $("toast").hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => ($("toast").hidden = true), 4500);
+      }
+      function view(name) {
+        $("table-view").hidden = name !== "table";
+        $("library-view").hidden = name !== "library";
+        if (name === "library") renderLibrary();
+      }
+      function renderLibrary() {
+        $("library").innerHTML = library
+          .map(
+            (c) =>
+              `<article class="panel cube-tile"><div class="eyebrow">${c.sample ? "Design sample" : "Imported JSON"}</div><h2>${esc(c.name)}</h2><div class="cube-numbers"><span>${c.cards.length} unique</span><span>${total(c)} copies</span></div><div class="library-meta">${c.sample ? "Fictional cards · XML export disabled" : "Saved in this browser for the design preview"}</div><button data-cube="${c.id}" class="primary">Use this Cube →</button></article>`,
+          )
+          .join("");
+      }
+      function readCube(data, name) {
+        if (
+          data?.schema !== "dbcd-cube-v1" ||
+          !Array.isArray(data.cards) ||
+          !data.cards.length
+        )
+          throw Error("Choose a non-empty dbcd-cube-v1 Cube JSON.");
+        const seen = new Set();
+        for (const c of data.cards) {
+          if (
+            !c ||
+            typeof c !== "object" ||
+            typeof c.id !== "string" ||
+            !c.id ||
+            seen.has(c.id) ||
+            typeof c.name !== "string" ||
+            !c.name.trim() ||
+            !Number.isInteger(c.copies) ||
+            c.copies < 1 ||
+            c.copies > 99
+          )
+            throw Error("Every card needs a unique ID, name, and 1–99 copies.");
+          for (const field of [
+            "origin",
+            "duelingbookId",
+            "artwork",
+            "frame",
+            "attribute",
+            "type",
+            "effect",
+            "pendulumEffect",
+            "section",
+          ])
+            if (c[field] != null && typeof c[field] !== "string")
+              throw Error(`Card ${c.name}: ${field} must be text.`);
+          for (const field of ["atk", "def", "level", "link"])
+            if (
+              c[field] != null &&
+              typeof c[field] !== "string" &&
+              !(typeof c[field] === "number" && Number.isFinite(c[field]))
+            )
+              throw Error(`Card ${c.name}: ${field} must be text or a number.`);
+          seen.add(c.id);
+        }
+        if (data.cards.length > 10000)
+          throw Error("Preview import limit: 10,000 unique cards.");
+        return {
+          ...data,
+          id: uuid(),
+          name: name.replace(/\.json$/i, ""),
+          cards: data.cards,
+        };
+      }
+      async function importFile(file) {
+        $("library-error").textContent = "";
+        try {
+          if (file.size > 10 * 1024 * 1024)
+            throw Error("Preview import limit: 10 MB.");
+          const c = readCube(JSON.parse(await file.text()), file.name);
+          const next = [...library, c];
+          localStorage.setItem(
+            key,
+            JSON.stringify(next.filter((x) => !x.sample)),
+          );
+          library = next;
+          renderLibrary();
+          toast("Cube imported into the local design preview.");
+        } catch (e) {
+          $("library-error").textContent = e.message;
+        }
+      }
+      function openSettings(cubeId) {
+        setupCubeId = cubeId || state.cubeId;
+        $("settings").hidden = false;
+        $("settings-error").textContent = "";
+        updateCapacity();
+      }
+      function updateCapacity() {
+        const configured = library.find((c) => c.id === setupCubeId) || cube();
+        const required =
+          Number($("players").value) *
+          Number($("rounds").value) *
+          Number($("pack-size").value);
+        $("capacity").textContent =
+          `${configured.name}: ${total(configured)} available copies · ${required} needed for this table.`;
+      }
+      function start(cubeId, settings = config) {
+        const c = library.find((c) => c.id === cubeId) || example;
+        const { players, rounds, size, seconds } = settings;
+        if (
+          !Number.isInteger(players) ||
+          players < 2 ||
+          players > 6 ||
+          !Number.isInteger(rounds) ||
+          rounds < 1 ||
+          rounds > 12 ||
+          !Number.isInteger(size) ||
+          size < 1 ||
+          size > 30 ||
+          !Number.isInteger(seconds) ||
+          seconds < 5 ||
+          seconds > 300
+        )
+          throw Error(
+            "Choose 2–6 players, 1–12 packs, 1–30 cards per pack and 5–300 seconds.",
+          );
+        if (total(c) < players * rounds * size)
+          throw Error(
+            `This table needs ${players * rounds * size} copies; the Cube contains ${total(c)}.`,
+          );
+        config = { ...settings };
+        const stock = [];
+        for (const card of c.cards)
+          for (let i = 0; i < card.copies; i++)
+            stock.push({ ...card, instanceId: uuid() });
+        state = {
+          cubeId: c.id,
+          stock: shuffled(stock),
+          packs: [],
+          pools: Array.from({ length: players }, () => []),
+          round: 0,
+          pick: 0,
+          finished: false,
+        };
+        dealRound();
+        selected = null;
+        view("table");
+        render();
+      }
+      function dealRound() {
+        state.round++;
+        state.pick = 1;
+        state.packs = Array.from({ length: config.players }, () =>
+          state.stock.splice(0, config.size),
+        );
+        state.deadline = Date.now() + config.seconds * 1000;
+      }
+      function pick(id, automatic = false) {
+        if (state.finished) return;
+        const index = state.packs[0].findIndex((c) => c.instanceId === id);
+        if (index < 0) return;
+        const card = state.packs[0].splice(index, 1)[0];
+        card.deckSection = ["main", "extra", "side"].includes(card.section)
+          ? card.section
+          : "main";
+        state.pools[0].push(card);
+        for (let seat = 1; seat < config.players; seat++) {
+          const pack = state.packs[seat];
+          const i = Math.floor(Math.random() * pack.length);
+          state.pools[seat].push(pack.splice(i, 1)[0]);
+        }
+        selected = null;
+        const priorRound = state.round;
+        if (!state.packs[0].length) {
+          if (state.round === config.rounds) state.finished = true;
+          else dealRound();
+        } else {
+          const dir = state.round % 2 ? 1 : -1;
+          const passed = Array(config.players);
+          state.packs.forEach((pack, seat) => {
+            passed[(seat + dir + config.players) % config.players] = pack;
+          });
+          state.packs = passed;
+          state.pick++;
+          state.deadline = Date.now() + config.seconds * 1000;
+        }
+        preview(card);
+        render();
+        $("status").textContent = state.finished
+          ? "Draft simulation complete. Assign cards to Main, Extra, Side or Reserve, then export."
+          : `${automatic ? "Time expired — auto-picked" : "Picked"} ${card.name}. ${priorRound !== state.round ? "A new round has started." : "The next pack has arrived."}`;
+        if (automatic)
+          toast("Timer expired. Randomly picked " + card.name + ".");
+      }
+      function xmlId(c) {
+        if (cube().sample) return "";
+        const value = c.duelingbookId || (c.origin === "custom" ? c.id : "");
+        return typeof value === "string" &&
+          /^[0-9]+$/.test(value) &&
+          !/^0+$/.test(value)
+          ? value
+          : "";
+      }
+      function render() {
+        const c = cube(),
+          pool = state.pools[0];
+        $("cube-title").textContent = c.name;
+        $("round-label").textContent =
+          `Round ${state.round} of ${config.rounds} · ${config.players} seats`;
+        $("direction").textContent =
+          state.round % 2 ? "← Passing left" : "Passing right →";
+        $("pick-label").textContent = state.finished
+          ? "All packs drafted"
+          : `Pick ${state.pick} of ${config.size} · ${state.packs[0].length} cards in your pack`;
+        $("pack-title").textContent = state.finished
+          ? "Build your final deck"
+          : "Choose your card";
+        $("pack").innerHTML = state.finished
+          ? '<div class="finished"><div class="eyebrow">Every pick counts</div><h2>Your draft is complete.</h2><p class="muted">Your cards are ready in the deck panel.</p></div>'
+          : state.packs[0]
+              .map(
+                (card) =>
+                  `<div class="pick-card" tabindex="0" role="button" aria-label="Select ${esc(card.name)}" data-instance="${card.instanceId}">${cardHtml(card)}${selected === card.instanceId ? `<div class="pick-confirm"><strong>Draft this card?</strong><div class="confirm-actions"><button class="primary yes" data-yes="${card.instanceId}">Yes, pick</button><button data-no>No</button></div></div>` : ""}</div>`,
+              )
+              .join("");
+        $("pool-count").textContent = pool.length + " cards";
+        for (const section of ["main", "extra", "side"])
+          $(section + "-count").textContent = pool.filter(
+            (x) => x.deckSection === section,
+          ).length;
+        $("pool").innerHTML = pool.length
+          ? pool
+              .map(
+                (card) =>
+                  `<div class="pool-row" data-pool="${card.instanceId}"><span class="pool-name">${esc(card.name)}</span><select aria-label="Section for ${esc(card.name)}" data-section="${card.instanceId}">${["main", "extra", "side", "reserve"].map((s) => `<option value="${s}"${s === card.deckSection ? " selected" : ""}>${s[0].toUpperCase() + s.slice(1)}</option>`).join("")}</select></div>`,
+              )
+              .join("")
+          : '<div class="empty">Your picks appear here.<br>Pick a card from the pack to begin.</div>';
+        $("seats").innerHTML = state.pools
+          .map(
+            (p, i) =>
+              `<div class="seat${i === 0 ? " you" : ""}"><i class="dot"></i>${i === 0 ? "You" : "Simulated seat " + (i + 1)} · ${p.length} picks</div>`,
+          )
+          .join("");
+        const deck = pool.filter((c) => c.deckSection !== "reserve");
+        const missing = deck.filter((c) => !xmlId(c)).length;
+        $("export").disabled = !deck.length || missing > 0;
+        $("export-help").textContent = !pool.length
+          ? "Draft cards to begin building your deck."
+          : missing
+            ? `${missing} cards need a confirmed DuelingBook ID. XML export stays disabled until IDs are resolved.`
+            : "Reserve cards are excluded. XML uses the IDs saved in your Cube. Import the downloaded file through DuelingBook’s Import Deck.";
+        if (!selected && hoverCard) preview(hoverCard);
+        updateTimer();
+      }
+      function updateTimer() {
+        if (!state) return;
+        const remaining = state.finished
+          ? 0
+          : Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
+        $("seconds").textContent = state.finished ? "✓" : remaining;
+        $("timer-fill").style.width =
+          (state.finished ? 0 : (remaining / config.seconds) * 100) + "%";
+      }
+      function exportXml() {
+        const pool = state.pools[0].filter((c) => c.deckSection !== "reserve");
+        if (!pool.length || pool.some((c) => !xmlId(c)))
+          return toast("Every exported card needs a confirmed DuelingBook ID.");
+        const doc = document.implementation.createDocument("", "deck", null);
+        for (const section of ["main", "extra", "side"]) {
+          const node = doc.createElement(section);
+          for (const card of pool.filter((c) => c.deckSection === section)) {
+            const entry = doc.createElement("card");
+            entry.setAttribute("id", xmlId(card));
+            entry.textContent = card.name;
+            node.append(entry);
+          }
+          doc.documentElement.append(node);
+        }
+        const blob = new Blob(
+          [
+            '<?xml version="1.0" encoding="UTF-8"?>\n' +
+              new XMLSerializer().serializeToString(doc),
+          ],
+          { type: "application/xml" },
+        );
+        const url = URL.createObjectURL(blob),
+          a = document.createElement("a");
+        a.href = url;
+        a.download = "cube-draft-deck.xml";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast("Deck XML exported. Validate it with DuelingBook’s Import Deck.");
+      }
+      $("pack").addEventListener("click", (event) => {
+        const yes = event.target.closest("[data-yes]");
+        if (yes) {
+          pick(yes.dataset.yes);
+          return;
+        }
+        if (event.target.closest("[data-no]")) {
+          selected = null;
+          render();
+          return;
+        }
+        const card = event.target.closest("[data-instance]");
+        if (card && !selected) {
+          selected = card.dataset.instance;
+          preview(state.packs[0].find((c) => c.instanceId === selected));
+          render();
+        }
+      });
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (selected && !event.target.closest(".pick-confirm")) {
+            selected = null;
+            render();
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        },
+        true,
+      );
+      $("pack").addEventListener("keydown", (event) => {
+        if (
+          event.target.matches("[data-instance]") &&
+          (event.key === "Enter" || event.key === " ")
+        ) {
+          event.preventDefault();
+          event.target.click();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (selected) {
+            selected = null;
+            render();
+          }
+          $("settings").hidden = true;
+        }
+      });
+      function inspect(event) {
+        if (selected) return;
+        const element = event.target.closest("[data-instance],[data-pool]");
+        if (!element) return;
+        const id = element.dataset.instance || element.dataset.pool;
+        const card = [...state.packs[0], ...state.pools[0]].find(
+          (c) => c.instanceId === id,
+        );
+        if (card) preview(card);
+      }
+      $("pack").addEventListener("pointerover", inspect);
+      $("pack").addEventListener("focusin", inspect);
+      $("pool").addEventListener("pointerover", inspect);
+      $("pool").addEventListener("change", (event) => {
+        const card = state.pools[0].find(
+          (c) => c.instanceId === event.target.dataset.section,
+        );
+        if (
+          card &&
+          ["main", "extra", "side", "reserve"].includes(event.target.value)
+        ) {
+          card.deckSection = event.target.value;
+          render();
+        }
+      });
+      $("library-nav").onclick = () => view("library");
+      $("table-nav").onclick = $("back-table").onclick = () => view("table");
+      $("settings-open").onclick = () => openSettings();
+      $("settings-cancel").onclick = () => ($("settings").hidden = true);
+      $("settings").onclick = (event) => {
+        if (event.target === $("settings")) $("settings").hidden = true;
+      };
+      $("library").onclick = (event) => {
+        const b = event.target.closest("[data-cube]");
+        if (b) openSettings(b.dataset.cube);
+      };
+      for (const id of ["players", "rounds", "pack-size", "pick-time"])
+        $(id).oninput = updateCapacity;
+      $("start").onclick = () => {
+        try {
+          start(setupCubeId || cube().id, {
+            players: Number($("players").value),
+            rounds: Number($("rounds").value),
+            size: Number($("pack-size").value),
+            seconds: Number($("pick-time").value),
+          });
+          $("settings").hidden = true;
+        } catch (e) {
+          $("settings-error").textContent = e.message;
+        }
+      };
+      $("cube-file").onchange = async (event) => {
+        if (event.target.files[0]) await importFile(event.target.files[0]);
+        event.target.value = "";
+      };
+      $("drop-zone").ondragover = (e) => e.preventDefault();
+      $("drop-zone").ondrop = async (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files[0]) await importFile(e.dataTransfer.files[0]);
+      };
+      $("export").onclick = exportXml;
+      document.addEventListener(
+        "error",
+        (event) => {
+          if (event.target instanceof HTMLImageElement)
+            event.target.hidden = true;
+        },
+        true,
+      );
+      start("demo");
+      setInterval(() => {
+        updateTimer();
+        if (state && !state.finished && Date.now() >= state.deadline) {
+          const pack = state.packs[0];
+          pick(pack[Math.floor(Math.random() * pack.length)].instanceId, true);
+        }
+      }, 250);
+    </script>
+  </body>
+</html>
