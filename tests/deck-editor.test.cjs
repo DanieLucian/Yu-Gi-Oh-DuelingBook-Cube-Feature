@@ -21,6 +21,16 @@ async function contentPage(html) {
 function send(page,message) {
   return page.evaluate(message=>new Promise(resolve=>window.receive(message,{},resolve)),message);
 }
+// Matches DuelingBook's CardFront template: the subtype is an image, and
+// Normal cards retain a hidden continuous.webp placeholder.
+function spellTrap(id, family, subtype, official=false) {
+  return card(id, `${subtype} ${family}`, official).replace('</div>',
+    `<img class="card_color" src="https://example.test/${family.toLowerCase()}_front2.webp">
+    <span class="type_txt" style="display:none">Spellcaster / Effect</span>
+    <span class="spell_type_txt">[ ${family.toUpperCase()} CARD ]</span>
+    <img class="type_icon" ${subtype==='Normal'?'style="display:none"':''}
+      src="https://example.test/${subtype==='Normal'?'continuous':subtype.toLowerCase()}.webp?v=1"></div>`);
+}
 async function popup(content,url='https://www.duelingbook.com/',cards={}) {
   const page=await browser.newPage();
   await page.route('**/*',route=>route.abort());
@@ -158,4 +168,82 @@ test('mixed and overlapping ID/class selectors import each selected node once',a
     const scan=await send(source,{type:'DBCD_SCAN'});
     assert.equal(scan.rendered,2);assert.deepEqual(scan.cards.map(c=>c.id),['42','43']);
   } finally {await source.close();}
+});
+
+test('official and custom Spell/Trap subtypes survive extraction and reach renderer icons',async()=>{
+  const {renderCard}=require('../platform-design/renderer/render.cjs');
+  const cases=[...['Normal','Continuous','Equip','Quick-Play','Field','Ritual'].map(type=>['Spell',type]),
+    ...['Normal','Continuous','Counter'].map(type=>['Trap',type])];
+  const fixtures=cases.flatMap(([family,type])=>[false,true].map(official=>({family,type,official})));
+  const source=await contentPage(`<div class="deck_cards">${fixtures.map(({family,type,official},i)=>spellTrap(String(i+1),family,type,official)).join('')}</div>`);
+  try {
+    const result=await send(source,{type:'DBCD_SCAN'});
+    assert.equal(result.ok,true);assert.equal(result.cards.length,18);
+    for (const [i,record] of result.cards.entries()) {
+      const {family,type,official}=fixtures[i];
+      const icon=type.toLowerCase();
+      assert.equal(record.type,`[ ${family.toUpperCase()} CARD ]`);
+      assert.equal(record.origin,official?'official':'custom');
+      assert.deepEqual(record.visual,{version:1,spellTrapIcon:icon});
+      const rendered=renderCard(JSON.parse(JSON.stringify(record)),{assets:new Map(),artworks:new Map()});
+      assert.equal(rendered.model.icon,icon);
+      assert.equal(rendered.diagnostics.includes('spell-trap-icon-unresolved'),false);
+      assert.equal(rendered.diagnostics.includes(`missing-asset:icon.${icon}`),icon!=='normal');
+    }
+  } finally {await source.close();}
+});
+
+test('missing and unknown icons stay unresolved; monsters ignore stale subtype images',async()=>{
+  const absent=spellTrap('1','Spell','Continuous').replace(/<img class="type_icon"[^>]*>/,'');
+  const unknown=spellTrap('2','Trap','Counter').replace('counter.webp','unknown.webp');
+  const monster=spellTrap('3','Spell','Ritual').replace('spell_front2.webp','ritual_front2.webp')
+    .replace('class="type_txt" style="display:none"','class="type_txt"')
+    .replace('class="spell_type_txt"','class="spell_type_txt" style="display:none"');
+  const explicit=spellTrap('4','Spell','Quick-Play').replace(/<img class="type_icon"[^>]*>/,'')
+    .replace('[ SPELL CARD ]','[ Quick-Play Spell ]');
+  const source=await contentPage(absent+unknown+monster+explicit);
+  try {
+    const {cards}=await send(source,{type:'DBCD_SCAN'});
+    assert.equal(cards.length,4);
+    for (const record of cards.slice(0,3)) assert.equal(record.visual,undefined);
+    assert.equal(cards[2].type,'Spellcaster / Effect');
+    assert.equal(cards[3].visual.spellTrapIcon,'quick-play');
+  } finally {await source.close();}
+});
+
+test('duplicate cards prefer the copy with subtype metadata in either order',async()=>{
+  const complete=spellTrap('42','Trap','Counter');
+  const incomplete=complete.replace(/<img class="type_icon"[^>]*>/,'');
+  for (const html of [incomplete+complete,complete+incomplete]) {
+    const source=await contentPage(html);
+    try {
+      const {cards}=await send(source,{type:'DBCD_SCAN'});
+      assert.equal(cards.length,1);assert.equal(cards[0].visual.spellTrapIcon,'counter');
+    } finally {await source.close();}
+  }
+});
+
+test('rescan and Cube JSON export/restore retain subtype and existing annotations',async()=>{
+  const source=await contentPage(`<div class="deck_cards">${spellTrap('42','Trap','Counter')}</div>`);
+  const old={id:'42',name:'Old card',copies:7,section:'side',importedAt:'2025-01-01',notes:'keep',
+    visual:{version:1,spellTrapIcon:'normal',customNote:'keep visual metadata'}};
+  const ui=await popup(source,'https://www.duelingbook.com/',{'42':old});
+  const restored=await popup(source);
+  try {
+    await ui.locator('#scan').click();
+    await ui.waitForFunction(()=>window.saved.dbcd_cards_v1['42'].visual.spellTrapIcon==='counter');
+    // Capture the actual export Blob without depending on a download directory.
+    await ui.evaluate(()=>{URL.createObjectURL=blob=>{window.exportedCube=blob.text();return 'blob:test';};});
+    await ui.locator('#export').click();
+    const exported=await ui.evaluate(()=>window.exportedCube);
+    const backup=JSON.parse(exported);
+    assert.equal(backup.schema,'dbcd-cube-v1');
+    const record=backup.cards[0];
+    assert.equal(record.copies,7);assert.equal(record.section,'side');
+    assert.equal(record.importedAt,old.importedAt);assert.equal(record.notes,'keep');
+    assert.deepEqual(record.visual,{version:1,spellTrapIcon:'counter',customNote:'keep visual metadata'});
+    await restored.locator('#json-file').setInputFiles({name:'cube.json',mimeType:'application/json',buffer:Buffer.from(exported)});
+    await restored.waitForFunction(()=>window.saved.dbcd_cards_v1['42']);
+    assert.deepEqual(await restored.evaluate(()=>window.saved.dbcd_cards_v1['42']),record);
+  } finally {await ui.close();await restored.close();await source.close();}
 });

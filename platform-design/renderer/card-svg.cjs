@@ -202,10 +202,17 @@ function composeCard(card, registry, style) {
     textured &&
     Boolean(registry.fontMetrics?.name) &&
     (!predefined || tuning.regions.name.font === "name");
+  const adjustableNameWeight = predefined && lightenName;
+  const nameColor = ["spell", "trap", "xyz", "link"].includes(c.frame)
+    ? "#fff"
+    : "#000";
   function regionAttributes(key, forceItalic = false) {
     const r = tuning.regions[key],
       font = regionFont(tuning, registry, key);
-    return `font-family="${font.family}" font-weight="${r.weight}" font-style="${forceItalic || r.italic ? "italic" : "normal"}" letter-spacing="${r.letterSpacing}" font-kerning="${r.font.startsWith("upload-") ? "none" : "normal"}"`;
+    // The bundled name face is static; the mask below supplies its weight steps
+    // without the browser's abrupt synthetic-bold switch.
+    const weight = key === "name" && adjustableNameWeight ? 400 : r.weight;
+    return `font-family="${font.family}" font-weight="${weight}" font-style="${forceItalic || r.italic ? "italic" : "normal"}" letter-spacing="${r.letterSpacing}" font-kerning="${r.font.startsWith("upload-") ? "none" : "normal"}"`;
   }
   const rasterDefinitions = new Map();
   function asset(key) {
@@ -359,10 +366,26 @@ function composeCard(card, registry, style) {
     predefined && background
       ? ""
       : `<rect width="813" height="1185" rx="24" fill="#3d3530"/><rect x="25" y="25" width="763" height="1135" rx="10" fill="${colors[c.frame]}"/>`;
-  // The bundled face has bold strokes baked into its outlines. Retain its
-  // exact glyph geometry, with a solid inner stroke and softer outer coverage.
-  if (lightenName)
-    body += `<defs><filter id="card-name-weight" x="-5%" y="-10%" width="110%" height="120%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="erode" radius="0.65" result="name-core"/><feComponentTransfer in="SourceAlpha" result="name-edge"><feFuncA type="linear" slope="${predefined ? tuning.regions.name.edgeOpacity : 0.45}"/></feComponentTransfer><feMerge result="name-mask"><feMergeNode in="name-edge"/><feMergeNode in="name-core"/></feMerge><feComposite in="SourceGraphic" in2="name-mask" operator="in"/></filter></defs>`;
+  // Rasterize every name in black: Chromium gives white source glyphs heavier
+  // antialiased coverage. Apply the final color only after forming the mask.
+  // The bundled face retains its adjustable solid core and softer outer edge.
+  let nameMask = lightenName ? "name-alpha" : "SourceAlpha";
+  let nameFilter = lightenName
+    ? `<feMorphology in="SourceAlpha" operator="erode" radius="0.65" result="name-core"/><feComponentTransfer in="SourceAlpha" result="name-edge"><feFuncA type="linear" slope="${predefined ? tuning.regions.name.edgeOpacity : 0.45}"/></feComponentTransfer><feMerge result="name-mask"><feMergeNode in="name-edge"/><feMergeNode in="name-core"/></feMerge><feComposite in="SourceAlpha" in2="name-mask" operator="in" result="name-alpha"/>`
+    : "";
+  if (adjustableNameWeight && tuning.regions.name.weight !== 400) {
+    const { weight, size } = tuning.regions.name,
+      lighter = weight < 400,
+      amount = (Math.abs(weight - 400) / (lighter ? 300 : 500)) *
+        (lighter ? 0.7 : 0.6),
+      radius = (size * 3) / 95;
+    // Blend toward a thinner/thicker outline. Varying only morphology's radius
+    // would quantize adjacent weights to the same pixels at thumbnail sizes.
+    // Retain some original coverage so light weights do not lose fine serifs.
+    nameFilter += `<feMorphology in="${nameMask}" operator="${lighter ? "erode" : "dilate"}" radius="${radius}" result="name-weight-limit"/><feComposite in="name-weight-limit" in2="${nameMask}" operator="arithmetic" k1="0" k2="${amount}" k3="${1 - amount}" k4="0" result="name-weight-alpha"/>`;
+    nameMask = "name-weight-alpha";
+  }
+  body += `<defs><filter id="card-name-weight" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">${nameFilter}<feFlood flood-color="${nameColor}" result="name-color"/><feComposite in="name-color" in2="${nameMask}" operator="in"/></filter></defs>`;
   if (commonFrame)
     body +=
       '<defs><filter id="gray-art-border" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/></filter>' +
@@ -380,15 +403,19 @@ function composeCard(card, registry, style) {
   );
   // These complete frames already contain all bevels, text boxes and stat labels.
   // The large Pendulum image is transparent over the underlying monster header.
+  // Keep its green surround inside the base card's original outer border.
   if (predefined && c.pendulum)
-    body += image(
-      asset("overlay.pendulum"),
-      0,
-      0,
-      813,
-      1185,
-      'preserveAspectRatio="none" data-card-frame="pendulum"',
-    );
+    body +=
+      `<defs><clipPath id="pendulum-face"><rect x="${19 * FRAME_SCALE_X}" y="${19 * FRAME_SCALE_Y}" width="${511 * FRAME_SCALE_X}" height="${762 * FRAME_SCALE_Y}"/></clipPath></defs><g clip-path="url(#pendulum-face)">` +
+      image(
+        asset("overlay.pendulum"),
+        0,
+        0,
+        813,
+        1185,
+        'preserveAspectRatio="none" data-card-frame="pendulum"',
+      ) +
+      "</g>";
   if (!textured || !background)
     body += `<rect x="50" y="48" width="713" height="75" fill="#fff" fill-opacity=".35"/>`;
   body += label(
@@ -400,7 +427,7 @@ function composeCard(card, registry, style) {
       : textured
         ? 80
         : Math.min(38, Math.max(15, 1050 / Array.from(c.name).length)),
-    `data-text-block="name" ${predefined ? regionAttributes("name") : 'font-family="CardName, Georgia, serif"'}${lightenName ? ' filter="url(#card-name-weight)"' : ""} fill="${["spell", "trap", "xyz"].includes(c.frame) ? "#fff" : "#000"}"` +
+    `data-text-block="name" ${predefined ? regionAttributes("name") : 'font-family="CardName, Georgia, serif"'} filter="url(#card-name-weight)" fill="#000"` +
       ((
         textured
           ? measureText(
@@ -433,15 +460,19 @@ function composeCard(card, registry, style) {
     if (c.frame !== "link") {
       const size = predefined ? tuning.stars.size : 42,
         gap = predefined ? tuning.stars.gap : 7,
+        // Rank rows share the regular Xyz artwork bevel's left edge.
+        rankLeft = 58 * FRAME_SCALE_X,
+        // Level rows follow the artwork bevel's right edge on each frame.
+        frameRight = (c.pendulum ? 517 : 491) * FRAME_SCALE_X,
         rowWidth = c.count * size + Math.max(0, c.count - 1) * gap,
         rowOverflow = c.count > 13 || rowWidth > 680;
       if (c.count != null && !rowOverflow) {
         const star = asset(c.frame === "xyz" ? "icon.rank" : "icon.level"),
           start =
             c.frame === "xyz"
-              ? 63
+              ? predefined ? rankLeft : 63
               : predefined
-                ? 743 - rowWidth
+                ? frameRight - rowWidth
                 : 750 - c.count * (size + gap);
         if (star)
           body +=
@@ -453,10 +484,10 @@ function composeCard(card, registry, style) {
       } else {
         body += label(
           `${c.frame === "xyz" ? "RANK" : "LEVEL"} ${c.count ?? "?"}`,
-          748,
+          predefined ? c.frame === "xyz" ? rankLeft : frameRight : 748,
           174,
           24,
-          'text-anchor="end"',
+          `text-anchor="${predefined && c.frame === "xyz" ? "start" : "end"}"`,
         );
         if (rowOverflow)
           diagnostics.push("star-row-overflow: numeric count shown");
@@ -471,20 +502,59 @@ function composeCard(card, registry, style) {
         76,
         76,
       );
+    const kind = tuning.regions.kind,
+      size = predefined ? kind.size : textured ? 40 : 30,
+      font = predefined
+        ? regionFont(tuning, registry, "kind").metrics
+        : registry.fontMetrics?.body,
+      spacing = predefined ? kind.letterSpacing : 0,
+      right =
+        (predefined ? 491 * FRAME_SCALE_X : textured ? 728 : 757) +
+        (predefined ? kind.offsetX : 0),
+      baseline = (textured ? 185 : 172) + (predefined ? kind.offsetY : 0),
+      gap = Math.max(4, measureText(" ", font, size) + spacing),
+      bracketLeft = right - measureText("]", font, size, spacing),
+      hasIcon = c.icon !== "normal",
+      iconSize = 54,
+      iconLeft = bracketLeft - gap - iconSize,
+      labelRight = hasIcon ? iconLeft - gap : bracketLeft - gap;
+    // Keep the subtype inside the brackets and the closing bracket aligned
+    // with the artwork bevel, whether or not this card has a subtype icon.
+    body += `<g data-text-block="kind"${predefined ? " " + regionAttributes("kind") : textured ? ' font-weight="bold"' : ""}>`;
     body += label(
-      c.frame === "spell" ? "[ SPELL CARD ]" : "[ TRAP CARD ]",
-      (textured && c.icon === "normal" ? 735 : 675) +
-        (predefined ? tuning.regions.kind.offsetX : 0),
-      (textured ? 185 : 172) + (predefined ? tuning.regions.kind.offsetY : 0),
-      predefined ? tuning.regions.kind.size : textured ? 40 : 30,
-      `data-text-block="kind" text-anchor="end"${predefined ? " " + regionAttributes("kind") : textured ? ' font-weight="bold"' : ""}`,
+      c.frame === "spell" ? "[ SPELL CARD" : "[ TRAP CARD",
+      labelRight,
+      baseline,
+      size,
+      'data-kind-part="label" text-anchor="end"',
     );
-    if (c.icon && c.icon !== "normal") {
-      const icon = asset(`icon.${c.icon}`);
+    if (hasIcon) {
+      const icon = c.icon ? asset(`icon.${c.icon}`) : null;
       body += icon
-        ? image(icon, 695, textured ? 145 : 133, 54, 54)
-        : label(c.icon, 718, 165, 14, 'text-anchor="middle"');
-    } else if (!c.icon) body += label("?", 720, 171, 30);
+        ? image(
+            icon,
+            iconLeft,
+            baseline - 40,
+            iconSize,
+            iconSize,
+            `data-kind-icon="${c.icon}"`,
+          )
+        : label(
+            c.icon || "?",
+            iconLeft + iconSize / 2,
+            baseline,
+            c.icon ? 14 : 30,
+            'data-kind-icon="unresolved" text-anchor="middle"',
+          );
+    }
+    body +=
+      label(
+        "]",
+        right,
+        baseline,
+        size,
+        'data-kind-part="close" text-anchor="end"',
+      ) + "</g>";
   }
   const art = registry.artworks.get(c.artwork);
   if (!art)

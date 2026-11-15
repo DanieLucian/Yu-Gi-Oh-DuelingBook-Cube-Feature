@@ -88,8 +88,8 @@ test("every family uses the requested name colors, neutral gray artwork and comm
           const pixel = (x, y) => [...context.getImageData(x, y, 1, 1).data];
           return {
             color: doc
-              .querySelector('[data-text-block="name"]')
-              .getAttribute("fill"),
+              .querySelector("#card-name-weight feFlood")
+              .getAttribute("flood-color"),
             gray: pixel(pendulum ? 46 : 90, 500),
             gold: pixel(42, 980),
             art: pixel(400, 400),
@@ -100,7 +100,7 @@ test("every family uses the requested name colors, neutral gray artwork and comm
       );
       assert.equal(
         result.color,
-        ["spell", "trap", "xyz"].includes(frame) ? "#fff" : "#000",
+        ["spell", "trap", "xyz", "link"].includes(frame) ? "#fff" : "#000",
         frame,
       );
       assert.ok(
@@ -194,6 +194,7 @@ test("the Torrential Tribute reference has taller readable text, and dense effec
         isolated.setAttribute("height", "200");
         isolated.append(
           original.querySelector("style").cloneNode(true),
+          original.querySelector("#card-name-weight").cloneNode(true),
           original.querySelector('[data-text-block="name"]').cloneNode(true),
         );
         const image = new Image();

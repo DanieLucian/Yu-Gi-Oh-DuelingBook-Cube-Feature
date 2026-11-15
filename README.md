@@ -4,6 +4,7 @@ An unofficial Chrome extension prototype to import custom and official Yu-Gi-Oh!
 
 ## Versions
 
+- **v0.4.2** — Extract Spell/Trap subtypes for renderer icons (pending live user verification).
 - **v0.1.0** — Initial custom-card import and Cube management. User verified successful import of 26 unique custom cards and persistence across imports.
 - **v0.2.0** — Experimental full-card previews (not yet verified by user).
 - **v0.3.0** — Mixed official/custom-card import and full-card previews.
@@ -36,6 +37,17 @@ CSS classes) are included. Search
 results and hover cards outside those containers are excluded. Existing IDs are
 refreshed without increasing saved copy counts or replacing manual annotations.
 See [deck-editor checks](docs/deck-editor.md) for details and remaining live checks.
+
+Spell/Trap scans now include `visual.spellTrapIcon` (`normal`, `continuous`,
+`counter`, `equip`, `field`, `quick-play`, or `ritual`) from the displayed subtype
+icon. Normal cards correctly have no icon. Unknown or unavailable subtype data
+is left unresolved. Scanning preserves saved copies, sections and other visual
+metadata, and Cube JSON export/restore carries the subtype through to the renderer.
+
+To repair older exports with missing icons, reload the extension, refresh
+DuelingBook, scan each deck containing your Cube cards again, then export a fresh
+Cube JSON and load it into the drafting platform/renderer. Old JSON alone cannot
+recover a subtype that was never extracted.
 
 ## Manage and restore a Cube
 

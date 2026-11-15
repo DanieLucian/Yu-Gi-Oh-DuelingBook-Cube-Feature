@@ -274,6 +274,7 @@ test(
     );
     await page.locator("#region").selectOption("name");
     await page.locator("#size").fill("74");
+    await page.locator("#weight").selectOption("200");
     await page.locator("#starGap").fill("11");
     await page.locator("#atkX").fill("605");
     await page.locator("#defX").fill("754");
@@ -314,6 +315,7 @@ test(
       JSON.parse(fs.readFileSync(await download.path(), "utf8")),
     );
     assert.equal(exported.regions.name.size, 74);
+    assert.equal(exported.regions.name.weight, 200);
     assert.equal(exported.regions.effect.letterSpacing, 0.3);
     assert.equal(Object.keys(exported.fonts).length, 1);
     const custom = Object.values(exported.fonts)[0];

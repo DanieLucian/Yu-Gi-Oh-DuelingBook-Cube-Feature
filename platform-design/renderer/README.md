@@ -54,8 +54,12 @@ move controls.
   Spell/Trap type, monster type line, or ATK/DEF values.
 - Choose a bundled font or load a **WOFF2** file. Adjust size, weight, italic,
   letter spacing and horizontal/vertical offsets. Effect regions also have
-  minimum fitted size and line height. The bundled name face has baked-in bold
-  outlines; its separate stroke-coverage control softens them.
+  minimum fitted size and line height. The bundled name face has one fixed set
+  of outlines. For card names, weights 100–900 now simulate progressively thinner
+  or thicker strokes; 400 preserves the selected original appearance. These are
+  visual adjustments, not nine separate font faces. Its stroke-coverage control
+  separately softens edges. Other fonts continue to use browser font-weight
+  behavior.
 - Adjust star size/gap, ATK and DEF/Link value positions, and the stat baseline.
   Measurements use the 813 × 1185 canvas. Printed ATK/DEF/LINK labels are part of
   the supplied PNGs; these controls change the overlaid values. Oversized star
@@ -107,15 +111,18 @@ remains a placeholder.
 
 ![Torrential Tribute appearance reference, without artwork](torrential-preview.png)
 
-- Names are white for Spell, Trap and Xyz frames, including Xyz Pendulum, and
-  black for all other frames, including Link.
+- Names are white for Spell, Trap, Xyz and Link frames, including Xyz Pendulum,
+  and black for all other frames.
+- Name glyphs use a common black coverage mask before their final color is
+  applied, so browser antialiasing does not make white names heavier.
 - The selected project profile in `style.default.json` uses the bundled small-cap
   name face at 95 px, with −2 px letter spacing and stroke coverage set to 1.
   Long names still compress horizontally when necessary.
 - The supplied frames provide the artwork bevels, text boxes, backgrounds and
   outer borders directly. No recoloring, border reconstruction or extra text-box
   texture is applied. The large transparent Pendulum overlay preserves the
-  selected monster frame's header.
+  selected monster frame's header and is clipped inside its original outer border.
+  The supplied PNG files remain unchanged.
 - Main and Pendulum effect text use pure black (`#000000`).
 - Normal Monster flavor text is always italic, including the main text of Normal
   Pendulum Monsters. Pendulum effects keep their separate typography. This rule
@@ -127,8 +134,12 @@ remains a placeholder.
   ATK x=577 and DEF/Link x=744, with baseline y=1105.5. Spell/Trap type uses
   40.5 px text. All settings match the supplied `card-render-style (1).json`;
   the existing bundled fonts are retained.
-- Normal Spell/Trap headers align to the right without reserving an empty subtype
-  icon slot. Their subtype icons remain separate when present.
+- Level rows end at the artwork frame's right bevel edge, including the wider
+  Pendulum frame, independent of star count, size or gap. Regular and Pendulum
+  Xyz Rank rows share the regular Xyz artwork frame's left bevel edge.
+- Spell/Trap headers place the subtype icon before the closing square bracket,
+  which aligns with the artwork frame's right bevel edge. Normal cards have no
+  empty icon slot. Header offsets move the text, icon and bracket together.
 
 The frames already contain ATK/DEF/LINK labels and separators, so the renderer
 adds only their values. Artwork stays inside the original aperture, including
