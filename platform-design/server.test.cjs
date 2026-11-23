@@ -35,14 +35,18 @@ async function fixture(t, options = {}) {
   );
   const server = createRenderServer({ assetRoot, dataRoot, ...options });
   await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const servers = [server];
   t.after(async () => {
     await Promise.all(pages.map((page) => page.close()));
-    server.closeAllConnections();
-    await new Promise((resolve) => server.close(resolve));
+    for (const active of servers) {
+      active.closeAllConnections();
+      await new Promise((resolve) => active.close(resolve));
+    }
     fs.rmSync(root, { recursive: true, force: true });
   });
   return {
     server,
+    addServer: active => servers.push(active),
     root,
     assetRoot,
     dataRoot,
@@ -61,6 +65,20 @@ const post = (url, value, headers = {}) =>
     body: JSON.stringify(value),
   });
 
+test("a full render cache evicts old generated images and continues rendering", async t => {
+  const f = await fixture(t, { maxCacheBytes: 15000 });
+  const first = await (await post(f.url, monster)).json();
+  for (let i = 0; i < 12; i++) {
+    const response = await post(f.url, { ...monster, name: "New Card " + i });
+    assert.equal(response.status, 200);
+  }
+  const directory = path.join(f.dataRoot, "render-cache");
+  assert.equal(fs.existsSync(path.join(directory, path.basename(first.url))), false);
+  const bytes = fs.readdirSync(directory).reduce((sum, name) => sum + fs.statSync(path.join(directory, name)).size, 0);
+  assert.ok(bytes <= 15000);
+  assert.equal((await post(f.url, monster)).status, 200);
+});
+
 test("HTTP renders persist across restart, repeat requests reuse images and invalid requests stay bounded", async (t) => {
   const f = await fixture(t);
   const first = await (await post(f.url, monster)).json();
@@ -72,16 +90,18 @@ test("HTTP renders persist across restart, repeat requests reuse images and inva
   assert.equal(image.status, 200);
   assert.match(image.headers.get("content-type"), /image\/svg\+xml/);
   assert.match(image.headers.get("content-security-policy"), /sandbox/);
+  assert.equal(image.headers.get("content-encoding"), "gzip");
   assert.match(await image.text(), /Test &amp; Monster/);
+  const uncompressed = await fetch(f.url + first.url, { headers: { "Accept-Encoding": "identity" } });
+  assert.equal(uncompressed.headers.get("content-encoding"), null);
+  assert.equal(await uncompressed.text(), await (await fetch(f.url + first.url)).text(),
+    "compressed and plain requests receive the exact same card SVG");
   const restart = createRenderServer({
     assetRoot: f.assetRoot,
     dataRoot: f.dataRoot,
   });
   await new Promise((r) => restart.listen(0, "127.0.0.1", r));
-  t.after(() => {
-    restart.closeAllConnections();
-    return new Promise((r) => restart.close(r));
-  });
+  f.addServer(restart);
   assert.equal(
     (
       await (
@@ -205,10 +225,7 @@ test("embedded local artwork actually paints in the browser without contacting i
     dataRoot: f.dataRoot,
   });
   await new Promise((resolve) => withArt.listen(0, "127.0.0.1", resolve));
-  t.after(() => {
-    withArt.closeAllConnections();
-    return new Promise((resolve) => withArt.close(resolve));
-  });
+  f.addServer(withArt);
   const url = "http://127.0.0.1:" + withArt.address().port;
   const rendered = await (
     await post(url, { ...monster, artwork: source })

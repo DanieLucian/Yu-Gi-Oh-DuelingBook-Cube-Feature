@@ -6,6 +6,31 @@
     const inline = node.style?.display;
     return inline !== 'none' && getComputedStyle(node).display !== 'none';
   };
+  function effectText(root) {
+    if (!display(root)) return '';
+    // Read the markup directly so breaks survive even in a hidden Extra Deck.
+    let result = '';
+    function endLine() {
+      if (result && !/\n[ \t]*$/.test(result)) result += '\n';
+    }
+    function append(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        result += node.nodeValue;
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE || node.matches('script, style') || !display(node)) return;
+      if (node.tagName === 'BR') {
+        result += '\n';
+        return;
+      }
+      const block = node.matches('div, p, li');
+      if (block) endLine();
+      for (const child of node.childNodes) append(child);
+      if (block) endLine();
+    }
+    for (const child of root.childNodes) append(child);
+    return result.replace(/\r\n?/g, '\n').trim();
+  }
   const src = (node) => node?.currentSrc || node?.getAttribute('src') || '';
   const asset = (node) => src(node).split('/').pop()?.split('?')[0] || '';
   const normalize = (s) => s.replace(/\s+/g, ' ').trim();
@@ -41,6 +66,9 @@
     const picture = node.querySelector('img.pic');
     const artwork = src(picture);
     const idMatch = artwork.match(/\/custom-pics\/\d+\/(\d+)\.(?:jpg|jpeg|png|webp)(?:\?|$)/i);
+    // DuelingBook's loadImage builds standard official artwork from its card ID.
+    // External artwork filenames do not establish a DuelingBook identity.
+    const officialIdMatch = artwork.match(/^https:\/\/images\.duelingbook\.com\/low-res\/([0-9]+)\.jpg(?:[?#]|$)/i);
     const name = normalize(text(node.querySelector('.name_txt')) || text(node.querySelector('.name2_txt')));
     if (!name || !artwork || /\/(?:blank|card_back)\.(?:png|webp|jpg)/i.test(artwork)) return null;
     const isCustom = Boolean(idMatch);
@@ -52,17 +80,41 @@
     const typeNodes = [node.querySelector('.type_txt'), node.querySelector('.spell_type_txt')];
     const typeText = normalize(text(typeNodes.find(el => display(el) && text(el))) || typeNodes.map(text).find(Boolean) || '');
     const icon = spellTrapIcon(node, role, typeText);
+    const visual = icon ? {version: 1, spellTrapIcon: icon} : {};
+    if (role === 'xyz' || /\bxyz\b/i.test(typeText)) {
+      const rank = [...node.querySelectorAll('.rank')].filter(display).length;
+      // Rank sockets are separate from Level sockets in DuelingBook's template.
+      // Missing/hidden sockets cannot establish a rank (including Rank 0).
+      if (rank) Object.assign(visual, {version: 1, rank});
+    }
+    if (role === 'link' || /\blink\b/i.test(typeText)) {
+      // DuelingBook numbers sockets clockwise from the upper-left corner.
+      const directions = ['top-left', 'top', 'top-right', 'right', 'bottom-right', 'bottom', 'bottom-left', 'left'];
+      const arrows = [...node.querySelectorAll('img.red_arrow')];
+      if (arrows.length) Object.assign(visual, {version: 1, linkArrows: directions.filter((_, index) =>
+        display(node.querySelector(`img.red_arrow${index + 1}`)))});
+    }
+    if (!['spell', 'trap'].includes(role) && !/\b(?:spell|trap) card\b/i.test(typeText)) {
+      for (const [field, selector] of [['scaleLeft', '.scale_left_txt'], ['scaleRight', '.scale_right_txt']]) {
+        const scaleNode = node.querySelector(selector);
+        const value = text(scaleNode);
+        // Hidden placeholders and unavailable values must not become scale 0.
+        if (display(scaleNode) && /^[0-9]{1,2}$/.test(value)) {
+          Object.assign(visual, {version: 1, pendulum: true, [field]: Number(value)});
+        }
+      }
+    }
     const record = {
       id: isCustom ? idMatch[1] : officialKey(name, artwork), name, artwork,
       origin: isCustom ? 'custom' : 'official',
-      duelingbookId: isCustom ? idMatch[1] : '',
+      duelingbookId: isCustom ? idMatch[1] : officialIdMatch?.[1] || '',
       frame: src(node.querySelector('.card_color')),
       attribute: asset(attrNode).replace(/_attribute\.webp$/i, '').toUpperCase(),
       level: levels || null,
       type: typeText,
-      ...(icon ? {visual: {version: 1, spellTrapIcon: icon}} : {}),
-      effect: display(effectNode) ? text(effectNode) : '',
-      pendulumEffect: display(pendulumNode) ? text(pendulumNode) : '',
+      ...(visual.version ? {visual} : {}),
+      effect: effectText(effectNode),
+      pendulumEffect: effectText(pendulumNode),
       atk: display(node.querySelector('.card_atk_txt')) ? text(node.querySelector('.card_atk_txt')) : '',
       def: display(node.querySelector('.card_def_txt')) ? text(node.querySelector('.card_def_txt')) : '',
       link: display(node.querySelector('.link_txt')) ? text(node.querySelector('.link_txt')) : '',
@@ -76,7 +128,7 @@
   }
 
   // Constructor containers may use class names rather than element IDs.
-  const EDITOR_CONTAINERS = '#deck_cards, .deck_cards, #side_cards, .side_cards';
+  const EDITOR_CONTAINERS = '#deck_cards, .deck_cards, #extra_cards, .extra_cards, #side_cards, .side_cards';
 
   function editorPresent() {
     return Boolean(document.querySelector(EDITOR_CONTAINERS));
@@ -100,8 +152,9 @@
       // The page may contain a duplicate preview element. Prefer the record with the most information.
       const old = records.get(card.id);
       const score = (v) => [v.name, v.effect, v.type, v.frame, v.atk].filter(Boolean).join('').length;
-      const iconScore = Number(Boolean(card.visual?.spellTrapIcon)) - Number(Boolean(old?.visual?.spellTrapIcon));
-      if (!old || iconScore > 0 || (iconScore === 0 && score(card) > score(old))) records.set(card.id, card);
+      const visualScore = (v) => ['spellTrapIcon', 'scaleLeft', 'scaleRight', 'linkArrows', 'rank'].filter(key => v?.visual?.[key] != null).length + (v?.visual?.linkArrows?.length || 0);
+      const metadataScore = visualScore(card) - visualScore(old);
+      if (!old || metadataScore > 0 || (metadataScore === 0 && score(card) > score(old))) records.set(card.id, card);
     }
     return { cards: [...records.values()], rendered: roots.length, page: location.href };
   }

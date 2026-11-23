@@ -1,7 +1,7 @@
 "use strict";
 const fs = require("node:fs");
 const path = require("node:path");
-const { loadAssets } = require("./render.cjs");
+const { defaultAssetRoot, loadAssets, loadLocalLinkFont, loadLocalTypeFont, loadLocalStatsFont } = require("./render.cjs");
 const { normalizeStyle } = require("./style-profile.cjs");
 function testerRuntime() {
   const modules = [
@@ -21,7 +21,7 @@ function testerState(registry, style, defaults = style) {
   return {
     style: normalizeStyle(style),
     defaults: normalizeStyle(defaults),
-    credits: ["predefined", "ygocarder"].map((pack) => ({
+    credits: ["predefined", "ygocarder", ...(registry.assets.get("font.link-rating") ? ["link-rating"] : []), ...(registry.assets.get("font.type") ? ["monster-type"] : [])].map((pack) => ({
       name: pack,
       notice: fs.readFileSync(
         path.join(__dirname, "packs", pack, "NOTICE.md"),
@@ -77,12 +77,11 @@ function testerHtml(state) {
 }
 module.exports = { testerRuntime, testerState, testerHtml };
 if (require.main === module) {
-  const { defaultAssetRoot } = require("./server.cjs");
   const root = defaultAssetRoot(),
-    registry = loadAssets(
+    registry = loadLocalStatsFont(loadLocalTypeFont(loadLocalLinkFont(loadAssets(
       root,
       JSON.parse(fs.readFileSync(path.join(root, "manifest.json"))),
-    );
+    ))));
   const defaultFile = path.join(__dirname, "style.default.json");
   const defaults = fs.existsSync(defaultFile)
     ? JSON.parse(fs.readFileSync(defaultFile, "utf8"))

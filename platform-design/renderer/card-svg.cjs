@@ -1,5 +1,5 @@
 "use strict";
-const { measureText, fitText } = require("./text-layout-core.cjs");
+const { measureText, wrapText, fitText } = require("./text-layout-core.cjs");
 const { normalizeStyle, regionFont } = require("./style-profile.cjs");
 // Uploaded frame coordinates are measured in their original 549 × 800 canvas.
 const FRAME_SCALE_X = 813 / 549;
@@ -55,6 +55,12 @@ const xml = (value) =>
         "'": "&apos;",
       })[c],
   );
+function capitalizeTypeWords(value) {
+  return String(value).replace(/\p{L}[\p{L}\p{M}'’]*/gu, (word) => {
+    const [first, ...rest] = Array.from(word);
+    return first.toLocaleUpperCase() + rest.join("");
+  });
+}
 function text(value, field, max = 12000) {
   if (value == null) return "";
   if (
@@ -198,21 +204,47 @@ function composeCard(card, registry, style) {
   const predefined = registry.profile === "predefined-813-v1";
   const textured = predefined || registry.profile === "tcg-813-v1";
   const tuning = normalizeStyle(style);
+  const typeFont = registry.assets.get("font.type");
+  const statsFaceActive = predefined && c.monster && registry.assets.get("font.stats") && tuning.regions.stats.font === "body";
+  const originalTypeFaceActive = (key) =>
+    predefined && Boolean(typeFont) && tuning.regions[key].font === "body" &&
+    ((key === "type" && c.monster) ||
+      (key === "kind" && ["spell", "trap"].includes(c.frame)));
   const lightenName =
     textured &&
-    Boolean(registry.fontMetrics?.name) &&
+    Boolean(registry.assets.get("font.name")) &&
     (!predefined || tuning.regions.name.font === "name");
   const adjustableNameWeight = predefined && lightenName;
+  const adjustableRegion = (key) =>
+    predefined && key !== "name" &&
+    (["body", "name"].includes(tuning.regions[key].font) ||
+      tuning.regions[key].font.startsWith("upload-") ||
+      (key === "stats" && c.frame === "link" &&
+        Boolean(registry.assets.get("font.link-rating"))));
+  const weightFilter = (key) => {
+    const region = tuning.regions[key], baseWeight = originalTypeFaceActive(key) ? 900 : 400;
+    if (!adjustableRegion(key) || region.weight === baseWeight) return "";
+    const stroke = region.weight > baseWeight
+      ? ` stroke="#000" stroke-width="${(region.size * 3 / 95) * ((region.weight - baseWeight) / (900 - baseWeight)) * 1.2}" stroke-linejoin="round" paint-order="stroke fill"`
+      : "";
+    return ` filter="url(#card-${key}-weight)"${stroke}`;
+  };
   const nameColor = ["spell", "trap", "xyz", "link"].includes(c.frame)
     ? "#fff"
     : "#000";
   function regionAttributes(key, forceItalic = false) {
     const r = tuning.regions[key],
-      font = regionFont(tuning, registry, key);
+      font = regionFont(tuning, registry, key),
+      family = originalTypeFaceActive(key)
+        ? "CardTypeLine"
+        : key === "stats" && statsFaceActive ? "CardStats" : font.family;
     // The bundled name face is static; the mask below supplies its weight steps
     // without the browser's abrupt synthetic-bold switch.
-    const weight = key === "name" && adjustableNameWeight ? 400 : r.weight;
-    return `font-family="${font.family}" font-weight="${weight}" font-style="${forceItalic || r.italic ? "italic" : "normal"}" letter-spacing="${r.letterSpacing}" font-kerning="${r.font.startsWith("upload-") ? "none" : "normal"}"`;
+    const weight =
+      (key === "name" && adjustableNameWeight) || adjustableRegion(key)
+        ? 400
+        : r.weight;
+    return `font-family="${family}" font-weight="${weight}" font-style="${forceItalic || r.italic ? "italic" : "normal"}" letter-spacing="${r.letterSpacing}" font-kerning="${r.font.startsWith("upload-") ? "none" : "normal"}"`;
   }
   const rasterDefinitions = new Map();
   function asset(key) {
@@ -245,10 +277,11 @@ function composeCard(card, registry, style) {
   }
   function fittedLines(value, x, top, width, height, block) {
     const r = tuning.regions[block];
+    const metrics = predefined
+      ? regionFont(tuning, registry, block).metrics
+      : registry.fontMetrics?.body;
     const layout = fitText(value, {
-      font: predefined
-        ? regionFont(tuning, registry, block).metrics
-        : registry.fontMetrics?.body,
+      font: metrics,
       width,
       height,
       ...(predefined
@@ -263,7 +296,19 @@ function composeCard(card, registry, style) {
     if (layout.overflow)
       diagnostics.push("text-overflow: full text retained in SVG description");
     const italicFlavor = c.frame === "normal" && block === "effect";
-    return `<g data-text-block="${block}" fill="#000000" ${predefined ? regionAttributes(block, italicFlavor) : `font-family="CardBody, Georgia, serif" font-style="${italicFlavor ? "italic" : "normal"}" font-kerning="normal"`} font-variant-ligatures="none">${layout.lines.map((line, i) => label(line, x + (predefined ? r.offsetX : 0), top + layout.ascent + i * layout.lineHeight + (predefined ? r.offsetY : 0), layout.fontSize)).join("")}</g>`;
+    let lineCount = 0;
+    const paragraphEnds = new Set();
+    for (const paragraph of String(value).split(/\r?\n/)) {
+      lineCount += wrapText(
+        paragraph,
+        width,
+        metrics,
+        layout.fontSize,
+        predefined ? r.letterSpacing : 0,
+      ).length;
+      paragraphEnds.add(lineCount - 1);
+    }
+    return `<g data-text-block="${block}" fill="#000000" ${predefined ? regionAttributes(block, italicFlavor) + weightFilter(block) : `font-family="CardBody, Georgia, serif" font-style="${italicFlavor ? "italic" : "normal"}" font-kerning="normal"`} font-variant-ligatures="none">${layout.lines.map((line, i) => label(line, x + (predefined ? r.offsetX : 0), top + layout.ascent + i * layout.lineHeight + (predefined ? r.offsetY : 0), layout.fontSize, !paragraphEnds.has(i) && line.includes(" ") ? `textLength="${width}" lengthAdjust="spacing"` : "")).join("")}</g>`;
   }
   // Both borders are sampled from the same unchanged, gray/gold Effect frame.
   // Cropping in the SVG keeps every upstream PNG byte intact.
@@ -282,8 +327,8 @@ function composeCard(card, registry, style) {
     return `<rect data-card-border="effect" x="55" y="${top}" width="703" height="${1100 - top}" fill="none" stroke="#b68e3b" stroke-width="4"/>`;
   }
   // Keep the original schematic fallback for manifests without a textured layout.
-  function lines(value, x, y, width, maxLines, block = "effect") {
-    const chunks = [];
+  function lines(value, x, y, width, maxLines, block = "effect", justifyWidth = 659) {
+    const chunks = [], paragraphEnds = new Set();
     for (const paragraph of value.split(/\r?\n/)) {
       let line = "";
       for (const word of paragraph.split(/\s+/)) {
@@ -298,6 +343,7 @@ function composeCard(card, registry, style) {
         }
       }
       chunks.push(line);
+      paragraphEnds.add(chunks.length - 1);
     }
     if (chunks.length > maxLines)
       diagnostics.push("text-overflow: full text retained in SVG description");
@@ -311,7 +357,10 @@ function composeCard(card, registry, style) {
             x,
             y + i * 25,
             21,
-            'font-family="CardBody, Georgia, serif" fill="#000000"',
+            'font-family="CardBody, Georgia, serif" fill="#000000"' +
+              (!paragraphEnds.has(i) && l.includes(" ")
+                ? ` textLength="${justifyWidth}" lengthAdjust="spacing"`
+                : ""),
           ),
         )
         .join("") +
@@ -334,14 +383,23 @@ function composeCard(card, registry, style) {
       `background.${c.frame}${c.pendulum && !predefined ? "-pendulum" : ""}`,
     ),
     border = predefined ? null : asset("border");
-  const nameFont = asset("font.name"),
-    bodyFont = asset("font.body");
+  const nameFont = (predefined && registry.assets.get("font.stats")) || asset("font.name"),
+    bodyFont = asset("font.body"),
+    linkFont = c.frame === "link" ? registry.assets.get("font.link-rating") : null;
   const fontCss =
+    (registry.assets.get("font.text") ? `@font-face{font-family:CardText;src:url('${registry.assets.get("font.text")}');font-weight:400;font-style:normal}` : "") +
+    (statsFaceActive || (c.pendulum && registry.assets.get("font.stats")) ? `@font-face{font-family:CardStats;src:url('${registry.assets.get("font.stats")}');font-weight:400;font-style:normal}` : "") +
     (nameFont
       ? `@font-face{font-family:CardName;src:url('${nameFont}')} `
       : "") +
     (bodyFont
       ? `@font-face{font-family:CardBody;src:url('${bodyFont}')}`
+      : "") +
+    ((originalTypeFaceActive("type") || originalTypeFaceActive("kind"))
+      ? `@font-face{font-family:CardTypeLine;src:url('${typeFont}');font-weight:400;font-style:normal}`
+      : "") +
+    (linkFont
+      ? `@font-face{font-family:CardLinkRating;src:url('${linkFont}');font-weight:400;font-style:normal}`
       : "") +
     (predefined
       ? Object.entries(tuning.fonts)
@@ -382,10 +440,36 @@ function composeCard(card, registry, style) {
     // Blend toward a thinner/thicker outline. Varying only morphology's radius
     // would quantize adjacent weights to the same pixels at thumbnail sizes.
     // Retain some original coverage so light weights do not lose fine serifs.
-    nameFilter += `<feMorphology in="${nameMask}" operator="${lighter ? "erode" : "dilate"}" radius="${radius}" result="name-weight-limit"/><feComposite in="name-weight-limit" in2="${nameMask}" operator="arithmetic" k1="0" k2="${amount}" k3="${1 - amount}" k4="0" result="name-weight-alpha"/>`;
-    nameMask = "name-weight-alpha";
+    if (lighter) {
+      nameFilter += `<feMorphology in="${nameMask}" operator="erode" radius="${radius}" result="name-weight-limit"/><feComposite in="name-weight-limit" in2="${nameMask}" operator="arithmetic" k1="0" k2="${amount}" k3="${1 - amount}" k4="0" result="name-weight-alpha"/>`;
+      nameMask = "name-weight-alpha";
+    } else {
+      // Preserve the base mask and increase edge coverage continuously. A fixed
+      // slope of 8 here made the first step above 400 abruptly look bold.
+      nameFilter += `<feComponentTransfer in="${nameMask}" result="name-solid-alpha"><feFuncA type="linear" slope="${1 + 7 * (weight - 400) / 500}" intercept="0"/></feComponentTransfer>`;
+      nameMask = "name-solid-alpha";
+    }
   }
   body += `<defs><filter id="card-name-weight" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">${nameFilter}<feFlood flood-color="${nameColor}" result="name-color"/><feComposite in="name-color" in2="${nameMask}" operator="in"/></filter></defs>`;
+  if (predefined)
+    for (const key of ["effect", "pendulum", "kind", "type", "stats"]) {
+      const region = tuning.regions[key];
+      const baseWeight = originalTypeFaceActive(key) ? 900 : 400;
+      if (!adjustableRegion(key) || region.weight === baseWeight) continue;
+      const lighter = region.weight < baseWeight,
+        amount = originalTypeFaceActive(key)
+          ? ((900 - region.weight) / 800) * 0.7
+          : (Math.abs(region.weight - 400) / (lighter ? 300 : 500)) *
+            (lighter ? 0.7 : 0.6),
+        radius = Math.max(1.5, (region.size * 3) / 95),
+        color = ["effect", "pendulum", "stats"].includes(key)
+          ? "#000000"
+          : "#171b20";
+      const mask = lighter
+        ? `<feMorphology in="SourceAlpha" operator="erode" radius="${radius}" result="weight-limit"/><feComposite in="weight-limit" in2="SourceAlpha" operator="arithmetic" k1="0" k2="${amount}" k3="${1 - amount}" k4="0" result="weight-alpha"/>`
+        : `<feComponentTransfer in="SourceAlpha" result="weight-alpha"><feFuncA type="linear" slope="${1 + 7 * (region.weight - baseWeight) / (900 - baseWeight)}" intercept="0"/></feComponentTransfer>`;
+      body += `<defs><filter id="card-${key}-weight" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">${mask}<feFlood flood-color="${color}" result="weight-color"/><feComposite in="weight-color" in2="weight-alpha" operator="in"/></filter></defs>`;
+    }
   if (commonFrame)
     body +=
       '<defs><filter id="gray-art-border" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"/></filter>' +
@@ -428,6 +512,9 @@ function composeCard(card, registry, style) {
         ? 80
         : Math.min(38, Math.max(15, 1050 / Array.from(c.name).length)),
     `data-text-block="name" ${predefined ? regionAttributes("name") : 'font-family="CardName, Georgia, serif"'} filter="url(#card-name-weight)" fill="#000"` +
+      (adjustableNameWeight && tuning.regions.name.weight > 400
+        ? ` stroke="#000" stroke-width="${(tuning.regions.name.size * 3 / 95) * ((tuning.regions.name.weight - 400) / 500) * 1.2}" stroke-linejoin="round" paint-order="stroke fill"`
+        : "") +
       ((
         textured
           ? measureText(
@@ -462,8 +549,8 @@ function composeCard(card, registry, style) {
         gap = predefined ? tuning.stars.gap : 7,
         // Rank rows share the regular Xyz artwork bevel's left edge.
         rankLeft = 58 * FRAME_SCALE_X,
-        // Level rows follow the artwork bevel's right edge on each frame.
-        frameRight = (c.pendulum ? 517 : 491) * FRAME_SCALE_X,
+        // Pendulum and regular Level rows share the regular artwork bevel's right edge.
+        frameRight = 491 * FRAME_SCALE_X,
         rowWidth = c.count * size + Math.max(0, c.count - 1) * gap,
         rowOverflow = c.count > 13 || rowWidth > 680;
       if (c.count != null && !rowOverflow) {
@@ -526,7 +613,7 @@ function composeCard(card, registry, style) {
       labelRight,
       baseline,
       size,
-      'data-kind-part="label" text-anchor="end"',
+      'data-kind-part="label" text-anchor="end"' + weightFilter("kind"),
     );
     if (hasIcon) {
       const icon = c.icon ? asset(`icon.${c.icon}`) : null;
@@ -553,7 +640,7 @@ function composeCard(card, registry, style) {
         right,
         baseline,
         size,
-        'data-kind-part="close" text-anchor="end"',
+        'data-kind-part="close" text-anchor="end"' + weightFilter("kind"),
       ) + "</g>";
   }
   const art = registry.artworks.get(c.artwork);
@@ -565,7 +652,7 @@ function composeCard(card, registry, style) {
           38 * FRAME_SCALE_X,
           145 * FRAME_SCALE_Y,
           472 * FRAME_SCALE_X,
-          352 * FRAME_SCALE_Y,
+          (art ? 582 : 352) * FRAME_SCALE_Y,
         ]
       : [
           68 * FRAME_SCALE_X,
@@ -583,6 +670,7 @@ function composeCard(card, registry, style) {
     body += `<rect x="${artBox[0]}" y="${artBox[1]}" width="${artBox[2]}" height="${artBox[3]}" fill="#273544"/>`;
   }
   // Preserve Link sockets and the Pendulum aperture's bottom corner hardware.
+  const effectBoxClips = `<rect transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" x="83" y="505" width="384" height="108"/><rect transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" x="40" y="623" width="469" height="104"/>`;
   const artAperture =
     predefined && c.pendulum
       ? "38,145 510,145 510,491 504,497 44,497 38,491"
@@ -590,13 +678,30 @@ function composeCard(card, registry, style) {
         ? "97,148 451,148 482,179 482,532 451,563 97,563 68,534 68,177"
         : null;
   if (artAperture)
-    body += `<defs><clipPath id="art-aperture"><polygon transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" points="${artAperture}"/></clipPath></defs><g clip-path="url(#art-aperture)">`;
+    body += `<defs><clipPath id="art-aperture"><polygon transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" points="${artAperture}"/>${predefined && c.pendulum && art ? effectBoxClips : ""}</clipPath></defs><g clip-path="url(#art-aperture)">`;
   body += image(
     art,
-    ...artBox,
-    'preserveAspectRatio="xMidYMid meet" data-card-artwork="true"',
+    // Overlap the aperture edge by one source pixel to cover white template
+    // pixels and fractional scaling seams. Pendulum foreground art cover-crops
+    // to the opening rather than letterboxing portrait source images.
+    ...(predefined
+      ? [artBox[0] - FRAME_SCALE_X, artBox[1] - FRAME_SCALE_Y,
+          artBox[2] + 2 * FRAME_SCALE_X, c.pendulum ? 354 * FRAME_SCALE_Y : artBox[3] + 2 * FRAME_SCALE_Y]
+      : artBox),
+    `preserveAspectRatio="${predefined && c.pendulum ? "xMidYMin slice" : "none"}" data-card-artwork="true"`,
   );
   if (artAperture) body += "</g>";
+  if (predefined && c.pendulum && art) {
+    // Keep the original artwork continuation beneath translucent text boxes
+    // separate from the cover-cropped, borderless foreground aperture.
+    body += `<defs><clipPath id="pendulum-effect-backgrounds">${effectBoxClips}</clipPath></defs><g clip-path="url(#pendulum-effect-backgrounds)">` +
+      image(art, artBox[0] - FRAME_SCALE_X, artBox[1] - FRAME_SCALE_Y,
+        artBox[2] + 2 * FRAME_SCALE_X, artBox[3] + 2 * FRAME_SCALE_Y,
+        'preserveAspectRatio="xMidYMin meet" data-pendulum-art-continuation="true"') +
+      '<g data-effect-backgrounds="pendulum" opacity="0.9">' +
+      image(background, 0, 0, 813, 1185, 'preserveAspectRatio="none"') +
+      image(asset("overlay.pendulum"), 0, 0, 813, 1185, 'preserveAspectRatio="none"') + "</g></g>";
+  }
   if (!art && !predefined)
     body += label(
       "Artwork unavailable locally",
@@ -606,19 +711,21 @@ function composeCard(card, registry, style) {
       'text-anchor="middle" fill="#e2e8f0"',
     );
   if (c.frame === "link" && predefined) {
-    // Highlight only the selected, preprinted sockets; never paint over the frame.
+    // Trace the preprinted socket interiors in the 549x800 source template.
+    // Subpixel edges preserve the bevel while avoiding gaps in diagonal fills.
     const points = [
-      "248,140 274,124 300,140",
-      "464,134 495,134 495,165",
-      "490,334 504,355 490,376",
-      "495,544 495,575 464,575",
-      "248,570 274,586 300,570",
-      "54,544 54,575 85,575",
-      "59,334 45,355 59,376",
-      "54,134 85,134 54,165",
+      "244,142 274.5,122 306,142",
+      "465.5,133 497,133 497,164.5",
+      "488,323 507.5,354.5 488,386",
+      "497,545 497,577 465,577",
+      "242.8,568 274.5,587.5 307.5,568",
+      "52,545 52,577 84,577",
+      "61,324 42.5,354.5 61,385.5",
+      "53,133 84.5,133 53,164.5",
     ];
+    body += '<defs><linearGradient id="active-link-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f1654c"/><stop offset="1" stop-color="#d93629"/></linearGradient></defs>';
     for (const direction of c.linkArrows)
-      body += `<polygon data-link-arrow="${direction}" transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" points="${points[ARROWS.indexOf(direction)]}" fill="#e84b36"/>`;
+      body += `<polygon data-link-arrow="${direction}" transform="scale(${FRAME_SCALE_X} ${FRAME_SCALE_Y})" points="${points[ARROWS.indexOf(direction)]}" fill="url(#active-link-fill)" shape-rendering="geometricPrecision"/>`;
   } else if (c.frame === "link") {
     const arrow = c.linkArrows.length ? asset("icon.link-arrow") : null;
     const positions = textured
@@ -658,22 +765,22 @@ function composeCard(card, registry, style) {
         c.scaleLeft ?? "?",
         textured ? 84.4 : 80,
         predefined ? 884 : textured ? 792 : 815,
-        textured ? 56.5 : 32,
-        'text-anchor="middle" fill="#326ca5"',
+        textured ? 62 : 35,
+        'data-pendulum-scale="left" text-anchor="middle" fill="#000000" font-family="CardStats, CardName, serif" font-weight="400"',
       ) +
       label(
         c.scaleRight ?? "?",
         textured ? 728 : 733,
         predefined ? 884 : textured ? 792 : 815,
-        textured ? 56.5 : 32,
-        'text-anchor="middle" fill="#b64949"',
+        textured ? 62 : 35,
+        'data-pendulum-scale="right" text-anchor="middle" fill="#000000" font-family="CardStats, CardName, serif" font-weight="400"',
       );
     body += textured
       ? fittedLines(
           c.pendulumEffect || "Pendulum text unavailable",
           129,
           predefined ? 754 : 749,
-          555,
+          545,
           predefined ? 151 : 122,
           "pendulum",
         )
@@ -684,6 +791,7 @@ function composeCard(card, registry, style) {
           textured ? 45 : 49,
           4,
           "pendulum",
+          583,
         );
   }
   const boxY =
@@ -698,19 +806,19 @@ function composeCard(card, registry, style) {
   }
   if (c.monster || !textured)
     body += label(
-      c.type || "Type unavailable",
+      c.type ? capitalizeTypeWords(c.type) : "Type Unavailable",
       (textured ? 65 : 72) + (predefined ? tuning.regions.type.offsetX : 0),
       boxY + 33 + (predefined ? tuning.regions.type.offsetY : 0),
       predefined ? tuning.regions.type.size : textured ? 26 : 24,
       'data-text-block="type" ' +
-        (predefined ? regionAttributes("type") : 'font-weight="bold"'),
+        (predefined ? regionAttributes("type") + weightFilter("type") : 'font-weight="bold"'),
     );
   body += textured
     ? fittedLines(
         c.effect,
         65,
         c.monster ? boxY + 44 : 899,
-        685,
+        675,
         c.monster ? (predefined ? 1070 - (boxY + 44) : 149) : 205,
         "effect",
       )
@@ -724,18 +832,24 @@ function composeCard(card, registry, style) {
   if (c.monster && predefined) {
     const r = tuning.regions.stats,
       statsFont = regionFont(tuning, registry, "stats");
-    const stat = `text-anchor="end" fill="#000000" ${regionAttributes("stats")}`;
-    const value = (text, x, width, block) =>
-      label(
+    const stat = `text-anchor="end" fill="#000000" ${regionAttributes("stats")}${weightFilter("stats")}`;
+    const value = (text, x, width, block) => {
+      const special = block === "link" && linkFont,
+        attributes = special
+          ? `text-anchor="end" fill="#000000" font-family="CardLinkRating" font-weight="400" font-style="normal" font-kerning="none" letter-spacing="${r.letterSpacing}"${weightFilter("stats")}`
+          : stat,
+        metrics = special ? registry.fontMetrics?.["link-rating"] : statsFaceActive ? registry.fontMetrics?.stats : statsFont.metrics;
+      return label(
         text,
         x + r.offsetX,
         tuning.stats.baseline + r.offsetY,
         r.size,
-        `data-text-block="${block}" ${stat}` +
-          (measureText(text, statsFont.metrics, r.size, r.letterSpacing) > width
+        `data-text-block="${block}" ${attributes}` +
+          (measureText(text, metrics, r.size, r.letterSpacing) > width
             ? ` textLength="${width}" lengthAdjust="spacingAndGlyphs"`
             : ""),
       );
+    };
     body += value(
       c.atk || "?",
       tuning.stats.atkX,
@@ -750,6 +864,9 @@ function composeCard(card, registry, style) {
       Math.max(8, tuning.stats.defX - (c.frame === "link" ? 719 : 674)),
       c.frame === "link" ? "link" : "def",
     );
+  } else if (c.monster && c.frame === "link" && linkFont) {
+    const rating = c.link.replace(/^LINK\s*[-/]?\s*/i, "") || "?";
+    body += `<text x="742" y="${textured ? 1098 : 1130}" font-size="26" text-anchor="end" font-weight="bold" fill="${textured ? "#171b20" : "#f8f5eb"}">${xml(`ATK / ${c.atk || "?"}   LINK-`)}<tspan data-text-block="link" font-family="CardLinkRating" font-weight="400" font-style="normal" font-kerning="none">${xml(rating)}</tspan></text>`;
   } else if (c.monster)
     body += label(
       `ATK / ${c.atk || "?"}   ${c.frame === "link" ? c.link || "LINK-?" : "DEF / " + (c.def || "?")}`,
@@ -768,7 +885,13 @@ function composeCard(card, registry, style) {
       14,
       'text-anchor="middle" fill="#fff" stroke="#333" stroke-width=".3"',
     );
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="813" height="1185" viewBox="0 0 813 1185" role="img"><title>${xml(c.name)}</title><desc>${xml([c.type, c.pendulumEffect, c.effect, ...diagnostics].join("\n"))}</desc><defs>${[...rasterDefinitions.values()].map((raster) => raster.svg).join("")}</defs><style>${fontCss}</style><g font-family="CardBody, Georgia, serif" fill="#171b20">${body}</g></svg>`;
+  const fontCredit = (statsFaceActive ? "ATK/DEF: Yu-Gi-Oh! Matrix Small Caps 1 Regular. ©1991 Emigre Graphics. " : "") + (linkFont
+    ? "Link Rating: Eurostile Candy W02 Bold; typeface artwork Linotype Design Studio; Copyright © 2008 Linotype GmbH. Source: OnlineWebFonts.com."
+    : "");
+  const typeCredit = (originalTypeFaceActive("type") || originalTypeFaceActive("kind"))
+    ? "Card type: Yu-Gi-Oh! ITC Stone Serif Bold Small Caps. Copyright © 1987, 1990, 1992 Adobe Systems Incorporated; ITC Stone trademark of International Typeface Corporation."
+    : "";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="813" height="1185" viewBox="0 0 813 1185" role="img"><title>${xml(c.name)}</title><desc>${xml([c.type, c.pendulumEffect, c.effect, ...diagnostics, fontCredit, typeCredit].join("\n"))}</desc><defs>${[...rasterDefinitions.values()].map((raster) => raster.svg).join("")}</defs><style>${fontCss}</style><g font-family="CardBody, Georgia, serif" fill="#171b20">${body}</g></svg>`;
   return { svg, diagnostics: [...new Set(diagnostics)], model: c };
 }
 module.exports = { normalizeCard, composeCard };

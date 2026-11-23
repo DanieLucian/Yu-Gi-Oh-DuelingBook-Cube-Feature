@@ -20,8 +20,8 @@ is present. Missing files/details produce diagnostics. Coordinates follow the
 813 × 1185 SVG canvas, scaled from the original frames, with DuelingBook
 presentation rules. Width-aware text fitting is implemented; exact matching and
 non-Latin fallbacks still need real-card
-comparison. This is a rendering experiment, separate from
-the draft simulation and multiplayer server.
+comparison. The shared draft rooms at `/draft` use this renderer for pack cards, deck cards
+and the spotlight. The permanent mock Cube also embeds generated local artwork.
 
 ![Bundled frame and icons in the server rendering gallery](template-preview.jpg)
 
@@ -30,12 +30,28 @@ the draft simulation and multiplayer server.
 Install Node.js 24 LTS, open a terminal at the repository root, then run:
 
 ```sh
-node platform-design/renderer/server.cjs
+node platform-design/server.cjs
 ```
 
 Open the address printed in that terminal (`http://127.0.0.1:3210`). The process
 listens only on your PC's loopback interface. Set `PORT` if that port is occupied.
 No npm installation is needed for the renderer itself.
+
+Open **http://127.0.0.1:3210/draft** for drafting with rendered cards. The pack
+and spotlight reuse each card's cached SVG; requests run four at a time. Basic
+HTML previews remain available while images load or if rendering fails. Reload
+the draft page after saving typography changes in the tester.
+
+Draft rendering can download HTTPS DuelingBook artwork from `duelingbook.com`,
+`www.duelingbook.com` and `images.duelingbook.com`, using numeric `pics/`
+and `custom-pics/` image paths, plus official-card artwork in `low-res/`,
+`card-pics/` and `small/` at all three DuelingBook quality settings (including
+version query parameters). It rejects redirects, other hosts and SVG files,
+limits downloads to 10 MB and six seconds, and caches original image bytes in
+ignored `data/artwork-cache/` (256 MB budget). Existing artwork mappings take
+precedence. Failed or unsupported artwork retains the frame's empty aperture
+and a diagnostic in the card tooltip. The gallery's `/api/render` endpoint
+continues to use local assets only.
 
 The gallery has fictional Normal/Effect/Ritual/Fusion/Synchro/Xyz/Link/Pendulum,
 Spell and Trap records. You can also select an extension Cube JSON and choose a
@@ -58,8 +74,15 @@ move controls.
   of outlines. For card names, weights 100–900 now simulate progressively thinner
   or thicker strokes; 400 preserves the selected original appearance. These are
   visual adjustments, not nine separate font faces. Its stroke-coverage control
-  separately softens edges. Other fonts continue to use browser font-weight
-  behavior.
+  separately softens edges. Bundled Stone Serif regions also use continuous
+  stroke adjustments. The original Bold Small Caps monster type face uses its
+  unmodified outlines at weight 900.
+  Heavier effect, Pendulum, type and stat text uses the same solid stroke and
+  unified coverage as card names, avoiding translucent halos or inset edges.
+  Both stroke width and edge coverage increase gradually from the base weight;
+  crossing 400 does not switch on a fixed-strength boldening filter.
+  Lighter weights retain the thinning mask. This also applies when a fixed name
+  face or uploaded font is selected in another text region.
 - Adjust star size/gap, ATK and DEF/Link value positions, and the stat baseline.
   Measurements use the 813 × 1185 canvas. Printed ATK/DEF/LINK labels are part of
   the supplied PNGs; these controls change the overlaid values. Oversized star
@@ -105,6 +128,43 @@ text are preview-only and are not included in the exported style.
 
 ## DuelingBook appearance
 
+Main card text and Pendulum text use the locally installed Matrix Book face
+(`data/fonts/MatrixBook.ttf`) with measured widths in `book-font-metrics.json`.
+Normal Monster flavor text retains italic styling.
+
+Monster and Spell/Trap type lines use the user's original **Yu-Gi-Oh! ITC Stone
+Serif Bold Small Caps** font when the bundled body font is selected. Weight 900 shows its
+original Bold outlines; lower weights progressively thin them. The unchanged
+TTF loads from ignored `data/fonts/StoneSerif-BoldSmallCaps.ttf` into the server
+and standalone tester. A custom manifest may provide `font.type` instead.
+[Font credits and provenance](packs/monster-type/NOTICE.md) record the Adobe
+copyright and ITC trademark. Without the local file, the bundled Stone Serif
+face remains the fallback. For other text areas using that face, the 100–900
+weight control now changes stroke coverage continuously, as it does for the card
+name. The selected size, alignment and line fitting remain separate controls.
+Every displayed word in a monster type line begins with an uppercase letter;
+the source card data remains unchanged.
+
+### Link Rating font
+
+The locally supplied **Eurostile Candy W02 Bold** is used for the Link Rating
+number. Typeface artwork is credited to **Linotype Design Studio**, copyright
+**Linotype GmbH**; the supplied archive is credited to
+[Web Fonts / OnlineWebFonts](https://www.onlinewebfonts.com/).
+See [the full font credits and source record](packs/link-rating/NOTICE.md).
+
+The original font and its notices are kept in ignored `data/fonts/`, separate
+from the tracked asset packs. The server and offline tester builder load
+`data/fonts/EurostileCandyW02-Bold.woff2` automatically. Custom asset manifests
+can provide `font.link-rating` instead. If no Link Rating font is installed, the
+renderer retains the existing stats font. ATK/DEF continue using the selected
+stats typography. Font bytes and attribution are embedded in local Link SVGs;
+the tester also carries the credits and font when built offline.
+
+To regenerate this font's measured widths with Playwright, run
+`node platform-design/renderer/build-link-font-metrics.cjs` with `CHROMIUM_PATH`
+set to your browser. Measurements are checked against the original font hash.
+
 The supplied **Torrential Tribute** screenshot is the current style reference.
 The gallery includes a text-only Torrential Tribute sample; its illustration
 remains a placeholder.
@@ -116,14 +176,21 @@ remains a placeholder.
 - Name glyphs use a common black coverage mask before their final color is
   applied, so browser antialiasing does not make white names heavier.
 - The selected project profile in `style.default.json` uses the bundled small-cap
-  name face at 95 px, with −2 px letter spacing and stroke coverage set to 1.
-  Long names still compress horizontally when necessary.
+  name face at 95 px, with −2 px letter spacing and stroke coverage set to 0.8,
+  calibrated against the supplied DuelingBook **Fire Mace** name sample at equal
+  letter size. Long names still compress horizontally when necessary.
 - The supplied frames provide the artwork bevels, text boxes, backgrounds and
   outer borders directly. No recoloring, border reconstruction or extra text-box
   texture is applied. The large transparent Pendulum overlay preserves the
   selected monster frame's header and is clipped inside its original outer border.
   The supplied PNG files remain unchanged.
 - Main and Pendulum effect text use pure black (`#000000`).
+- Pendulum artwork keeps its proportions and aligns to the top of its aperture;
+  only artwork taller than the aperture continues behind the effect text areas.
+  Artwork that already fits is not stretched down. The effect areas' background
+  textures are 90% opaque (10% transparent); text, scales and borders remain opaque.
+- Main and Pendulum effect text justify wrapped lines to the text box width;
+  the final line of each paragraph retains its natural spacing.
 - Normal Monster flavor text is always italic, including the main text of Normal
   Pendulum Monsters. Pendulum effects keep their separate typography. This rule
   also applies to the earlier layered and schematic profiles.
@@ -132,11 +199,11 @@ remains a placeholder.
   measured font widths. Pendulum and monster effects keep separate regions.
 - Stars use 50 px icons with 4 px gaps. Stat values use 29 px text, anchored at
   ATK x=577 and DEF/Link x=744, with baseline y=1105.5. Spell/Trap type uses
-  40.5 px text. All settings match the supplied `card-render-style (1).json`;
-  the existing bundled fonts are retained.
-- Level rows end at the artwork frame's right bevel edge, including the wider
-  Pendulum frame, independent of star count, size or gap. Regular and Pendulum
-  Xyz Rank rows share the regular Xyz artwork frame's left bevel edge.
+  40.5 px text. These sizes and positions retain the supplied
+  `card-render-style (1).json` settings and existing bundled fonts.
+- Regular and Pendulum Level rows share the non-Pendulum artwork frame's right
+  bevel edge, independent of star count, size or gap. Regular and Pendulum Xyz
+  Rank rows share the regular Xyz artwork frame's left bevel edge.
 - Spell/Trap headers place the subtype icon before the closing square bracket,
   which aligns with the artwork frame's right bevel edge. Normal cards have no
   empty icon slot. Header offsets move the text, icon and bracket together.
@@ -217,8 +284,9 @@ For example, **merge** these entries into the example manifest:
 
 The artwork map uses the **exact** `artwork` string in the Cube JSON, including
 any query string. This makes asset resolution explicit. An uploaded URL is never
-treated as a server file path or fetched over the network. Automated artwork
-acquisition is not implemented; the original files must be placed locally first.
+treated as a server file path. The draft's `/api/draft-render` endpoint can cache
+supported DuelingBook artwork automatically as described above. Other artwork
+sources require an explicit local mapping.
 
 For the original schematic/layered profiles, the manifest covers:
 
@@ -235,7 +303,8 @@ For the original schematic/layered profiles, the manifest covers:
 | Artwork | PNG, JPEG or WebP mapped from source artwork URL |
 
 Image assets must be PNG, JPEG or WebP; active SVG assets are rejected. Fonts must
-be WOFF2. Files must stay inside the assets directory, including symlink targets.
+be WOFF2, except `font.type` may be a TTF. Files must stay inside the assets
+directory, including symlink targets.
 The loader checks file signatures/size, not pixel dimensions or full image/font
 integrity: check those visually in the gallery. Limits are 10 MB/file and 256 MB
 loaded asset bytes for this experiment. Original source geometry may require
@@ -304,6 +373,16 @@ card data is truncated or changed.
 
 ## HTTP and cache
 
+Draft card SVGs retain their existing appearance and content-addressed URLs.
+Browsers that accept gzip receive a compressed copy of each SVG; the server
+keeps up to 24 MB of recently compressed images in memory and retains the
+originals in the existing disk cache. Repeated requests for the same card and
+style can reuse a bounded in-memory render index instead of composing the SVG
+again. Changing the style invalidates that index. This especially helps remote
+drafts, where each player otherwise transfers large embedded artwork and font
+data through the tunnel. A newly seen card can still wait for its first artwork
+download (up to six seconds) before rendering.
+
 - `GET /tester`: local typography/spacing editor; `GET /api/tester-state` supplies
   the active local assets and style. `GET /api/style` returns the active profile.
 - `PUT /api/style`: validated style and embedded WOFF2 fonts, at most 8 MB.
@@ -339,6 +418,11 @@ The predefined-frame tests verify all ten original hashes and dimensions, compar
 rendered pixels with the source frames (including transparent Pendulum headers
 and printed stat labels), and check that mapped artwork preserves Link sockets
 and Pendulum corner hardware. Only values are overlaid on the printed stat labels.
+Pendulum foreground artwork cover-crops into its aperture, without white
+letterboxing or aspect-ratio distortion. The continuation behind the translucent
+effect boxes remains separately fitted. Scale numbers use a slightly larger
+62px size. Active Link arrows follow calibrated inner socket coordinates with
+antialiased edges and a gentle red gradient, preserving the printed gray bevels.
 Additional checks verify the requested name colors, border pixels across every
 family, artwork visibility, font-file identity, the reference's two-line effect,
 and measured fitting of denser effects. The title's rendered glyph bounds are

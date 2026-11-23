@@ -7,7 +7,7 @@ const os = require("node:os");
 const { chromium } = require("playwright");
 const { normalizeStyle, DEFAULT_STYLE } = require("./style-profile.cjs");
 const { loadAssets, renderCard } = require("./render.cjs");
-const { createRenderServer } = require("./server.cjs");
+const { createRenderServer } = require("../server.cjs");
 const { testerState, testerHtml } = require("./tester-build.cjs");
 const projectStyle = normalizeStyle(require("./style.default.json"));
 const root = path.join(__dirname, "packs");
@@ -274,7 +274,7 @@ test(
     );
     await page.locator("#region").selectOption("name");
     await page.locator("#size").fill("74");
-    await page.locator("#weight").selectOption("200");
+    await page.locator("#weight").fill("200");
     await page.locator("#starGap").fill("11");
     await page.locator("#atkX").fill("605");
     await page.locator("#defX").fill("754");

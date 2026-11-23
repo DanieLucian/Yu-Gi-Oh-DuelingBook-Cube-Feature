@@ -1,9 +1,10 @@
 # Cube Draft platform: first release design
 
-Status: architecture + interactive interface prototype. This branch does not run
-a multiplayer service yet. The prototype opens as `index.html` and uses browser
-storage and simulated seats. Production storage and timing belong to your PC.
-The Chrome extension is unchanged.
+Status: working file-backed multiplayer rooms with host-controlled lobby settings,
+real guests and server-controlled bots. `/draft` is the shared entry point for
+all drafts. The built-in 300-card mock Cube includes generated local artwork;
+the separate simulator page has been removed. Some architecture sections below
+describe future production work; see README.md for the current workflow.
 
 ## Confirmed requirements and rules
 
@@ -127,8 +128,9 @@ fields and missing-detail diagnostics. Do not infer Normal Spell from a generic
 `[ SPELL CARD ]` label or invent Link arrows from its rating.
 
 Artwork is also stored locally, with an explicit map from the original URL to a
-server asset file. The experiment performs no URL fetching; a later ingestion
-step must restrict artwork downloads to supported sources and validated images.
+server asset file. Draft rendering downloads supported DuelingBook HTTPS image
+paths into a bounded local cache, validates raster signatures and rejects
+redirects. The renderer gallery continues to use explicit local mappings.
 Uploaded JSON cannot select arbitrary server paths or trigger arbitrary network
 requests. Retain original records and render names/effects as escaped text.
 The current renderer uses the supplied complete frames without rebuilding or
@@ -248,16 +250,16 @@ a platform-specific privacy policy before a public launch.
 6. **PC hosting:** LAN access from another device, then invited internet access,
    data backup/restore and server restart/rejoin behavior.
 
-The prototype currently covers local JSON import/library persistence, screen
-layout, hover preview, on-card confirmation, configurable simulated tables,
-copy-respecting pack passing, timeout picks, deck sections and XML serialization.
-It does not implement shared PC persistence, real rooms, network multiplayer,
-authentication, reconnects or direct DuelingBook import. Its random generator and
-client timer are demonstration behavior, not the production authority model.
+The current interface covers JSON import/library persistence, screen layout,
+card readers, host/guest rooms, bots, the permanent mock Cube, deck counts,
+copy-respecting pack passing, server timeout picks, deck sections and XML. Room
+credentials, private packs and decks are persisted on the host PC and resume
+after restart. Account-based authentication, shared imported-Cube storage and
+direct DuelingBook import remain future work.
 
 The separate renderer gallery implements a local HTTP process, asset manifest,
-SVG composition, missing-detail diagnostics and disk cache. It does not yet feed
-rendered images into the draft simulation. The bundled source files and layer
+SVG composition, missing-detail diagnostics and disk cache. Its `/draft` route
+feeds rendered images into the draft pack and spotlight. The bundled source files and layer
 geometry are checked, and width-aware fitting uses precomputed measurements.
 Real-card DuelingBook comparisons and fallback-font checks remain required for
 faithful reproduction.

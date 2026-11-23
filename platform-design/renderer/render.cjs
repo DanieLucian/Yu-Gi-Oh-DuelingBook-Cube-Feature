@@ -50,6 +50,8 @@ function loadAssets(root, manifest) {
     const mime =
       font && buffer.subarray(0, 4).toString() === "wOF2"
         ? "font/woff2"
+        : ["font.type", "font.stats", "font.text"].includes(key) && buffer.length >= 4 && buffer.readUInt32BE(0) === 0x00010000
+          ? "font/ttf"
         : !font &&
             buffer
               .subarray(0, 8)
@@ -64,7 +66,7 @@ function loadAssets(root, manifest) {
               : null;
     if (!mime)
       throw Error(
-        `Unsupported asset format for ${key}. Use PNG/JPEG/WebP or WOFF2 fonts.`,
+        `Unsupported asset format for ${key}. Use PNG/JPEG/WebP, WOFF2 fonts, or a TTF monster type font.`,
       );
     if (font) fontMetrics[key.slice(5)] = metricsForFont(buffer, key.slice(5));
     const data = `data:${mime};base64,${buffer.toString("base64")}`;
@@ -143,4 +145,31 @@ function renderCard(card, registry, style) {
     .digest("hex");
   return { ...result, hash };
 }
-module.exports = { normalizeCard, loadAssets, renderCard, VERSION };
+function loadLocalFont(registry, key, file, dataRoot) {
+  if (registry.assets.get(key)) return registry;
+  const root = path.join(dataRoot, "fonts");
+  if (!fs.existsSync(path.join(root, file))) return registry;
+  const local = loadAssets(root, {
+    version: 1, files: { [key]: file }, artworks: {},
+  });
+  registry.assets.set(key, local.assets.get(key));
+  registry.fontMetrics[key.slice(5)] = local.fontMetrics[key.slice(5)];
+  return registry;
+}
+function loadLocalLinkFont(registry, dataRoot = path.join(__dirname, "data")) {
+  return loadLocalFont(registry, "font.link-rating", "EurostileCandyW02-Bold.woff2", dataRoot);
+}
+function loadLocalTypeFont(registry, dataRoot = path.join(__dirname, "data")) {
+  return loadLocalFont(registry, "font.type", "StoneSerif-BoldSmallCaps.ttf", dataRoot);
+}
+function loadLocalStatsFont(registry, dataRoot = path.join(__dirname, "data")) {
+  loadLocalFont(registry, "font.text", "MatrixBook.ttf", dataRoot);
+  return loadLocalFont(registry, "font.stats", "MatrixRegularSmallCaps.ttf", dataRoot);
+}
+function defaultAssetRoot(directory = __dirname) {
+  const custom = path.join(directory, "assets");
+  return fs.existsSync(path.join(custom, "manifest.json"))
+    ? custom
+    : path.join(directory, "packs");
+}
+module.exports = { normalizeCard, defaultAssetRoot, loadAssets, loadLocalLinkFont, loadLocalTypeFont, loadLocalStatsFont, renderCard, VERSION };

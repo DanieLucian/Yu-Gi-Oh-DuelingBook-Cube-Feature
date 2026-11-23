@@ -196,6 +196,24 @@ test("SVG escapes hostile text, rejects invalid XML text, retains overflowing ef
     assert.throws(() => renderCard({ ...monster, ...extra }, blank()));
 });
 
+test("main and Pendulum card text justify wrapped lines but retain natural paragraph endings", () => {
+  const value = {
+    ...monster,
+    effect: "This is a deliberately long effect sentence with enough words to wrap across several lines inside the card text area while preserving a natural final line.",
+    pendulumEffect: "This is a separate long Pendulum effect sentence with enough words to wrap across more than one line in its own text area.",
+    visual: { frame: "effect", pendulum: true, scaleLeft: 1, scaleRight: 1 },
+  };
+  const { svg } = renderCard(value, blank());
+  for (const [block, width] of [["effect", 659], ["pendulum", 583]]) {
+    const group = svg.match(new RegExp(`<g data-text-block="${block}"[^>]*>(.*?)</g>`))?.[1];
+    assert.ok(group, `${block} text group exists`);
+    const lines = [...group.matchAll(/<text\b[^>]*>/g)].map(match => match[0]);
+    assert.ok(lines.length > 1, `${block} text wraps`);
+    assert.match(lines[0], new RegExp(`textLength="${width}" lengthAdjust="spacing"`));
+    assert.doesNotMatch(lines.at(-1), /textLength=/);
+  }
+});
+
 test("server assets embed locally, repeated stars share data and cache identity reflects visual content", (t) => {
   const root = fixture(t);
   fs.writeFileSync(path.join(root, "pixel.png"), png);

@@ -156,12 +156,14 @@ function regionFont(style, registry, region) {
   if (font === "name")
     return {
       family: "CardName, Georgia, serif",
-      metrics: registry.fontMetrics?.name,
+      metrics: registry.profile === "predefined-813-v1" && registry.assets.get("font.stats")
+        ? registry.fontMetrics?.stats
+        : registry.fontMetrics?.name,
     };
   if (font === "body")
     return {
-      family: "CardBody, Georgia, serif",
-      metrics: registry.fontMetrics?.body,
+      family: ["effect", "pendulum"].includes(region) && registry.assets.get("font.text") ? "CardText, Georgia, serif" : "CardBody, Georgia, serif",
+      metrics: ["effect", "pendulum"].includes(region) && registry.assets.get("font.text") ? registry.fontMetrics?.text : registry.fontMetrics?.body,
     };
   if (font === "serif" || font === "sans-serif")
     return { family: font, metrics: null };

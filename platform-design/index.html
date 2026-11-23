@@ -96,7 +96,7 @@
         color: #cce7dd;
       }
       main {
-        max-width: 1600px;
+        width: 100%;
         margin: auto;
         padding: 24px;
       }
@@ -114,6 +114,8 @@
         font-size: 10px;
         font-weight: 700;
       }
+      .draft-heading { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .draft-heading h1 { margin: 0; font-size: 22px; }
       h1 {
         font-size: 26px;
         margin: 7px 0 0;
@@ -130,7 +132,7 @@
       }
       .grid {
         display: grid;
-        grid-template-columns: 280px minmax(420px, 1fr) 300px;
+        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr) minmax(320px, 480px);
         gap: 20px;
         align-items: start;
       }
@@ -151,8 +153,42 @@
         color: var(--muted);
       }
       #preview {
-        min-height: 485px;
+        width: min(100%, 290px);
+        margin: auto;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        justify-content: center;
       }
+      .preview-panel {
+        position: sticky;
+        top: 12px;
+        height: calc(100dvh - 210px);
+        display: flex;
+        flex-direction: column;
+      }
+      #preview .large { height: auto; width: 100%; max-height: 100%; min-height: 0; aspect-ratio: 813 / 1185; align-self: center; }
+      .card-details {
+        margin-top: 12px;
+        height: 300px;
+        max-height: 55dvh;
+        flex: none;
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d1521;
+        overflow-wrap: anywhere;
+      }
+      .card-details h3 { margin: 0 0 8px; font-size: 18px; }
+      .card-details .detail-meta { color: var(--accent); font-size: 15px; line-height: 1.5; }
+      .card-details p { font-size: 17px; line-height: 1.6; white-space: pre-wrap; margin: 12px 0 0; }
+      .card-details h4 { margin: 16px 0 0; font-size: 15px; color: var(--muted); }
+      .card-details .detail-stats { font-size: 15px; color: var(--muted); }
+      .detail-text { overflow-y: auto; min-height: 0; overscroll-behavior: contain; margin-top: 10px; }
+      .detail-text p:first-child { margin-top: 0; }
+      .detail-meta { flex: none; }
       .preview-note {
         font-size: 11px;
         color: var(--muted);
@@ -181,6 +217,16 @@
         line-height: 1.2;
         min-height: 28px;
       }
+      .card .rendered-card {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #1b1b1b;
+      }
+      .card.has-render { border: 0; min-height: 0; aspect-ratio: 813 / 1185; }
+      .card.has-render > :not(.rendered-card) { display: none; }
       .art {
         margin: 5px;
         background:
@@ -298,7 +344,7 @@
       }
       .pack-grid {
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 10px;
       }
       .pick-card {
@@ -373,34 +419,79 @@
         margin-bottom: 4px;
       }
       .pool-list {
-        max-height: 470px;
-        overflow: auto;
         display: grid;
-        gap: 6px;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 4px;
+        padding: 4px;
       }
       .pool-row {
         background: #1a2739;
         border: 1px solid #2e3c50;
         border-radius: 6px;
-        padding: 8px;
+        padding: 1px;
         display: grid;
-        grid-template-columns: 1fr 66px;
-        gap: 8px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
         align-items: center;
       }
-      .pool-name {
-        font-size: 12px;
-        overflow-wrap: anywhere;
+      .pool-row:hover, .pool-row:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
       }
-      .pool-row select {
-        width: 66px;
-        background: #0f1a2b;
-        border: 1px solid #45516a;
-        color: #d5dfed;
-        font-size: 10px;
-        border-radius: 4px;
-        padding: 5px 2px;
+      .pool-card { padding: 0; border: 0; background: transparent; width: 100%; text-align: left; }
+      .pool-card:hover { background: transparent; }
+      .pool-card .card { aspect-ratio: 813 / 1185; }
+      .pool-card .card-name { font-size: 7px; padding: 1px; min-height: 0; }
+      .pool-card .card-kind, .pool-card .stats { display: none; }
+      .pool-card .art { min-height: 0; margin: 2px; }
+      .final-deck-panel { grid-column: 2; }
+      .draft-finished .pool-list {
+        width: min(100%, calc((100dvh - 300px) * 1.715));
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 2px;
+        padding: 0;
       }
+      .draft-finished .pool-row { padding: 0; background: transparent; border-color: transparent; border-radius: 3px; }
+      .draft-finished .pool-card { width: 100%; }
+      .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+      .deck-overview { position:relative; flex:none; min-width:0; }
+      .deck-overview .deck-stats { column-gap:7px; margin:0; }
+      .deck-overview .deck-kind-count { column-gap:4px; }
+      .deck-actions { position:absolute; top:0; right:0; width:30%; min-width:112px; max-width:160px; display:grid; grid-template-rows:48px 48px; gap:8px; }
+      .deck-actions button { width:100%; margin:0; padding:8px; font-size:12px; line-height:15px; }
+      .deck-actions #draft-end-session { grid-row:1; }
+      .deck-actions #export { grid-row:2; margin:0; }
+      @media(max-width:1150px) {
+        .deck-actions { position:static; width:100%; max-width:none; min-width:0; margin-top:8px; grid-template-rows:none; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); }
+        .deck-actions #draft-end-session, .deck-actions #export { grid-row:auto; }
+      }
+      .deck-stats { display:grid; grid-template-columns:max-content 1ch var(--section-count-width,2ch) repeat(4,max-content); gap:6px 12px; margin:0 0 8px; font-size:13px; font-weight:600; min-width:0; overflow-x:auto; }
+      .deck-count-row { display:grid; grid-template-columns:subgrid; grid-column:1/-1; align-items:center; min-height:35px; white-space:nowrap; }
+      .deck-count-row[data-summary-row="total"] { min-height:22px; }
+      .deck-count-label { display:contents; color:var(--muted); }
+      .deck-part-name { text-align:right; }
+      .deck-part-name, .deck-count-times { font-weight:400; }
+      .deck-count-times, .deck-part-total { text-align:center; }
+      .deck-count-row b { min-width:0; color:#e8edf5; font-weight:600; font-variant-numeric:tabular-nums; }
+      .deck-kind-count { display:grid; grid-template-columns:23px 1ch var(--type-count-width,2ch); align-items:center; column-gap:5px; }
+      .deck-kind-quantity { text-align:left; }
+      .deck-kind-count[hidden], #deck-stats[hidden] { display:none; }
+      .deck-frame-icon { display:block; flex:none; width:23px; height:34px; }
+      @media(max-width:680px) {
+        .deck-stats { grid-template-columns:repeat(2,max-content); font-size:10px; gap:4px 6px; }
+        .deck-count-row { row-gap:3px; }
+        .deck-count-row[data-summary-row="total"] { min-height:16px; }
+        .deck-count-label { display:grid; grid-column:1/-1; grid-template-columns:5ch 1ch var(--section-count-width,2ch); column-gap:6px; }
+        .deck-frame-icon { width:15px; height:22px; }
+        .deck-kind-count { grid-template-columns:15px 1ch var(--type-count-width,2ch); column-gap:3px; }
+      }
+      .draft-finished .deck-sort { flex-direction: column; align-items: stretch; }
+      .draft-finished .deck-sort label { justify-content: space-between; }
+      .deck-sort { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+      .deck-sort[hidden] { display: none; }
+      .deck-sort label { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+      .deck-sort select { background: #0f1a2b; color: inherit; border: 1px solid var(--line); border-radius: 5px; padding: 7px; }
+      #group-types[aria-pressed="true"] { background: var(--accent); color: #0c111a; }
       .empty {
         color: var(--muted);
         font-size: 12px;
@@ -473,6 +564,130 @@
       }
       .cube-tile h2 {
         font-size: 19px;
+      }
+      .cube-tile-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .cube-tile-actions [data-delete-cube] { color: #ffc4b9; }
+      .cube-edit-link {
+        display: inline-flex;
+        align-items: center;
+        background: #233044;
+        border: 1px solid #3b4a60;
+        border-radius: 7px;
+        padding: 10px 13px;
+        color: inherit;
+        text-decoration: none;
+      }
+      .cube-edit-link:hover { background: #324359; }
+      #cube-editor { height: 100%; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
+      #cube-editor :is(h1, h2, h3, h4, p) { margin: 0; }
+      #cube-editor [hidden] { display: none; }
+      .editor-shell { max-width: 1440px; margin: auto; padding: 4px 2px 20px; }
+      .editor-heading { display: grid; gap: 12px; margin-bottom: 14px; }
+      .editor-heading h1 { font-size: clamp(23px, 3vw, 34px); overflow-wrap: anywhere; }
+      .editor-bar, .editor-actions, .editor-pagination, .editor-list-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      .editor-bar, .editor-list-header { justify-content: space-between; }
+      .editor-actions { align-items: end; }
+      .editor-body { display: grid; grid-template-columns: minmax(215px, 260px) minmax(0, 1fr); gap: 16px; align-items: start; }
+      #cube-editor label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+      #cube-editor :is(input, select) {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid #3b4a60;
+        border-radius: 6px;
+        background: #0d1521;
+        color: #e8edf5;
+        padding: 7px 8px;
+        font: inherit;
+        font-size: 13px;
+        color-scheme: dark;
+      }
+      #cube-editor #editor-name { width: min(260px, 65vw); }
+      #editor-filters, #editor-monster-fields, .editor-results, #editor-cards {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+      #editor-monster-fields { border: 0; border-top: 1px solid var(--line); padding: 10px 0 0; margin: 0; }
+      #editor-monster-fields legend { padding: 0 6px 0 0; font-size: 13px; }
+      .editor-filter-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+      .editor-list-header h2, #editor-filters h2 { font-size: 16px; }
+      @media (min-width: 661px) {
+        #editor-filters { position: sticky; top: 4px; max-height: calc(100dvh - 90px); overflow: auto; }
+      }
+      #editor-page, #editor-summary, #editor-message { font-size: 13px; color: var(--muted); }
+      #editor-message:empty { display: none; }
+      #editor-delete { color: #ffc4b9; }
+      .editor-source summary { cursor: pointer; font-weight: 650; }
+      .editor-source[open] summary { margin-bottom: 10px; }
+      .editor-source-list { margin-top: 8px; max-height: 260px; overflow: auto; }
+      .editor-source-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; }
+      .editor-source-card span { overflow-wrap: anywhere; }
+      .editor-source-card button { flex: none; }
+      .editor-card-row {
+        display: grid;
+        grid-template-columns: clamp(84px, 12vw, 120px) minmax(0, 1fr);
+        align-items: start;
+        gap: 14px;
+        padding: 11px;
+      }
+      .editor-card-row .card { width: 100%; min-height: 0; aspect-ratio: 813 / 1185; }
+      .editor-card-copy { display: grid; gap: 7px; min-width: 0; overflow-wrap: anywhere; }
+      .editor-card-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+      .editor-card-heading h3 { flex: 1 1 220px; min-width: 0; font-size: clamp(15px, 1.6vw, 19px); }
+      .editor-card-actions { align-items: center; justify-content: flex-end; margin-inline-start: auto; max-width: 100%; }
+      #cube-editor .editor-card-actions label { display: flex; align-items: center; gap: 6px; }
+      #cube-editor .editor-card-actions input { width: 62px; padding: 5px 6px; }
+      .editor-card-actions button { padding: 6px 9px; font-size: 13px; }
+      .editor-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px 14px;
+        padding: 5px 0;
+        border-block: 1px solid var(--line);
+        color: var(--accent);
+        font-size: 13px;
+      }
+      .editor-card-meta > span { display: inline-flex; align-items: center; gap: 5px; }
+      .editor-card-meta > .editor-combat-stats {
+        margin-inline-start: auto;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 5px 14px;
+      }
+      .editor-combat-stats > span { white-space: nowrap; }
+      .editor-meta-icon { width: 19px; height: 19px; flex: none; object-fit: contain; }
+      .editor-generic-icon {
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid #8898aa;
+        border-radius: 50%;
+        background: #243248;
+        color: #e8edf5;
+        font-size: 12px;
+        line-height: 1;
+      }
+      .editor-link-icon { width: 22px; height: 22px; }
+      .editor-link-center { fill: #14232c; stroke: #536870; }
+      .editor-link-arrow { fill: #83969f; }
+      .editor-link-arrow.is-active { fill: #ff6554; }
+      .editor-card-copy p { font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+      .editor-card-copy h4 { font-size: 13px; color: var(--muted); }
+      .editor-pendulum-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 12px; }
+      .editor-pendulum-heading > span { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-size: 13px; }
+      .editor-page-bottom { justify-content: end; }
+      @media (max-width: 660px) {
+        .editor-body { grid-template-columns: minmax(0, 1fr); }
+        .editor-card-row { gap: 9px; padding: 8px; }
+        .editor-actions button { padding: 6px 8px; }
       }
       .cube-numbers {
         display: flex;
@@ -583,12 +798,9 @@
         .pool-panel {
           grid-column: 1/-1;
         }
+        .draft-finished .pool-panel { grid-column: 2; }
         .pool-list {
-          grid-template-columns: repeat(3, 1fr);
-          max-height: 230px;
-        }
-        .pack-grid {
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(10, minmax(0, 1fr));
         }
         header {
           padding: 0 18px;
@@ -607,15 +819,17 @@
           margin-bottom: 15px;
         }
         .preview-panel {
-          max-width: 280px;
+          width: 100%;
+          height: auto;
+          z-index: 3;
           margin: 0 auto 20px;
         }
-        .pack-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
+        .preview-panel #preview, .preview-panel .panel-title { display: none; }
+        .card-details { margin-top: 0; height: 250px; max-height: 40dvh; }
         .pool-list {
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
         }
+        .draft-finished .pool-list { grid-template-columns: repeat(6, minmax(0, 1fr)); }
         .table-top {
           align-items: start;
         }
@@ -632,6 +846,212 @@
           line-height: 1.5;
         }
       }
+      /* Keep the application within the viewport; size cards from panel space. */
+      html, body { height: 100%; overflow: hidden; }
+      body { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+      header { height: 56px; }
+      .notice { padding: 6px; }
+      main { height: 100%; min-height: 0; margin: 0; padding: 12px 18px; overflow: hidden; }
+      #table-view { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+      #table-view[hidden], #library-view[hidden] { display: none; }
+      .table-top { flex: none; margin-bottom: 0; }
+      .grid { flex: 1; min-height: 0; align-items: stretch; gap: 14px; }
+      .grid > .panel { min-width: 0; min-height: 0; height: 100%; margin: 0; padding: 12px; overflow: hidden; }
+      .preview-panel { position: static; }
+      #preview { width: 100%; margin: 0; align-items: center; }
+      #preview .large { width: var(--spotlight-width, 100%); height: auto; max-height: 100%; flex: none; }
+      .card-details { height: clamp(170px, 40%, 300px); max-height: none; padding: 12px; }
+      .card-details h3, .detail-meta { flex: none; }
+      #pack-panel, .pool-panel, .final-deck-panel { display: flex; flex-direction: column; }
+      #pack-panel[hidden], #final-deck-panel[hidden] { display: none; }
+      .pack-top, .timer-track, .panel-title, .pool-summary, .deck-stats, .deck-sort, .export, #export-help { flex: none; }
+      .pack-grid, #draft-pool-slot, #final-pool-slot { flex: 1; min-height: 0; }
+      #draft-pool-slot:empty { display: none; }
+      .pack-grid, .pool-list, .draft-finished .pool-list {
+        height: 100%; width: 100%; min-height: 0; align-content: start;
+        grid-auto-rows: max-content; overflow: hidden;
+        grid-template-columns: repeat(var(--card-columns, 6), minmax(0, var(--thumb-width, 1fr)));
+      }
+      .draft-finished .pool-list { --card-columns: 10; }
+      .pick-card, .pool-row { width: var(--thumb-width, 100%); min-width: 0; justify-self: start; }
+      .pick-card .card { aspect-ratio: 813 / 1185; min-height: 0; }
+      .pick-card .art { min-height: 0; }
+      .pick-card .card-name { min-height: 0; }
+      .pack-hint { margin-top: 8px; flex: none; }
+      #status:empty { display: none; }
+      .pool-summary { margin: 8px 0; }
+      .deck-stats { margin: 0 0 8px; }
+      .seats { flex: none; margin-top: 0; gap: 6px; }
+      .seat { padding: 5px 8px; }
+      #table-view > .help { margin: 0; flex: none; }
+      #library-view { height: 100%; display: flex; flex-direction: column; min-height: 0; gap: 12px; }
+      .library-grid { min-height: 0; overflow: auto; align-content: start; }
+      .dialog { max-height: calc(100dvh - 32px); overflow: auto; }
+      @media (max-width: 1150px) {
+        .grid { grid-template-columns: minmax(180px, 240px) minmax(0, 1fr) minmax(200px, 280px); }
+        .pool-panel, .draft-finished .pool-panel { grid-column: 3; }
+        .pool-list { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        .draft-finished .pool-list { grid-template-columns: repeat(10, minmax(0, var(--thumb-width, 1fr))); }
+      }
+      @media (max-width: 680px) {
+        header { height: 48px; flex-wrap: nowrap; padding: 6px 8px; gap: 6px; }
+        .brand { gap: 4px; }
+        .brand b { font-size: 11px; letter-spacing: 0; }
+        .brand .sub, .notice { display: none; }
+        .mark { font-size: 20px; }
+        nav { gap: 3px; }
+        nav button { padding: 6px; font-size: 10px; }
+        body { grid-template-rows: auto minmax(0, 1fr); }
+        main { padding: 8px; }
+        #table-view { gap: 6px; }
+        .draft-heading { gap: 4px; }
+        .draft-heading h1 { font-size: 16px; }
+        .grid { display: grid; grid-template-columns: minmax(0, 1fr) 140px; grid-template-rows: 150px minmax(0, 1fr); gap: 6px; }
+        .grid > .panel { padding: 6px; }
+        .preview-panel { grid-column: 1 / -1; grid-row: 1; width: 100%; z-index: auto; }
+        .preview-panel #preview { display: none; }
+        .card-details { height: 100%; margin: 0; padding: 6px; }
+        .card-details h3 { font-size: 15px; margin-bottom: 3px; }
+        .card-details .detail-meta { font-size: 12px; }
+        .card-details p { font-size: 14px; }
+        #pack-panel, .final-deck-panel { grid-column: 1; grid-row: 2; }
+        .pool-panel, .draft-finished .pool-panel { grid-column: 2; grid-row: 2; }
+        .draft-finished .pool-list { grid-template-columns: repeat(6, minmax(0, var(--thumb-width, 1fr))); }
+        .panel-title { margin-bottom: 6px; gap: 3px; }
+        h2 { font-size: 12px; }
+        .badge { font-size: 10px; padding: 4px; }
+        .timer { font-size: 18px; }
+        .timer small { font-size: 8px; }
+        .pool-summary span { padding: 4px; font-size: 10px; }
+        .pool-summary b { font-size: 16px; }
+        .deck-sort { gap: 6px; margin: 6px 0; }
+        .deck-sort label { font-size: 10px; flex-wrap: wrap; }
+        .deck-sort select { max-width: 100%; padding: 4px; font-size: 10px; }
+        #group-types, .export { font-size: 10px; padding: 6px; }
+        #export-help { font-size: 9px; line-height: 1.3; }
+        .pack-hint, #table-view > .help { display: none; }
+        .seats { gap: 3px; }
+        .seat { padding: 3px; font-size: 9px; }
+        .pick-confirm { gap: 3px; padding: 2px; }
+        .pick-confirm strong { font-size: 8px; }
+        .confirm-actions { flex-direction: column; gap: 2px; }
+        .pick-confirm button { font-size: 8px; padding: 3px; }
+      }
+      .pack-grid { padding: 4px; grid-template-columns: repeat(var(--pack-columns, 6), minmax(0, 1fr)); }
+      .pack-grid .pick-card { width: 100%; }
+      .pool-list > .empty { grid-column: 1 / -1; }
+      .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; width: 100%; }
+      .confirm-actions [data-details] { grid-column: 1 / -1; }
+      .reader-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+      .draft-finished #pool { display: flex; flex-direction: column; gap: 8px; }
+      .deck-zone { flex: none; min-width: 0; }
+      .deck-zone h3 { margin: 0 0 5px; font-size: 13px; color: var(--muted); }
+      .deck-zone-cards { display: grid; grid-template-columns: repeat(var(--deck-columns, 10), minmax(0, var(--thumb-width, 1fr))); gap: 2px; padding: 4px; }
+      .pool-row[draggable="true"] { cursor: grab; }
+      .pool-row.drop-target { outline: 2px solid var(--accent); outline-offset: 1px; }
+      nav a { color: var(--accent); align-self: center; font-size: 12px; white-space: nowrap; }
+      #session-idle { height: 100%; display: grid; place-content: center; text-align: center; gap: 14px; }
+      #session-idle[hidden], #table-view.session-idle > :not(#session-idle) { display: none; }
+      #session-idle p { max-width: 520px; margin: 0; color: var(--muted); }
+      .card-reader { max-width: 1050px; width: min(1050px, 95vw); height: min(800px, 92dvh); display: flex; flex-direction: column; gap: 12px; }
+      .reader-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+      #modal-card { min-height: 0; display: flex; justify-content: center; align-items: center; }
+      #modal-card .large { width: auto; height: 100%; max-width: 100%; min-height: 0; aspect-ratio: 813 / 1185; }
+      #modal-details { margin: 0; height: 100%; max-height: none; min-height: 0; }
+      #modal-details p { font-size: 19px; }
+      #modal-section[hidden], #modal-confirm[hidden] { display: none; }
+      #deck-composition { font-size: 12px; color: var(--accent); margin: 8px 0; }
+      .pool-row[data-category="side"] { border-color: #aa8fbe; }
+      @media (max-width: 680px) {
+        .deck-zone-cards { --deck-columns: 6; }
+        nav a { font-size: 9px; }
+        #card-modal { padding: 8px; }
+        .card-reader { padding: 10px; width: 100%; height: 94dvh; }
+        .reader-body { gap: 8px; grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); }
+        #modal-card .large { width: 100%; height: auto; }
+        #modal-details p { font-size: 15px; }
+        .card-reader .dialog-actions { flex-wrap: wrap; gap: 6px; }
+      }
+      #preview { flex: none; }
+      .preview-panel > .card-details { flex: 1; height: auto; min-height: 0; }
+      .reader-actions { display: flex; align-items: center; gap: 10px; }
+      .card-reader { max-width: 1050px; width: min(1050px, calc(100vw - 40px)); height: min(800px, calc(100dvh - 40px)); }
+      .deck-zone-cards { position: relative; display: block; }
+      .pool-list { isolation: isolate; }
+      .deck-zone-cards > .pool-row { position: absolute; border: 0; }
+      .deck-zone-cards .card { width: 100%; height: 100%; }
+      .deck-zone-cards .pool-row:hover, .deck-zone-cards .pool-row:focus-within { z-index: 1000 !important; }
+      .deck-zone-cards .drop-target { z-index: 1001 !important; }
+      :root {
+        /* Visual tuning: .8 = 80% of the original spotlight image size. */
+        --spotlight-scale: .75;
+        /* Preferred pack size chooses columns; cards expand to fill each row. */
+        --pack-card-width: 125px;
+        /* Drafted cards keep this width as the deck grows; overflowing lists scroll. */
+        --deck-card-width: 80px;
+        --card-focus-width: 4px;
+        --card-focus-offset: -2px;
+      }
+      .pick-card:hover, .pick-card:focus-visible,
+      .pool-row:hover, .pool-row:focus-within, .pool-row.drop-target {
+        outline: var(--card-focus-width) solid var(--accent);
+        outline-offset: var(--card-focus-offset);
+        box-shadow: none;
+      }
+      #pack-panel #status { display: block; min-height: 2.8em; }
+      #pack { overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable both-edges; scrollbar-width:thin; padding:2px; }
+      #pool { overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable both-edges; scrollbar-width:thin; padding:2px; }
+      #pool .pool-row { padding:0; border:0; background:transparent; }
+      #pool .pool-card { height:100%; display:block; }
+      #pool .pool-card .card { height:100%; }
+      #draft-layout:not(.draft-finished) #pool { gap:4px; justify-content:center; }
+      .draft-finished #pool { align-items:flex-start; }
+      #draft-pool-slot, #final-pool-slot { overflow:hidden; }
+      .zoom-dismissed { outline: none !important; box-shadow: none !important; }
+      @media (min-width: 681px) {
+        .grid.draft-finished {
+          --final-left-min: 340px;
+          --final-right-min: 440px;
+          grid-template-columns: minmax(var(--final-left-min), 1fr) minmax(0, var(--final-deck-width, 1fr)) minmax(var(--final-right-min), 1.2fr);
+        }
+      }
+      @media (min-width: 681px) and (max-width: 1150px) {
+        .grid.draft-finished { --final-left-min: 180px; --final-right-min: 200px; }
+      }
+      @media (max-width: 680px) {
+        .card-reader { width: 100%; height: calc(100dvh - 16px); }
+        .reader-actions { gap: 5px; }
+        .reader-actions button { font-size: 11px; padding: 7px; }
+      }
+      header .brand, header nav { flex:none; }
+      #cube-title { flex:1; min-width:0; margin:0; font-size:18px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      #cube-title[hidden] { display:none; }
+      #pack-panel, .grid > .pool-panel { padding-left:8px; padding-right:8px; }
+      .pack-choice { flex:none; min-width:0; }
+      #pack-session-slot { flex:1; min-width:0; }
+      #session-info { display:flex; flex-direction:column; align-items:center; gap:5px; min-width:0; text-align:center; }
+      .session-info-line { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:5px 12px; }
+      #session-info .eyebrow { font-size:9px; letter-spacing:1px; }
+      #session-info .badge { font-size:10px; padding:4px 8px; }
+      #session-info .seats { justify-content:center; margin:0; gap:5px; font-size:11px; line-height:1.4; overflow-wrap:anywhere; }
+      #session-info .seat { padding:3px 6px; }
+      #final-session-slot { flex:none; min-width:0; margin-bottom:8px; }
+      #final-session-slot:empty { display:none; }
+      @media(max-width:1150px) {
+        .pack-top { flex-wrap:wrap; }
+        .pack-choice { flex:1; }
+        #pack-session-slot { flex-basis:100%; order:3; }
+      }
+      @media(max-width:680px) {
+        header { height:auto; min-height:48px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 6px; }
+        header .brand { grid-column:1; grid-row:1; }
+        header nav { grid-column:2; grid-row:1; }
+        #cube-title { grid-column:1/-1; grid-row:2; font-size:13px; }
+        #pack-panel, .grid > .pool-panel { padding-left:6px; padding-right:6px; }
+        #session-info .eyebrow { font-size:8px; }
+        #session-info .seats { font-size:9px; }
+        .session-info-line { gap:4px 6px; }
+      }
     </style>
   </head>
   <body>
@@ -643,44 +1063,37 @@
           <div class="sub">A table for your collection</div>
         </div>
       </div>
+      <h1 id="cube-title" hidden>Workshop Cube</h1>
       <nav>
         <button id="library-nav">Cube library</button
         ><button id="table-nav">Draft table</button
         ><button id="settings-open">Room settings</button>
       </nav>
     </header>
-    <div class="notice">
-      <strong>Interactive design prototype</strong> · Single-browser simulation.
-      Other seats auto-pick. Library storage is browser-local here; the planned
-      server stores it on your PC.
-    </div>
     <main>
       <section id="table-view">
-        <div class="table-top">
-          <div>
-            <div class="eyebrow" id="round-label">Round 1 · Pack 1 of 3</div>
-            <h1 id="cube-title">Workshop Cube</h1>
-          </div>
-          <span class="badge" id="direction">← Passing left</span>
+        <div id="session-idle" hidden>
+          <h1>No active drafting session</h1>
+          <p>Create or join a draft room. Use an imported Cube or the built-in Mock Cube, and invite players or add bots.</p>
+          <button id="idle-library" class="primary">Open Cube library</button>
         </div>
-        <div class="grid">
+        <div class="grid" id="draft-layout">
           <aside class="panel preview-panel">
-            <div class="panel-title">
-              <h2>Card spotlight</h2>
-              <span class="small">Hover to inspect</span>
-            </div>
             <div id="preview"></div>
-            <div class="preview-note">
-              The selected card stays here while you confirm. Imported previews
-              use the JSON artwork and available metadata.
-            </div>
+            <div id="card-details" class="card-details" role="region" aria-label="Card details"></div>
           </aside>
-          <section class="panel">
+          <section class="panel" id="pack-panel">
             <div class="pack-top">
-              <div>
+              <div class="pack-choice">
                 <h2 id="pack-title">Choose your card</h2>
                 <div class="small" id="pick-label" style="margin-top: 6px">
                   Pick 1 of 15
+                </div>
+              </div>
+              <div id="pack-session-slot">
+                <div id="session-info">
+                  <div class="session-info-line"><div class="eyebrow" id="round-label">Round 1 · Pack 1 of 3</div><span class="badge" id="direction">← Passing left</span></div>
+                  <div id="seats" class="seats"></div>
                 </div>
               </div>
               <div class="timer">
@@ -695,29 +1108,33 @@
             </p>
             <div id="status" class="status" aria-live="polite"></div>
           </section>
-          <aside class="panel pool-panel">
-            <div class="panel-title">
-              <h2>Your drafted cards</h2>
-              <span id="pool-count" class="badge">0 cards</span>
+          <section class="panel final-deck-panel" id="final-deck-panel" hidden>
+            <div id="final-session-slot"></div>
+            <div id="final-pool-slot"></div>
+          </section>
+          <aside class="panel pool-panel" aria-labelledby="pool-title">
+            <h2 id="pool-title" class="sr-only">Your drafted cards</h2>
+            <span id="pool-count" class="sr-only" aria-live="polite">0 cards</span>
+            <div class="deck-overview">
+              <div class="deck-stats" id="deck-stats" role="group" aria-label="Deck amounts"></div>
+              <div class="deck-actions" id="deck-actions">
+                <button id="export" class="export primary" aria-describedby="export-help" disabled>Export to XML</button>
+              </div>
             </div>
-            <div class="pool-summary">
-              <span><b id="main-count">0</b>Main</span
-              ><span><b id="extra-count">0</b>Extra</span
-              ><span><b id="side-count">0</b>Side</span>
+            <div id="export-help" class="help">Draft cards to begin building your deck.</div>
+            <div class="deck-sort" id="deck-sort" hidden>
+              <button id="group-types" aria-pressed="true">Group by type: On</button>
+              <label>Sort by <select id="deck-sort-key">
+                <option value="pick">Pick order</option><option value="atk">ATK</option>
+                <option value="def">DEF</option><option value="level" selected>Level</option>
+                <option value="name">Card Name</option>
+              </select></label>
+              <label>Order <select id="deck-sort-direction">
+                <option value="asc">Ascending</option><option value="desc" selected>Descending</option>
+              </select></label>
             </div>
-            <div class="pool-list" id="pool"></div>
-            <button id="export" class="export primary" disabled>
-              Export deck XML ↓
-            </button>
-            <div id="export-help" class="help">
-              Draft cards to begin building your deck.
-            </div>
+            <div id="draft-pool-slot"><div class="pool-list" id="pool"></div></div>
           </aside>
-        </div>
-        <div id="seats" class="seats"></div>
-        <div class="help">
-          Passing directions alternate each round. Each Cube copy is a separate
-          draftable card; no copies are created during a draft.
         </div>
       </section>
       <section id="library-view" hidden>
@@ -748,6 +1165,83 @@
         <div id="library-error" class="warning" role="alert"></div>
         <div id="library" class="library-grid"></div>
       </section>
+      <section id="cube-editor" aria-labelledby="editor-title" hidden>
+        <div class="editor-shell">
+          <div class="editor-heading">
+            <div class="editor-bar">
+              <div>
+                <div class="eyebrow" id="editor-mode">Cube editor</div>
+                <h1 id="editor-title" tabindex="-1">Loading Cube…</h1>
+              </div>
+              <button id="editor-close">← Back to Cube library</button>
+            </div>
+            <div id="editor-summary"></div>
+            <div class="editor-actions" id="editor-edit-actions" hidden>
+              <label>Cube name <input id="editor-name" maxlength="100"></label>
+              <button id="editor-rename">Save name</button>
+              <button id="editor-delete">Delete Cube</button>
+            </div>
+            <div id="editor-message" role="status"></div>
+          </div>
+          <div class="editor-body" id="editor-body" hidden>
+            <form class="panel" id="editor-filters">
+              <h2>Filter cards</h2>
+              <label>Search by name <input id="editor-search" type="search" placeholder="Card name"></label>
+              <label>Card type
+                <select id="editor-category">
+                  <option value="">All types</option>
+                  <option value="monster">Monster</option><option value="spell">Spell</option><option value="trap">Trap</option>
+                </select>
+              </label>
+              <fieldset id="editor-monster-fields" hidden>
+                <legend>Monster filters</legend>
+                <label>Monster type <select id="editor-race"><option value="">Any type</option></select></label>
+                <label>Monster second type <select id="editor-trait"><option value="">Any second type</option></select></label>
+                <label>Combine monster types
+                  <select id="editor-type-match">
+                    <option value="and">AND · match both</option><option value="or">OR · match either</option>
+                  </select>
+                </label>
+                <label>Level, Rank or Link Rating
+                  <select id="editor-rating-kind">
+                    <option value="">Any rating</option>
+                    <option value="level">Level</option><option value="rank">Rank</option><option value="link">Link Rating</option>
+                  </select>
+                </label>
+                <label>Exact rating <input id="editor-rating" type="number" min="0" step="1" disabled></label>
+                <div class="editor-filter-pair">
+                  <label>Min ATK <input id="editor-atk-min" type="number" min="0" step="1"></label>
+                  <label>Max ATK <input id="editor-atk-max" type="number" min="0" step="1"></label>
+                  <label>Min DEF <input id="editor-def-min" type="number" min="0" step="1"></label>
+                  <label>Max DEF <input id="editor-def-max" type="number" min="0" step="1"></label>
+                </div>
+              </fieldset>
+              <label id="editor-subtype-field" hidden>Spell / Trap type
+                <select id="editor-subtype"><option value="">Any subtype</option></select>
+              </label>
+              <button id="editor-clear-filters" type="button">Clear filters</button>
+            </form>
+            <div class="editor-results">
+              <details class="panel editor-source" id="editor-source-panel">
+                <summary>Add cards from another Cube</summary>
+                <div class="editor-filter-pair">
+                  <label>Source Cube <select id="editor-source"></select></label>
+                  <label>Search source cards <input id="editor-source-search" type="search" placeholder="Card name"></label>
+                </div>
+                <div class="editor-source-list" id="editor-source-cards"></div>
+              </details>
+              <div class="editor-list-header">
+                <h2>Cards in this Cube</h2>
+                <span id="editor-page" role="status"></span>
+              </div>
+              <div id="editor-cards"></div>
+              <div class="editor-pagination editor-page-bottom">
+                <button id="editor-prev">Previous page</button><button id="editor-next">Next page</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
     <div id="settings" class="overlay" hidden>
       <div
@@ -761,8 +1255,7 @@
           Set up the table
         </h2>
         <p class="small">
-          A new preview resets drafted cards. The real host will set these
-          before players start.
+          Starting a new session replaces your current draft.
         </p>
         <div class="form-grid">
           <div class="field">
@@ -787,12 +1280,16 @@
             <label for="pick-time">Seconds per pick</label
             ><input id="pick-time" type="number" min="5" max="300" value="30" />
           </div>
+          <div class="field">
+            <label for="main-deck-size">Main Deck size</label>
+            <input id="main-deck-size" type="number" min="30" max="60" value="40" />
+          </div>
         </div>
         <p id="capacity" class="small"></p>
         <p id="settings-error" class="warning" role="alert"></p>
         <p class="warning">
-          When the timer expires, a remaining card is picked at random. In this
-          preview, simulated opponents pick at the same time as you.
+          When the timer expires, a remaining card is picked at random.
+          The host can fill empty player seats with bots in the draft room.
         </p>
         <div class="dialog-actions">
           <button id="settings-cancel">Cancel</button
@@ -800,7 +1297,19 @@
         </div>
       </div>
     </div>
+    <div id="card-modal" class="overlay" hidden>
+      <div class="dialog card-reader" role="dialog" aria-modal="true" aria-labelledby="reader-title">
+        <div class="reader-heading"><h2 id="reader-title">Card zoom</h2><div class="reader-actions"><button id="modal-confirm" class="primary" hidden>Confirm pick</button><button id="modal-cancel">Close</button></div></div>
+        <div class="reader-body">
+          <div id="modal-card"></div>
+          <div id="modal-details" class="card-details"></div>
+        </div>
+        <p id="modal-section-note" class="small"></p>
+      </div>
+    </div>
     <div id="toast" hidden role="status"></div>
+    <script src="./mock-cube.js"></script>
+    <!-- DRAFT_RENDERER -->
     <script>
       "use strict";
       const $ = (id) => document.getElementById(id),
@@ -817,82 +1326,20 @@
               })[c],
           );
       const key = "cube-draft-design.library.v1";
-      const sampleNames = [
-        "Ashen Sentinel",
-        "Moonlit Archive",
-        "Crystal Warden",
-        "Echo of the Grove",
-        "Veil of Embers",
-        "Ironbound Guide",
-        "Starfall Invocation",
-        "Forgotten Compass",
-        "Cinder Herald",
-        "Luminous Pact",
-        "Mirror of Tides",
-        "Twilight Falcon",
-        "Crown of Roots",
-        "Silent Observatory",
-        "Violet Revenant",
-        "Dawnkeeper",
-        "Wayfarer’s Lantern",
-        "Prism Guardian",
-        "Thornwoven Shield",
-        "Astral Courier",
-        "Keeper of Hours",
-        "Runic Horizon",
-        "Sea of Whispers",
-        "Copperwing Scout",
-        "Ritual of Rain",
-        "Orchid Enchanter",
-        "Nightglass Dragon",
-        "Solar Artisan",
-        "Ivory Watcher",
-        "Verdant Promise",
-      ];
-      const example = {
-        id: "demo",
-        name: "Workshop Cube",
-        sample: true,
-        cards: sampleNames.map((name, i) => ({
-          id: String(90000000 + i),
-          name,
-          origin: "official",
-          duelingbookId: "",
-          artwork: "",
-          copies: 12,
-          section: i % 7 === 0 ? "extra" : "main",
-          type:
-            i % 7 === 0
-              ? "Dragon / Fusion / Effect"
-              : i % 5 === 0
-                ? "Normal Spell"
-                : i % 4 === 0
-                  ? "Normal Trap"
-                  : "Warrior / Effect",
-          effect:
-            "Illustrative card for the interface design. Real Cubes display the effect text supplied in their JSON.",
-          atk:
-            i % 7 !== 0 && (i % 5 === 0 || i % 4 === 0)
-              ? ""
-              : String(1200 + (i % 8) * 200),
-          def:
-            i % 7 !== 0 && (i % 5 === 0 || i % 4 === 0)
-              ? ""
-              : String(1000 + (i % 6) * 200),
-          attribute: "LIGHT",
-        })),
-      };
+      const example = MockCube.create();
       let library = [example];
       try {
         const saved = JSON.parse(localStorage.getItem(key) || "[]");
-        if (Array.isArray(saved)) library.push(...saved);
+        if (Array.isArray(saved)) library.push(...saved.filter(c => !c.builtIn && !c.sample && c.id !== example.id));
       } catch {}
-      let config = { players: 4, rounds: 3, size: 15, seconds: 30 },
+      let config = { players: 4, rounds: 3, size: 15, seconds: 30, mainDeckSize: 40 },
         state = null,
         selected = null,
         hoverCard = example.cards[0],
         toastTimer,
         setupCubeId = null;
+      let draftTimer = null, modalCard = null, modalPicking = false, modalFocus = null;
+      const deckSort = { groupTypes: true, key: "level", direction: "desc" };
       function uuid() {
         return crypto.randomUUID();
       }
@@ -912,6 +1359,7 @@
       }
       function safeImage(url) {
         try {
+          if (/^\/mock-art\/\d{1,3}\.svg$/.test(url)) return url;
           const u = new URL(url);
           return u.protocol === "https:" ? u.href : "";
         } catch {
@@ -919,7 +1367,7 @@
         }
       }
       function frame(card) {
-        const t = String(card.type || "").toLowerCase();
+        const t = cardKind(card);
         return t.includes("spell")
           ? "#6ebbb0"
           : t.includes("trap")
@@ -934,12 +1382,161 @@
       }
       function cardHtml(card, large = false) {
         const image = safeImage(card.artwork);
-        return `<div class="card${large ? " large" : ""}" style="--frame:${frame(card)}"><div class="card-name">${esc(card.name)}</div><div class="art"><div class="sigil"></div>${image ? `<img src="${esc(image)}" alt="${esc(card.name)} artwork" referrerpolicy="no-referrer">` : ""}</div><div class="card-kind">${esc(card.type || "Card")}</div><div class="effect">${esc(card.effect || card.pendulumEffect || "No effect text in this Cube record.")}</div><div class="stats">${card.atk ? "ATK / " + esc(card.atk) : esc(card.attribute || "")} ${card.def ? " · DEF / " + esc(card.def) : ""}</div></div>`;
+        const fallback = `<div class="card${large ? " large" : ""}" style="--frame:${frame(card)}"><div class="card-name">${esc(card.name)}</div><div class="art"><div class="sigil"></div>${image ? `<img src="${esc(image)}" alt="${esc(card.name)} artwork" referrerpolicy="no-referrer">` : ""}</div><div class="card-kind">${esc(card.type || "Card")}</div><div class="effect">${esc(card.effect || card.pendulumEffect || "No effect text in this Cube record.")}</div><div class="stats">${card.atk ? "ATK / " + esc(card.atk) : esc(card.attribute || "")} ${card.def ? " · DEF / " + esc(card.def) : ""}</div></div>`;
+        return window.DraftCards ? window.DraftCards.cardHtml(card, fallback) : fallback;
+      }
+      function cardKind(card) {
+        const explicit = card.visual?.frame;
+        if (explicit) return explicit;
+        const legacy = String(card.frame || "").split(/[?#]/)[0].split("/").pop()
+          .replace(/_front\d*\.(webp|png|jpg)$/i, "").replace(/\.(webp|png|jpg)$/i, "")
+          .replace(/^pendulum_/, "").replace(/_pendulum$/, "");
+        const kinds = ["spell", "trap", "fusion", "synchro", "xyz", "link", "ritual", "normal", "effect"];
+        return kinds.includes(legacy) ? legacy : kinds.find(k => new RegExp(`\\b${k}\\b`, "i").test(card.type || "")) || "monster";
+      }
+      function deckCategory(card) {
+        return ["fusion", "synchro", "xyz", "link"].includes(cardKind(card)) ? "extra" : "main";
+      }
+      function sectionFor(card) {
+        return deckCategory(card) === "extra" ? "extra" : card.deckSection === "side" ? "side" : "main";
+      }
+      function assignDeckSections() {
+        let mainCount = 0;
+        for (const card of state.pools[0]) {
+          if (deckCategory(card) === "extra") card.deckSection = "extra";
+          else if (card.deckSection === "side" || mainCount >= config.mainDeckSize) card.deckSection = "side";
+          else { card.deckSection = "main"; mainCount++; }
+        }
+      }
+      function miniFrame(kind) {
+        const colors = {
+          effect:["#d79769","#96502e","#dfceb7"], spell:["#58bba4","#136656","#c6dbcc"], trap:["#c77db3","#813265","#e3c3db"],
+          fusion:["#ad8cce","#624285","#dbd0e4"], xyz:["#50515c","#14141e","#d9d7d1"], synchro:["#f2f1e8","#aaaeb1","#e8e5d9"], link:["#4cadd2","#125881","#cce0eb"],
+        }[kind];
+        // A blank miniature frame: no name, attribute, stars, arrows filled red,
+        // effect text, or stats. Its black artwork makes the frame type stand out.
+        const arrows = kind === "link" ? '<path d="M10 18H17L10 25ZM37 18H44V25ZM10 44V51H17ZM37 51H44V44Z" fill="#1a2332" stroke="#8498ab" stroke-width="1"/>' : "";
+        return `<svg class="deck-frame-icon" data-frame="${kind}" viewBox="0 0 54 79" aria-hidden="true"><rect x=".6" y=".6" width="52.8" height="77.8" rx="2" fill="#4d5263"/><path d="M3 3H51V76H3Z" fill="${colors[1]}"/><path d="M4 4H50V75H4Z" fill="${colors[0]}"/><path d="M5 5H49V11H5Z" fill="${colors[1]}" opacity=".6"/><path d="M10 18H44V52H10Z" fill="#858792"/><path d="M11 19H43V51H11Z" fill="#000"/><path d="M5 59H49V73H5Z" fill="${colors[2]}" stroke="${colors[1]}"/>${arrows}</svg>`;
+      }
+      function updateDeckSummary() {
+        const pool = state?.pools[0] || [];
+        if (!$("total-count")) {
+          const kinds = ["monster", "spell", "trap"], extras = ["fusion", "xyz", "synchro", "link"];
+          const count = (section, kind) => `<span class="deck-kind-count" data-count-section="${section}" data-kind="${kind}" title="${kind[0].toUpperCase()+kind.slice(1)}${kind === "monster" ? "s" : ""}">${miniFrame(kind === "monster" ? "effect" : kind)}<span class="deck-count-times">×</span><b class="deck-kind-quantity" id="${section}-${kind}-count">0</b></span>`;
+          const label = (name, id) => `<span class="deck-count-label"><span class="deck-part-name">${name}</span><span class="deck-count-times">×</span><b class="deck-part-total" id="${id}">0</b></span>`;
+          $("deck-stats").innerHTML = `<div class="deck-count-row" data-summary-row="total">${label("Total", "total-count")}</div>` +
+            ["main", "side", "extra"].map(section => `<div class="deck-count-row" data-summary-row="${section}">${label(section[0].toUpperCase()+section.slice(1), section+"-count")}${(section === "extra" ? extras : kinds).map(kind => count(section,kind)).join("")}</div>`).join("");
+        }
+        $("total-count").textContent = pool.length;
+        for (const section of ["main", "side", "extra"]) {
+          const cards = pool.filter(card => sectionFor(card) === section);
+          $(section + "-count").textContent = cards.length;
+          for (const counter of document.querySelectorAll(`[data-count-section="${section}"]`)) {
+            const kind = counter.dataset.kind;
+            const qty = cards.filter(card => kind === "monster" ? !["spell", "trap"].includes(cardKind(card)) : cardKind(card) === kind).length;
+            counter.querySelector("b").textContent = qty;
+            counter.setAttribute("aria-label", `${kind}: ${qty}`);
+            counter.hidden = section === "extra" && qty === 0;
+          }
+        }
+        const digitWidth = selector => `${Math.max(2, ...[...$("deck-stats").querySelectorAll(selector)].map(node => node.textContent.length))}ch`;
+        $("deck-stats").style.setProperty("--section-count-width", digitWidth(".deck-part-total"));
+        $("deck-stats").style.setProperty("--type-count-width", digitWidth(".deck-kind-quantity"));
+      }
+      function sortedDeck(cards) {
+        const typeOrder = card => {
+          const kind = cardKind(card);
+          // Extra Deck monsters follow the three Main Deck monster groups.
+          return { normal: 0, effect: 1, ritual: 2, fusion: 3, synchro: 4, xyz: 5, link: 6, spell: 7, trap: 8 }[kind] ?? 1;
+        };
+        const byName = (a, b) => String(a.card.name).localeCompare(String(b.card.name), undefined, { numeric: true, sensitivity: "base" }) || a.index - b.index;
+        const numericValue = card => {
+          const raw = deckSort.key === "level" ? (card.visual?.rank ?? card.level ?? card.link) : card[deckSort.key];
+          return raw != null && String(raw).trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : null;
+        };
+        const direction = deckSort.direction === "desc" ? -1 : 1;
+        return cards.map((card, index) => ({ card, index })).sort((a, b) => {
+          if (deckSort.groupTypes) {
+            const group = typeOrder(a.card) - typeOrder(b.card);
+            if (group) return group;
+          }
+          if (deckSort.key === "name")
+            return direction * String(a.card.name).localeCompare(String(b.card.name), undefined, { numeric: true, sensitivity: "base" }) || a.index - b.index;
+          if (deckSort.key !== "pick") {
+            const av = numericValue(a.card), bv = numericValue(b.card);
+            // Unavailable stats stay last in either direction, including Spell/Trap cards.
+            if (av === null || bv === null) return av === bv ? byName(a, b) : av === null ? 1 : -1;
+            return direction * (av - bv) || byName(a, b);
+          }
+          return direction * (a.index - b.index);
+        }).map(entry => entry.card);
+      }
+      function cardDetailsHtml(card) {
+        const visual = card.visual || {};
+        const kind = cardKind(card);
+        const category = kind === "spell" ? "Spell" : kind === "trap" ? "Trap" : "";
+        let metadata;
+        if (category) {
+          const subtype = visual.spellTrapIcon ||
+            (String(card.type || "").match(/quick[- ]play|continuous|counter|ritual|equip|field|normal/i)?.[0]);
+          metadata = esc(subtype
+            ? `${subtype.replace(/\b\w/g, c => c.toUpperCase())} ${category}`
+            : `${category} · Type unavailable`);
+        } else {
+          const rating = kind === "link" ? `Link ${card.link ?? "—"}`
+            : `${kind === "xyz" ? "Rank" : "Level"} ${kind === "xyz" ? (visual.rank ?? card.level ?? "—") : (card.level ?? "—")}`;
+          const stats = `ATK / ${card.atk ?? "—"}${kind === "link" ? "" : ` · DEF / ${card.def ?? "—"}`}`;
+          metadata = `<div>${esc(card.attribute || "Attribute unavailable")} · ${esc(card.type || "Monster")}</div><div>${esc(rating)} · ${esc(stats)}</div>`;
+        }
+        return `<h3>${esc(card.name)}</h3><div class="detail-meta">${metadata}</div><div class="detail-text" tabindex="0" aria-label="Card effect text">${card.pendulumEffect ? `<h4>Pendulum effect</h4><p>${esc(card.pendulumEffect)}</p><h4>Card text</h4>` : ""}<p>${esc(card.effect || "No card text in this Cube record.")}</p></div>`;
       }
       function preview(card) {
         hoverCard = card;
-        $("preview").innerHTML = cardHtml(card, true);
+        $("card-details").innerHTML = cardDetailsHtml(card);
+        const html = cardHtml(card, true);
+        if (window.DraftCards) window.DraftCards.showSpotlight($("preview"), card, html);
+        else $("preview").innerHTML = html;
       }
+      function openCardDialog(card, picking = false) {
+        if (!card) return;
+        if ($("card-modal").hidden) modalFocus = document.activeElement;
+        modalCard = card; modalPicking = picking;
+        $("modal-card").innerHTML = cardHtml(card, true);
+        $("modal-details").innerHTML = cardDetailsHtml(card);
+        $("reader-title").textContent = picking ? "Inspect and confirm your pick" : "Card zoom";
+        $("modal-confirm").hidden = !picking;
+        $("modal-cancel").textContent = "Close";
+        $("modal-cancel").setAttribute("aria-label", picking ? "Close and cancel pick" : "Close");
+        const extra = deckCategory(card) === "extra";
+        $("modal-section-note").textContent = picking ? "Your pick timer continues while you read."
+          : `${extra ? "Extra Deck" : sectionFor(card) === "side" ? "Side Deck" : "Main Deck"}${extra ? " · Extra Deck monsters stay in the Extra Deck." : ""}`;
+        $("card-modal").hidden = false;
+        $("modal-cancel").focus();
+      }
+      function closeCardDialog(cancelPick = false) {
+        const oldCard = modalCard;
+        $("card-modal").hidden = true;
+        modalCard = null; modalPicking = false; modalFocus = null;
+        if (cancelPick && selected) { selected = null; render(); }
+        if (oldCard) {
+          // Keep keyboard focus out of the hidden dialog without restoring the
+          // card's focus-within outline after the reader closes.
+          document.activeElement?.blur();
+          const heading = $(state?.finished || state?.pools[0].some(card => card.instanceId === oldCard.instanceId) ? "pool-title" : "pack-title");
+          heading.setAttribute("tabindex", "-1");
+          heading.focus({ preventScroll: true });
+          const row = document.querySelector(`[data-instance="${oldCard.instanceId}"], [data-pool="${oldCard.instanceId}"]`);
+          if (row) {
+            row.classList.add("zoom-dismissed");
+            requestAnimationFrame(() => { if (!row.matches(":hover")) row.classList.remove("zoom-dismissed"); });
+          }
+        }
+      }
+      $("modal-confirm").onclick = () => {
+        if (modalPicking && modalCard && selected === modalCard.instanceId) pick(modalCard.instanceId);
+      };
+      $("modal-cancel").onclick = () => closeCardDialog(modalPicking);
+      $("card-modal").onclick = event => { if (event.target === $("card-modal")) closeCardDialog(modalPicking); };
       function toast(message) {
         $("toast").textContent = message;
         $("toast").hidden = false;
@@ -949,15 +1546,17 @@
       function view(name) {
         $("table-view").hidden = name !== "table";
         $("library-view").hidden = name !== "library";
+        $("cube-title").hidden = name !== "table" || !state;
         if (name === "library") renderLibrary();
       }
       function renderLibrary() {
         $("library").innerHTML = library
+          .filter(c => !c.sample)
           .map(
             (c) =>
-              `<article class="panel cube-tile"><div class="eyebrow">${c.sample ? "Design sample" : "Imported JSON"}</div><h2>${esc(c.name)}</h2><div class="cube-numbers"><span>${c.cards.length} unique</span><span>${total(c)} copies</span></div><div class="library-meta">${c.sample ? "Fictional cards · XML export disabled" : "Saved in this browser for the design preview"}</div><button data-cube="${c.id}" class="primary">Use this Cube →</button></article>`,
+              `<article class="panel cube-tile"><div class="eyebrow">${c.builtIn ? "Built-in mock Cube" : c.editable === undefined ? "Imported JSON" : "Shared Cube"}</div><h2>${esc(c.name)}</h2><div class="cube-numbers"><span>${c.cards.length} unique</span><span>${total(c)} copies</span></div><div class="library-meta">${c.mock ? "300 fictional cards · Generated artwork · Always available" : c.editable === undefined ? "Saved in this browser" : "Saved on this server"}</div><button data-cube="${c.id}" class="primary">Use this Cube →</button></article>`,
           )
-          .join("");
+          .join("") || '<p class="empty">No Cubes imported yet. Import a Cube JSON above to start drafting.</p>';
       }
       function readCube(data, name) {
         if (
@@ -1021,7 +1620,7 @@
           const next = [...library, c];
           localStorage.setItem(
             key,
-            JSON.stringify(next.filter((x) => !x.sample)),
+            JSON.stringify(next.filter((x) => !x.builtIn && !x.sample)),
           );
           library = next;
           renderLibrary();
@@ -1031,13 +1630,14 @@
         }
       }
       function openSettings(cubeId) {
-        setupCubeId = cubeId || state.cubeId;
+        setupCubeId = cubeId || state?.cubeId || library.find(c => !c.sample)?.id;
         $("settings").hidden = false;
         $("settings-error").textContent = "";
         updateCapacity();
       }
       function updateCapacity() {
         const configured = library.find((c) => c.id === setupCubeId) || cube();
+        $("start").disabled = !setupCubeId;
         const required =
           Number($("players").value) *
           Number($("rounds").value) *
@@ -1047,7 +1647,9 @@
       }
       function start(cubeId, settings = config) {
         const c = library.find((c) => c.id === cubeId) || example;
-        const { players, rounds, size, seconds } = settings;
+        const { players, rounds, size, seconds, mainDeckSize = 40 } = settings;
+        if (!Number.isInteger(mainDeckSize) || mainDeckSize < 30 || mainDeckSize > 60)
+          throw Error("Main Deck size must be a whole number from 30 to 60.");
         if (
           !Number.isInteger(players) ||
           players < 2 ||
@@ -1069,7 +1671,8 @@
           throw Error(
             `This table needs ${players * rounds * size} copies; the Cube contains ${total(c)}.`,
           );
-        config = { ...settings };
+        config = { ...settings, mainDeckSize };
+        closeCardDialog();
         const stock = [];
         for (const card of c.cards)
           for (let i = 0; i < card.copies; i++)
@@ -1087,6 +1690,14 @@
         selected = null;
         view("table");
         render();
+        clearInterval(draftTimer);
+        draftTimer = setInterval(() => {
+          updateTimer();
+          if (state && !state.finished && Date.now() >= state.deadline) {
+            const pack = state.packs[0];
+            if (pack.length) pick(pack[Math.floor(Math.random() * pack.length)].instanceId, true);
+          }
+        }, 250);
       }
       function dealRound() {
         state.round++;
@@ -1097,13 +1708,12 @@
         state.deadline = Date.now() + config.seconds * 1000;
       }
       function pick(id, automatic = false) {
-        if (state.finished) return;
+        if (!state || state.finished) return;
         const index = state.packs[0].findIndex((c) => c.instanceId === id);
         if (index < 0) return;
         const card = state.packs[0].splice(index, 1)[0];
-        card.deckSection = ["main", "extra", "side"].includes(card.section)
-          ? card.section
-          : "main";
+        closeCardDialog();
+        card.deckSection = deckCategory(card);
         state.pools[0].push(card);
         for (let seat = 1; seat < config.players; seat++) {
           const pack = state.packs[seat];
@@ -1127,14 +1737,15 @@
         }
         preview(card);
         render();
+        if (state.finished) { clearInterval(draftTimer); draftTimer = null; }
         $("status").textContent = state.finished
-          ? "Draft simulation complete. Assign cards to Main, Extra, Side or Reserve, then export."
+          ? "Draft complete. Your Main and Extra Deck cards are ready."
           : `${automatic ? "Time expired — auto-picked" : "Picked"} ${card.name}. ${priorRound !== state.round ? "A new round has started." : "The next pack has arrived."}`;
         if (automatic)
           toast("Timer expired. Randomly picked " + card.name + ".");
       }
       function xmlId(c) {
-        if (cube().sample) return "";
+        if (cube().mock || c.origin === "mock") return "";
         const value = c.duelingbookId || (c.origin === "custom" ? c.id : "");
         return typeof value === "string" &&
           /^[0-9]+$/.test(value) &&
@@ -1143,8 +1754,25 @@
           : "";
       }
       function render() {
+        $("cube-title").hidden = !state || $("table-view").hidden;
+        $("table-view").classList.toggle("session-idle", !state);
+        $("session-idle").hidden = Boolean(state);
+        if (!state) return;
+        assignDeckSections();
         const c = cube(),
           pool = state.pools[0];
+        $("draft-layout").classList.toggle("draft-finished", state.finished);
+        $("pack-panel").hidden = state.finished;
+        $("final-deck-panel").hidden = !state.finished;
+        const sessionSlot = $(state.finished ? "final-session-slot" : "pack-session-slot");
+        if ($("session-info").parentElement !== sessionSlot) sessionSlot.append($("session-info"));
+        const poolSlot = $(state.finished ? "final-pool-slot" : "draft-pool-slot");
+        if ($("pool").parentElement !== poolSlot) poolSlot.append($("pool"));
+        $("deck-stats").hidden = false;
+        $("deck-sort").hidden = !state.finished;
+        $("pool-title").textContent = state.finished ? "Deck menu" : "Your drafted cards";
+        $("group-types").setAttribute("aria-pressed", String(deckSort.groupTypes));
+        $("group-types").textContent = `Group by type: ${deckSort.groupTypes ? "On" : "Off"}`;
         $("cube-title").textContent = c.name;
         $("round-label").textContent =
           `Round ${state.round} of ${config.rounds} · ${config.players} seats`;
@@ -1161,56 +1789,143 @@
           : state.packs[0]
               .map(
                 (card) =>
-                  `<div class="pick-card" tabindex="0" role="button" aria-label="Select ${esc(card.name)}" data-instance="${card.instanceId}">${cardHtml(card)}${selected === card.instanceId ? `<div class="pick-confirm"><strong>Draft this card?</strong><div class="confirm-actions"><button class="primary yes" data-yes="${card.instanceId}">Yes, pick</button><button data-no>No</button></div></div>` : ""}</div>`,
+                  `<div class="pick-card" tabindex="0" role="button" aria-label="Select ${esc(card.name)}" data-instance="${card.instanceId}">${cardHtml(card)}${selected === card.instanceId ? `<div class="pick-confirm"><strong>Draft this card?</strong><div class="confirm-actions"><button class="primary yes" data-yes="${card.instanceId}">YES</button><button data-no>NO</button><button data-details="${card.instanceId}">Zoom</button></div></div>` : ""}</div>`,
               )
               .join("");
         $("pool-count").textContent = pool.length + " cards";
-        for (const section of ["main", "extra", "side"])
-          $(section + "-count").textContent = pool.filter(
-            (x) => x.deckSection === section,
-          ).length;
-        $("pool").innerHTML = pool.length
-          ? pool
-              .map(
-                (card) =>
-                  `<div class="pool-row" data-pool="${card.instanceId}"><span class="pool-name">${esc(card.name)}</span><select aria-label="Section for ${esc(card.name)}" data-section="${card.instanceId}">${["main", "extra", "side", "reserve"].map((s) => `<option value="${s}"${s === card.deckSection ? " selected" : ""}>${s[0].toUpperCase() + s.slice(1)}</option>`).join("")}</select></div>`,
-              )
-              .join("")
-          : '<div class="empty">Your picks appear here.<br>Pick a card from the pack to begin.</div>';
+        updateDeckSummary();
+        const rowHtml = card => `<div class="pool-row" data-pool="${card.instanceId}" data-category="${sectionFor(card)}" draggable="${state.finished && sectionFor(card) !== "extra"}"><button class="pool-card" aria-label="Inspect ${esc(card.name)}" title="${esc(card.name)} · ${sectionFor(card)}">${cardHtml(card)}</button></div>`;
+        let ordered = state.finished ? sortedDeck(pool) : pool;
+        if (state.finished && state.deckOrder) {
+          const positions = new Map(state.deckOrder.map((id, i) => [id, i]));
+          ordered.sort((a, b) => (positions.get(a.instanceId) ?? Infinity) - (positions.get(b.instanceId) ?? Infinity));
+        }
+        $("pool").innerHTML = !pool.length ? '<div class="empty">Your picks appear here. Pick a card from the pack to begin.</div>'
+          : state.finished ? ["main", "side", "extra"].map(section => {
+            const cards = ordered.filter(card => sectionFor(card) === section);
+            return `<section class="deck-zone" data-deck-zone="${section}"><h3>${section === "main" ? "Main Deck" : section === "side" ? "Side Deck" : "Extra Deck"} · ${cards.length}</h3><div class="deck-zone-cards">${cards.map(rowHtml).join("")}</div></section>`;
+          }).join("") : ordered.map(rowHtml).join("");
         $("seats").innerHTML = state.pools
           .map(
             (p, i) =>
               `<div class="seat${i === 0 ? " you" : ""}"><i class="dot"></i>${i === 0 ? "You" : "Simulated seat " + (i + 1)} · ${p.length} picks</div>`,
           )
           .join("");
-        const deck = pool.filter((c) => c.deckSection !== "reserve");
+        const deck = pool;
         const missing = deck.filter((c) => !xmlId(c)).length;
-        $("export").disabled = !deck.length || missing > 0;
-        $("export-help").textContent = !pool.length
-          ? "Draft cards to begin building your deck."
+        const mainCount = deck.filter(card => sectionFor(card) === "main").length;
+        $("export").disabled = !draftComplete() || mainCount !== config.mainDeckSize || missing > 0;
+        $("export-help").textContent = !draftComplete()
+          ? "Complete the draft to unlock deck XML export."
+          : mainCount !== config.mainDeckSize ? `Main Deck needs ${config.mainDeckSize} cards (${mainCount} selected). Drag a Main card onto a Side card to swap them.`
           : missing
             ? `${missing} cards need a confirmed DuelingBook ID. XML export stays disabled until IDs are resolved.`
-            : "Reserve cards are excluded. XML uses the IDs saved in your Cube. Import the downloaded file through DuelingBook’s Import Deck.";
+            : !deck.length ? "Draft at least one card to export."
+            : "Main, Side and Extra are included in XML. Drag between Main and Side cards to swap them. Import the file through DuelingBook’s Import Deck.";
         if (!selected && hoverCard) preview(hoverCard);
         updateTimer();
+        fitCards();
+      }
+      function fitCards() {
+        for (const id of ["pack", "pool"]) {
+          const grid = $(id);
+          if (!grid.clientWidth || !grid.clientHeight || !grid.children.length) continue;
+          const style = getComputedStyle(grid);
+          if (id === "pool" && state?.finished) {
+            const zones = [...grid.querySelectorAll(".deck-zone-cards")];
+            const layout = $("draft-layout"), layoutStyle = getComputedStyle(layout);
+            const panelStyle = getComputedStyle($("final-deck-panel"));
+            const chrome = parseFloat(panelStyle.paddingLeft) + parseFloat(panelStyle.paddingRight) + 2;
+            const desktop = innerWidth > 680;
+            const maximumPanelWidth = desktop
+              ? Math.max(1, layout.clientWidth - 2 * parseFloat(layoutStyle.columnGap)
+                - parseFloat(layoutStyle.getPropertyValue("--final-left-min")) - parseFloat(layoutStyle.getPropertyValue("--final-right-min")))
+              : grid.clientWidth + chrome;
+            const cardWidth = Math.max(1, parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--deck-card-width")) || 80);
+            const cardHeight = cardWidth * 1185 / 813;
+            const rowWidth = cardWidth * 10 + 18;
+            const poolChrome = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + grid.offsetWidth - grid.clientWidth;
+            if (desktop) layout.style.setProperty("--final-deck-width", `${Math.min(maximumPanelWidth, rowWidth + 8 + chrome + poolChrome)}px`);
+            for (const [zoneIndex, zone] of zones.entries()) {
+              const count = zone.children.length;
+              const main = zoneIndex === 0;
+              const columns = main ? Math.max(10, Math.ceil(count / 4)) : Math.max(10, count);
+              const rows = !count ? 0 : main ? Math.min(4, Math.ceil(count / 10)) : 1;
+              const height = !count ? 0 : cardHeight * rows + 2 * (rows - 1);
+              zone.style.height = `${height + 8}px`;
+              zone.style.width = `${rowWidth + 8}px`;
+              zone.parentElement.style.width = `${rowWidth + 8}px`;
+              // Keep two-pixel gaps at ten cards; overlap extras in that span.
+              const stepX = (rowWidth - cardWidth) / (columns - 1);
+              const stepY = rows > 1 ? Math.max(0, (height - cardHeight) / (rows - 1)) : 0;
+              [...zone.children].forEach((card, i) => {
+                card.style.width = `${cardWidth}px`;
+                card.style.height = `${cardHeight}px`;
+                card.style.left = `${4 + i % columns * stepX}px`;
+                card.style.top = `${4 + Math.floor(i / columns) * stepY}px`;
+                card.style.zIndex = String(i + 1);
+              });
+            }
+            continue;
+          }
+          let columns = style.gridTemplateColumns.split(" ").length;
+          if (id === "pack") {
+            const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const width = grid.clientWidth - padding;
+            const densityWidth = grid.getBoundingClientRect().width - padding;
+            const gapX = parseFloat(style.columnGap) || 0;
+            const desired = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--pack-card-width")) || 125;
+            // Choose density from viewport space, never remaining/configured pack
+            // count, then expand the same columns across the entire usable row.
+            columns = Math.max(1, Math.floor((densityWidth + gapX) / (desired + gapX)));
+            const bestWidth = Math.max(1, (width - gapX * (columns - 1)) / columns);
+            grid.style.setProperty("--pack-columns", columns);
+            grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+            grid.style.setProperty("--thumb-width", `${bestWidth}px`);
+            continue;
+          }
+          const desired = Math.max(1, parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--deck-card-width")) || 80);
+          const gap = parseFloat(style.columnGap) || 0;
+          const width = grid.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+          columns = Math.max(1, Math.floor((width + gap) / (desired + gap)));
+          const cardWidth = Math.max(1, (width - gap * (columns - 1)) / columns);
+          grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0,1fr))`;
+          grid.style.setProperty("--thumb-width", `${cardWidth}px`);
+          for (const row of grid.querySelectorAll(":scope > .pool-row")) row.style.height = `${cardWidth * 1185 / 813}px`;
+
+        }
+        const spotlight = $("preview"), panel = spotlight.parentElement;
+        const panelHeight = Math.max(0, panel.clientHeight - 24);
+        const oldTextHeight = Math.min(300, Math.max(170, panelHeight * .4));
+        const oldImageHeight = Math.max(0, panelHeight - oldTextHeight - 12);
+        const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--spotlight-scale")) || .8;
+        const imageWidth = Math.min(spotlight.clientWidth, oldImageHeight * 813 / 1185) * scale;
+        spotlight.style.setProperty("--spotlight-width", `${imageWidth}px`);
+        spotlight.style.flexBasis = `${imageWidth * 1185 / 813}px`;
+
       }
       function updateTimer() {
         if (!state) return;
+        const unlimited = config.seconds === 0;
         const remaining = state.finished
           ? 0
           : Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
-        $("seconds").textContent = state.finished ? "✓" : remaining;
+        $("seconds").textContent = state.finished ? "✓" : unlimited ? "∞" : remaining;
+        $("seconds").parentElement.querySelector("small").textContent = unlimited && !state.finished ? "NO TIME LIMIT" : "SECONDS TO PICK";
         $("timer-fill").style.width =
-          (state.finished ? 0 : (remaining / config.seconds) * 100) + "%";
+          (state.finished || unlimited ? 0 : (remaining / config.seconds) * 100) + "%";
       }
       function exportXml() {
-        const pool = state.pools[0].filter((c) => c.deckSection !== "reserve");
+        if (!draftComplete()) return toast("Complete the draft before exporting your deck.");
+        const pool = sortedDeck(state.pools[0]);
+        if (pool.filter(card => sectionFor(card) === "main").length !== config.mainDeckSize)
+          return toast(`Main Deck must contain exactly ${config.mainDeckSize} cards.`);
         if (!pool.length || pool.some((c) => !xmlId(c)))
           return toast("Every exported card needs a confirmed DuelingBook ID.");
         const doc = document.implementation.createDocument("", "deck", null);
         for (const section of ["main", "extra", "side"]) {
           const node = doc.createElement(section);
-          for (const card of pool.filter((c) => c.deckSection === section)) {
+          for (const card of pool.filter((c) => sectionFor(c) === section)) {
             const entry = doc.createElement("card");
             entry.setAttribute("id", xmlId(card));
             entry.textContent = card.name;
@@ -1233,7 +1948,15 @@
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         toast("Deck XML exported. Validate it with DuelingBook’s Import Deck.");
       }
+      function draftComplete() {
+        return Boolean(state?.finished && state.pools[0].length === config.rounds * config.size);
+      }
       $("pack").addEventListener("click", (event) => {
+        const details = event.target.closest("[data-details]");
+        if (details) {
+          openCardDialog(state.packs[0].find(card => card.instanceId === details.dataset.details), true);
+          return;
+        }
         const yes = event.target.closest("[data-yes]");
         if (yes) {
           pick(yes.dataset.yes);
@@ -1249,12 +1972,13 @@
           selected = card.dataset.instance;
           preview(state.packs[0].find((c) => c.instanceId === selected));
           render();
+          $("pack").querySelector("[data-yes]")?.focus();
         }
       });
       document.addEventListener(
         "click",
         (event) => {
-          if (selected && !event.target.closest(".pick-confirm")) {
+          if (selected && !event.target.closest(".pick-confirm") && $("card-modal").hidden) {
             selected = null;
             render();
             event.preventDefault();
@@ -1273,6 +1997,15 @@
         }
       });
       document.addEventListener("keydown", (event) => {
+        if (!$("card-modal").hidden) {
+          if (event.key === "Escape") { event.preventDefault(); closeCardDialog(modalPicking); return; }
+          if (event.key === "Tab") {
+            const controls = [...$("card-modal").querySelectorAll('button:not([hidden]), [tabindex="0"]')].filter(node => node.getClientRects().length);
+            const first = controls[0], last = controls.at(-1);
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+          }
+        }
         if (event.key === "Escape") {
           if (selected) {
             selected = null;
@@ -1282,7 +2015,7 @@
         }
       });
       function inspect(event) {
-        if (selected) return;
+        if (!state || selected || !$("card-modal").hidden) return;
         const element = event.target.closest("[data-instance],[data-pool]");
         if (!element) return;
         const id = element.dataset.instance || element.dataset.pool;
@@ -1294,19 +2027,81 @@
       $("pack").addEventListener("pointerover", inspect);
       $("pack").addEventListener("focusin", inspect);
       $("pool").addEventListener("pointerover", inspect);
-      $("pool").addEventListener("change", (event) => {
-        const card = state.pools[0].find(
-          (c) => c.instanceId === event.target.dataset.section,
-        );
-        if (
-          card &&
-          ["main", "extra", "side", "reserve"].includes(event.target.value)
-        ) {
-          card.deckSection = event.target.value;
-          render();
+      $("pool").addEventListener("focusin", inspect);
+      for (const grid of [$("pack"), $("pool")]) {
+        grid.addEventListener("pointerleave", event => event.target.closest?.(".zoom-dismissed")?.classList.remove("zoom-dismissed"), true);
+        grid.addEventListener("focusin", event => event.target.closest(".zoom-dismissed")?.classList.remove("zoom-dismissed"));
+      }
+      $("pool").addEventListener("click", inspect);
+      $("pool").addEventListener("click", event => {
+        if (Date.now() < suppressDeckClickUntil) return;
+        if (!state) return;
+        const node = event.target.closest("[data-pool]");
+        if (node) openCardDialog(state.pools[0].find(card => card.instanceId === node.dataset.pool));
+      });
+      let draggedCardId = null, suppressDeckClickUntil = 0;
+      function swapDeckCards(sourceId, targetId) {
+        if (!state?.finished || sourceId === targetId) return false;
+        const source = state.pools[0].find(card => card.instanceId === sourceId);
+        const target = state.pools[0].find(card => card.instanceId === targetId);
+        if (!source || !target) return false;
+        const from = sectionFor(source), to = sectionFor(target);
+        if (!["main", "side"].includes(from) || !["main", "side"].includes(to) || from === to) return false;
+        const order = [...$("pool").querySelectorAll("[data-pool]")].map(node => node.dataset.pool);
+        const a = order.indexOf(sourceId), b = order.indexOf(targetId);
+        if (a < 0 || b < 0) return false;
+        [order[a], order[b]] = [order[b], order[a]];
+        source.deckSection = to; target.deckSection = from;
+        state.deckOrder = order;
+        // Keep decoded card images alive: only exchange the two existing nodes.
+        const sourceNode = $("pool").querySelector(`[data-pool="${sourceId}"]`);
+        const targetNode = $("pool").querySelector(`[data-pool="${targetId}"]`);
+        const marker = document.createComment("deck-swap");
+        const sourceStyle = sourceNode.style.cssText;
+        sourceNode.replaceWith(marker);
+        targetNode.replaceWith(sourceNode);
+        marker.replaceWith(targetNode);
+        sourceNode.style.cssText = targetNode.style.cssText;
+        targetNode.style.cssText = sourceStyle;
+        for (const [node, card] of [[sourceNode, source], [targetNode, target]]) {
+          node.dataset.category = sectionFor(card);
+          node.querySelector(".pool-card").title = `${card.name} · ${sectionFor(card)}`;
+        }
+        updateDeckSummary();
+        return true;
+      }
+      $("pool").addEventListener("dragstart", event => {
+        const row = event.target.closest('[data-pool][draggable="true"]');
+        if (!row) { event.preventDefault(); return; }
+        draggedCardId = row.dataset.pool;
+        event.dataTransfer.setData("text/plain", draggedCardId);
+        event.dataTransfer.effectAllowed = "move";
+      });
+      $("pool").addEventListener("dragover", event => {
+        const row = event.target.closest("[data-pool]");
+        const source = state?.pools[0].find(card => card.instanceId === draggedCardId);
+        if (source && row && row.dataset.category !== "extra" && row.dataset.category !== sectionFor(source)) {
+          event.preventDefault(); event.dataTransfer.dropEffect = "move";
+          row.classList.add("drop-target");
         }
       });
+      $("pool").addEventListener("dragleave", event => event.target.closest("[data-pool]")?.classList.remove("drop-target"));
+      $("pool").addEventListener("drop", event => {
+        event.preventDefault();
+        const row = event.target.closest("[data-pool]");
+        if (row && draggedCardId) swapDeckCards(draggedCardId, row.dataset.pool);
+        draggedCardId = null; suppressDeckClickUntil = Date.now() + 200;
+        $("pool").querySelectorAll(".drop-target").forEach(node => node.classList.remove("drop-target"));
+      });
+      $("pool").addEventListener("dragend", () => {
+        draggedCardId = null; suppressDeckClickUntil = Date.now() + 200;
+        $("pool").querySelectorAll(".drop-target").forEach(node => node.classList.remove("drop-target"));
+      });
+      $("group-types").onclick = () => { if (state) state.deckOrder = null; deckSort.groupTypes = !deckSort.groupTypes; render(); };
+      $("deck-sort-key").onchange = event => { if (state) state.deckOrder = null; deckSort.key = event.target.value; render(); };
+      $("deck-sort-direction").onchange = event => { if (state) state.deckOrder = null; deckSort.direction = event.target.value; render(); };
       $("library-nav").onclick = () => view("library");
+      $("idle-library").onclick = () => view("library");
       $("table-nav").onclick = $("back-table").onclick = () => view("table");
       $("settings-open").onclick = () => openSettings();
       $("settings-cancel").onclick = () => ($("settings").hidden = true);
@@ -1317,7 +2112,7 @@
         const b = event.target.closest("[data-cube]");
         if (b) openSettings(b.dataset.cube);
       };
-      for (const id of ["players", "rounds", "pack-size", "pick-time"])
+      for (const id of ["players", "rounds", "pack-size", "pick-time", "main-deck-size"])
         $(id).oninput = updateCapacity;
       $("start").onclick = () => {
         try {
@@ -1326,6 +2121,7 @@
             rounds: Number($("rounds").value),
             size: Number($("pack-size").value),
             seconds: Number($("pick-time").value),
+            mainDeckSize: Number($("main-deck-size").value),
           });
           $("settings").hidden = true;
         } catch (e) {
@@ -1350,14 +2146,9 @@
         },
         true,
       );
-      start("demo");
-      setInterval(() => {
-        updateTimer();
-        if (state && !state.finished && Date.now() >= state.deadline) {
-          const pack = state.packs[0];
-          pick(pack[Math.floor(Math.random() * pack.length)].instanceId, true);
-        }
-      }, 250);
+      render();
+      const layoutObserver = new ResizeObserver(fitCards);
+      for (const id of ["pack", "pool", "preview"]) layoutObserver.observe($(id));
     </script>
   </body>
 </html>

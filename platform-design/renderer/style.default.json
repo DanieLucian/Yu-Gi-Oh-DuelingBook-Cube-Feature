@@ -9,7 +9,7 @@
       "letterSpacing": -2,
       "offsetX": 0,
       "offsetY": 0,
-      "edgeOpacity": 1
+      "edgeOpacity": 0.8
     },
     "effect": {
       "font": "body",

@@ -34,7 +34,9 @@
     "icon.ritual": null,
     "icon.link-arrow": null,
     "font.name": null,
-    "font.body": null
+    "font.body": null,
+    "font.link-rating": null,
+    "font.type": null
   },
   "artworks": {}
 }

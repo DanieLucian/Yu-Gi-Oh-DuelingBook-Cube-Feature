@@ -116,7 +116,7 @@ test("composites reject recursion, missing images, font images and invalid geome
 });
 
 test("server defaults to bundled templates and preserves an explicitly selected custom manifest", async (t) => {
-  const { createRenderServer, defaultAssetRoot } = require("./server.cjs");
+  const { createRenderServer, defaultAssetRoot } = require("../server.cjs");
   const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "cube-bundled-test-"));
   t.after(() => fs.rmSync(dataRoot, { force: true, recursive: true }));
   assert.equal(
@@ -164,7 +164,7 @@ test(
   { timeout: 60000 },
   async (t) => {
     const { chromium } = require("playwright");
-    const { createRenderServer } = require("./server.cjs");
+    const { createRenderServer } = require("../server.cjs");
     const dataRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "cube-template-browser-"),
     );
