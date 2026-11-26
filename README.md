@@ -4,6 +4,11 @@ An unofficial Chrome extension prototype to import custom and official Yu-Gi-Oh!
 
 ## Versions
 
+- **v0.4.6** - Save Xyz ranks so rank stars appear on the drafting page (pending live verification).
+- **v0.4.5** - Extract official DuelingBook IDs from standard artwork URLs (pending live verification).
+- **v0.4.4** � Save Pendulum scales for official and custom monsters (pending live verification).
+- **v0.4.3** � Include Extra Deck cards in editor scans and previews (pending live verification).
+- **v0.4.2** — Extract Spell/Trap subtypes for renderer icons (pending live user verification).
 - **v0.1.0** — Initial custom-card import and Cube management. User verified successful import of 26 unique custom cards and persistence across imports.
 - **v0.2.0** — Experimental full-card previews (not yet verified by user).
 - **v0.3.0** — Mixed official/custom-card import and full-card previews.
@@ -31,11 +36,39 @@ the existing extension directory.
 
 Reload the extension and refresh your DuelingBook tab after updating. Open the
 Deck Constructor/editor, load a deck, then use **Scan & import current page**.
-All recognized cards inside `deck_cards` and `side_cards` containers (IDs or
+All recognized cards inside `deck_cards`, `extra_cards` and `side_cards` containers (IDs or
 CSS classes) are included. Search
 results and hover cards outside those containers are excluded. Existing IDs are
 refreshed without increasing saved copy counts or replacing manual annotations.
 See [deck-editor checks](docs/deck-editor.md) for details and remaining live checks.
+
+Spell/Trap scans now include `visual.spellTrapIcon` (`normal`, `continuous`,
+`counter`, `equip`, `field`, `quick-play`, or `ritual`) from the displayed subtype
+icon. Normal cards correctly have no icon. Unknown or unavailable subtype data
+is left unresolved. Scanning preserves saved copies, sections and other visual
+metadata, and Cube JSON export/restore carries the subtype through to the renderer.
+
+To repair older exports with missing icons, reload the extension, refresh
+DuelingBook, scan each deck containing your Cube cards again, then export a fresh
+Cube JSON and load it into the drafting platform/renderer. Old JSON alone cannot
+recover a subtype that was never extracted.
+
+Pendulum scans save both printed scales as `visual.scaleLeft` and
+`visual.scaleRight`, including scale 0. Reload the extension, refresh DuelingBook,
+rescan decks containing Pendulum cards and export a fresh Cube JSON to repair
+older exports. Existing copies, sections and other visual metadata are preserved.
+
+Official cards using `https://images.duelingbook.com/low-res/<id>.jpg` now save
+that numeric ID in `duelingbookId`. Existing `official:` collection keys remain
+unchanged, so rescanning fills missing IDs without duplicating saved cards.
+External or unrecognized artwork URLs still require XML matching. Previously
+XML-matched IDs are preserved. Reload, refresh DuelingBook and rescan to update
+older records, then export a fresh Cube JSON.
+
+Xyz scans now count the separate `.rank` stars and save `visual.rank`. To repair
+Cube JSON with missing ranks, reload the extension, refresh DuelingBook, rescan
+your Xyz cards, export a fresh Cube JSON and import it into the drafting page.
+The missing ranks cannot be recovered from an old export alone.
 
 ## Manage and restore a Cube
 

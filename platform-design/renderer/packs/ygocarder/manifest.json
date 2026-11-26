@@ -1,0 +1,710 @@
+{
+  "version": 1,
+  "profile": "tcg-813-v1",
+  "files": {
+    "layer.frame.normal": "frame-normal.png",
+    "layer.header.normal": "background-name-normal.png",
+    "layer.text.normal": "background-text-normal.png",
+    "layer.frame.effect": "frame-effect.png",
+    "layer.header.effect": "background-name-effect.png",
+    "layer.text.effect": "background-text-effect.png",
+    "layer.frame.ritual": "frame-ritual.png",
+    "layer.header.ritual": "background-name-ritual.png",
+    "layer.text.ritual": "background-text-ritual.png",
+    "layer.frame.fusion": "frame-fusion.png",
+    "layer.header.fusion": "background-name-fusion.png",
+    "layer.text.fusion": "background-text-fusion.png",
+    "layer.frame.synchro": "frame-synchro.png",
+    "layer.header.synchro": "background-name-synchro.png",
+    "layer.text.synchro": "background-text-synchro.png",
+    "layer.frame.xyz": "frame-xyz.png",
+    "layer.header.xyz": "background-name-xyz.png",
+    "layer.text.xyz": "background-text-xyz.png",
+    "layer.frame.link": "frame-link.png",
+    "layer.header.link": "background-name-link.png",
+    "layer.text.link": "background-text-link.png",
+    "layer.frame.spell": "frame-spell.png",
+    "layer.header.spell": "background-name-spell.png",
+    "layer.text.spell": "background-text-spell.png",
+    "layer.frame.trap": "frame-trap.png",
+    "layer.header.trap": "background-name-trap.png",
+    "layer.text.trap": "background-text-trap.png",
+    "layer.name-border": "name-border-normal.png",
+    "layer.name-border-xyz": "name-border-xyz.png",
+    "border": "card-border-normal.png",
+    "layer.pendulum-border": "border-pendulum-medium-base.png",
+    "layer.pendulum-frame.normal": "frame-pendulum-normal.png",
+    "layer.pendulum-text.normal": "background-pendulum-normal.png",
+    "layer.pendulum-frame.effect": "frame-pendulum-effect.png",
+    "layer.pendulum-text.effect": "background-pendulum-effect.png",
+    "layer.pendulum-frame.ritual": "frame-pendulum-ritual.png",
+    "layer.pendulum-text.ritual": "background-pendulum-ritual.png",
+    "layer.pendulum-frame.fusion": "frame-pendulum-fusion.png",
+    "layer.pendulum-text.fusion": "background-pendulum-fusion.png",
+    "layer.pendulum-frame.synchro": "frame-pendulum-synchro.png",
+    "layer.pendulum-text.synchro": "background-pendulum-synchro.png",
+    "layer.pendulum-frame.xyz": "frame-pendulum-xyz.png",
+    "layer.pendulum-text.xyz": "background-pendulum-xyz.png",
+    "attribute.DARK": "attr-tcg-dark.png",
+    "attribute.LIGHT": "attr-tcg-light.png",
+    "attribute.EARTH": "attr-tcg-earth.png",
+    "attribute.WATER": "attr-tcg-water.png",
+    "attribute.FIRE": "attr-tcg-fire.png",
+    "attribute.WIND": "attr-tcg-wind.png",
+    "attribute.DIVINE": "attr-tcg-divine.png",
+    "icon.level": "subfamily-level.png",
+    "icon.rank": "subfamily-rank.png",
+    "icon.continuous": "subfamily-continuous.png",
+    "icon.counter": "subfamily-counter.png",
+    "icon.equip": "subfamily-equip.png",
+    "icon.field": "subfamily-field.png",
+    "icon.quick-play": "subfamily-quick-play.png",
+    "icon.ritual": "subfamily-ritual.png",
+    "layer.link-arrow-base": "link-active-8-base.png",
+    "layer.link-arrow-core": "link-active-8-core.png",
+    "font.name": "MatrixBoldSmallCaps.woff2",
+    "font.body": "stone-serif-regular-webfont.woff2",
+    "layer.pendulum-border-artless": "border-pendulum-medium-base-artless.png",
+    "layer.pendulum-frame.spell": "frame-pendulum-spell.png",
+    "layer.pendulum-text.spell": "background-pendulum-spell.png",
+    "attribute.SPELL": "attr-tcg-spell.png",
+    "attribute.TRAP": "attr-tcg-trap.png"
+  },
+  "composites": {
+    "background.normal": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.normal",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.normal",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.normal",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.normal-pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.normal",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.pendulum-frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.normal",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.normal",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.pendulum-text.spell",
+          "x": 55,
+          "y": 738,
+          "width": 705,
+          "height": 147
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.effect": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.effect",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.effect",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.effect",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.effect-pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.effect",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.pendulum-frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.effect",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.effect",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.pendulum-text.spell",
+          "x": 55,
+          "y": 738,
+          "width": 705,
+          "height": 147
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.ritual": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.ritual",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.ritual",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.ritual",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.ritual-pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.ritual",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.pendulum-frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.ritual",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.ritual",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.pendulum-text.spell",
+          "x": 55,
+          "y": 738,
+          "width": 705,
+          "height": 147
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.fusion": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.fusion",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.fusion",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.fusion",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.fusion-pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.fusion",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.pendulum-frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.fusion",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.fusion",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.pendulum-text.spell",
+          "x": 55,
+          "y": 738,
+          "width": 705,
+          "height": 147
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.synchro": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.synchro",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.synchro",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.synchro",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.synchro-pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.synchro",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.pendulum-frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.synchro",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.synchro",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.pendulum-text.spell",
+          "x": 55,
+          "y": 738,
+          "width": 705,
+          "height": 147
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.xyz": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.xyz",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.xyz",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.xyz",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border-xyz",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.xyz-pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.xyz",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.pendulum-frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.xyz",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.xyz",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.pendulum-text.spell",
+          "x": 55,
+          "y": 738,
+          "width": 705,
+          "height": 147
+        },
+        {
+          "key": "layer.name-border-xyz",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.link": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.link",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.link",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.link",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.spell": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.spell",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.spell",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "background.trap": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.frame.trap",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 1185
+        },
+        {
+          "key": "layer.header.trap",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        },
+        {
+          "key": "layer.text.trap",
+          "x": 54,
+          "y": 885,
+          "width": 705,
+          "height": 231
+        },
+        {
+          "key": "layer.name-border",
+          "x": 0,
+          "y": 0,
+          "width": 813,
+          "height": 170
+        }
+      ]
+    },
+    "icon.link-arrow": {
+      "width": 170,
+      "height": 80,
+      "layers": [
+        {
+          "key": "layer.link-arrow-base",
+          "x": 0,
+          "y": 0,
+          "width": 170,
+          "height": 80
+        },
+        {
+          "key": "layer.link-arrow-core",
+          "x": 0,
+          "y": 0,
+          "width": 170,
+          "height": 80
+        }
+      ]
+    },
+    "overlay.pendulum": {
+      "width": 813,
+      "height": 1185,
+      "layers": [
+        {
+          "key": "layer.pendulum-border-artless",
+          "x": 30,
+          "y": 185,
+          "width": 753,
+          "height": 955
+        },
+        {
+          "key": "layer.pendulum-border",
+          "x": 30,
+          "y": 185,
+          "width": 753,
+          "height": 553
+        }
+      ]
+    }
+  },
+  "artworks": {}
+}

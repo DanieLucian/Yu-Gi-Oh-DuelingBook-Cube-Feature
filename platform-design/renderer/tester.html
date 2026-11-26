@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cube Draft · Card typography tester</title>
+    <style>
+      :root {
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        color: #e5edf5;
+        background: #101722;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        max-width: 1300px;
+        margin: auto;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 27px;
+      }
+      p {
+        color: #aebed0;
+      }
+      main {
+        display: grid;
+        grid-template-columns: minmax(280px, 420px) minmax(320px, 1fr);
+        gap: 24px;
+        align-items: start;
+      }
+      .panel {
+        background: #192434;
+        border: 1px solid #344456;
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .preview {
+        position: sticky;
+        top: 16px;
+      }
+      #card {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      label {
+        display: block;
+        margin: 10px 0 4px;
+      }
+      input,
+      select,
+      textarea,
+      button {
+        font: inherit;
+        color: inherit;
+        background: #101c2b;
+        border: 1px solid #60778c;
+        border-radius: 6px;
+        padding: 8px;
+        width: 100%;
+      }
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      input[type="checkbox"] {
+        width: auto;
+      }
+      fieldset {
+        border: 1px solid #42556b;
+        border-radius: 8px;
+        margin: 16px 0;
+        padding: 14px;
+      }
+      legend {
+        font-weight: 650;
+        padding: 0 6px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 14px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .actions > * {
+        flex: 1;
+        min-width: 130px;
+      }
+      .hint {
+        font-size: 13px;
+        color: #aebed0;
+      }
+      .badge {
+        color: #b0e3cf;
+      }
+      #status {
+        min-height: 45px;
+      }
+      summary {
+        cursor: pointer;
+      }
+      #font-file {
+        font-size: 13px;
+      }
+      a {
+        color: #b0e3cf;
+      }
+      @media (max-width: 750px) {
+        body {
+          padding: 14px;
+        }
+        main {
+          grid-template-columns: 1fr;
+        }
+        .preview {
+          position: static;
+          max-width: 420px;
+          margin: auto;
+        }
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Card typography tester</h1>
+    <p>
+      Adjust a card, compare the live preview, then save your style. Normal
+      Monster flavor text is always italic; effect text stays pure black.
+    </p>
+    <main>
+      <section class="panel preview">
+        <img id="card" alt="Live card rendering" />
+        <p id="status" role="status">Loading…</p>
+        <ul id="diagnostics" class="hint"></ul>
+        <label for="zoom">Preview size</label
+        ><input id="zoom" type="range" min="240" max="420" value="420" />
+        <p class="hint">
+          All measurements below use the renderer’s 813 × 1185 canvas.
+        </p>
+      </section>
+      <section class="panel">
+        <label for="sample">Test card</label
+        ><select id="sample"></select>
+        <div class="grid">
+          <div>
+            <label for="cube-file">Use your Cube JSON</label
+            ><input
+              id="cube-file"
+              type="file"
+              accept=".json,application/json"
+            />
+          </div>
+          <div>
+            <label for="art-file">Preview local artwork</label
+            ><input
+              id="art-file"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+            />
+          </div>
+        </div>
+        <fieldset>
+          <legend>Typography</legend>
+          <label for="region">Card region</label
+          ><select id="region">
+            <option value="name">Card name</option>
+            <option value="effect">Card effect / Normal flavor text</option>
+            <option value="pendulum">Pendulum effect</option>
+            <option value="kind">Spell / Trap type</option>
+            <option value="type">Monster type line</option>
+            <option value="stats">Monster ATK / DEF values</option>
+          </select>
+          <label for="font">Font</label
+          ><select id="font"></select>
+          <label for="font-file"
+            >Add a font to this region (.woff2, up to 2 MB)</label
+          ><input id="font-file" type="file" accept=".woff2,font/woff2" />
+          <div class="grid">
+            <div>
+              <label for="size">Font size</label
+              ><input id="size" type="number" min="8" max="120" step="0.5" />
+            </div>
+            <div>
+              <label for="weight">Font weight</label
+              ><input id="weight" type="number" min="100" max="900" step="1" />
+            </div>
+            <div>
+              <label for="letterSpacing">Letter spacing</label
+              ><input
+                id="letterSpacing"
+                type="number"
+                min="-2"
+                max="8"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <label><input id="italic" type="checkbox" /> Italic</label
+              ><span class="hint"
+                >Always applied to Normal Monster flavor text.</span
+              >
+            </div>
+            <div>
+              <label for="offsetX">Horizontal offset</label
+              ><input id="offsetX" type="number" min="-80" max="80" step="1" />
+            </div>
+            <div>
+              <label for="offsetY">Vertical offset</label
+              ><input id="offsetY" type="number" min="-60" max="60" step="1" />
+            </div>
+            <div id="minSize-field">
+              <label for="minSize">Minimum fitted size</label
+              ><input id="minSize" type="number" min="8" max="60" step="0.5" />
+            </div>
+            <div id="lineHeight-field">
+              <label for="lineHeight">Line height multiplier</label
+              ><input
+                id="lineHeight"
+                type="number"
+                min="0.8"
+                max="2"
+                step="0.02"
+              />
+            </div>
+            <div id="edgeOpacity-field">
+              <label for="edgeOpacity">Bundled name font stroke coverage</label
+              ><input
+                id="edgeOpacity"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+              /><span class="hint"
+                >Bundled font weights are simulated from fixed faces: 400 keeps
+                their original thickness. Name stroke coverage separately softens edges.</span
+              >
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Monster spacing</legend>
+          <div class="grid">
+            <div>
+              <label for="starGap">Gap between stars</label
+              ><input id="starGap" type="number" min="0" max="30" step="0.5" />
+            </div>
+            <div>
+              <label for="starSize">Star size</label
+              ><input
+                id="starSize"
+                type="number"
+                min="16"
+                max="60"
+                step="0.5"
+              />
+            </div>
+            <div>
+              <label for="atkX">ATK value right edge</label
+              ><input id="atkX" type="number" min="510" max="640" step="0.5" />
+            </div>
+            <div>
+              <label for="defX">DEF / Link value right edge</label
+              ><input id="defX" type="number" min="690" max="765" step="0.5" />
+            </div>
+            <div>
+              <label for="baseline">Stat baseline</label
+              ><input
+                id="baseline"
+                type="number"
+                min="1085"
+                max="1120"
+                step="0.5"
+              />
+            </div>
+          </div>
+          <p class="hint">
+            Printed ATK/DEF/LINK labels belong to the supplied frames. These
+            controls position the values. Star gaps also apply to Xyz Ranks.
+          </p>
+        </fieldset>
+        <details>
+          <summary>Edit sample text and values</summary>
+          <label for="cardName">Card name</label
+          ><input id="cardName" maxlength="200" />
+          <label for="cardEffect">Card text</label
+          ><textarea id="cardEffect" maxlength="12000"></textarea>
+          <label for="pendulumEffect">Pendulum effect</label
+          ><textarea id="pendulumEffect" maxlength="12000"></textarea>
+          <div class="grid">
+            <div>
+              <label for="cardAtk">ATK</label
+              ><input id="cardAtk" maxlength="32" />
+            </div>
+            <div>
+              <label for="cardDef">DEF</label
+              ><input id="cardDef" maxlength="32" />
+            </div>
+          </div>
+        </details>
+        <p id="mode" class="badge"></p>
+        <div class="actions">
+          <button id="save" type="button">Save to server</button
+          ><button id="export" type="button">Export style + fonts</button
+          ><button id="reset" type="button">Reset controls</button>
+        </div>
+        <label for="profile-file">Import a saved style (.json)</label
+        ><input id="profile-file" type="file" accept=".json,application/json" />
+        <p class="hint">
+          Export includes uploaded font bytes and settings. Send that JSON back
+          in the chat to make your chosen style the project default. Local
+          artwork and card edits are preview-only.
+        </p>
+        <details>
+          <summary>Asset credits and source records</summary>
+          <pre
+            id="credits"
+            style="
+              white-space: pre-wrap;
+              overflow-wrap: anywhere;
+              font-size: 12px;
+            "
+          ></pre>
+        </details>
+      </section>
+    </main>
+    <!-- TESTER_DATA -->
+    <!-- TESTER_RUNTIME -->
+  </body>
+</html>

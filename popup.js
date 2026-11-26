@@ -48,6 +48,7 @@ async function scan() {
       for (const card of response.cards) {
         const old = next[card.id];
         next[card.id] = old ? {...old, ...card, copies:old.copies, section:old.section==='unknown'?card.section:old.section, duelingbookId:old.duelingbookId || card.duelingbookId, importedAt:old.importedAt} : {...card, importedAt:new Date().toISOString()};
+        if (old?.visual && card.visual) next[card.id].visual = {...old.visual, ...card.visual};
         old ? updated++ : added++;
       }
       return {added, updated};

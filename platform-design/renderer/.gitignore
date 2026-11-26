@@ -1,0 +1,4 @@
+/data/
+/card-render-tester.html
+/assets/*
+!/assets/manifest.example.json
