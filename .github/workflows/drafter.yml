@@ -1,0 +1,48 @@
+name: Drafting platform
+
+on:
+  pull_request:
+    paths: &drafter_paths
+      - 'drafter/**'
+      - 'shared/**'
+      - 'tools/stage.cjs'
+      - 'package*.json'
+      - '.dockerignore'
+      - 'render.yaml'
+      - '.github/workflows/drafter.yml'
+  push:
+    branches: [main]
+    paths: *drafter_paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:drafter
+      - name: Build and smoke-test the production image
+        run: |
+          docker build -f drafter/Dockerfile -t cube-drafter:ci .
+          container=$(docker run -d --rm -p 127.0.0.1:10000:10000 cube-drafter:ci)
+          trap 'docker stop "$container" >/dev/null' EXIT
+          curl --fail --silent --show-error --retry 10 --retry-connrefused http://127.0.0.1:10000/draft >/dev/null
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:10000/tester)" = 404
+      - name: Archive the standalone drafter
+        run: tar -czf dist/duelingbook-drafter.tar.gz -C dist/drafter .
+      - uses: actions/upload-artifact@v6
+        with:
+          name: drafter-runtime
+          path: dist/duelingbook-drafter.tar.gz
+          if-no-files-found: error

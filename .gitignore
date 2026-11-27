@@ -2,3 +2,6 @@
 .DS_Store
 node_modules/
 dist/
+/platform-design/renderer/data/
+/platform-design/renderer/assets/
+/platform-design/renderer/card-render-tester.html

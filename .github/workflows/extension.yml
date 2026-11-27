@@ -1,0 +1,40 @@
+name: Chrome extension
+
+on:
+  pull_request:
+    paths: &extension_paths
+      - 'extension/**'
+      - 'shared/**'
+      - 'tools/stage.cjs'
+      - 'package*.json'
+      - '.github/workflows/extension.yml'
+  push:
+    branches: [main]
+    paths: *extension_paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:extension
+      - name: Create Chrome Web Store ZIP
+        working-directory: dist/extension
+        run: zip -X ../duelingbook-extension.zip manifest.json content.js popup.html popup.css popup.js
+      - uses: actions/upload-artifact@v6
+        with:
+          name: chrome-web-store
+          path: dist/duelingbook-extension.zip
+          if-no-files-found: error

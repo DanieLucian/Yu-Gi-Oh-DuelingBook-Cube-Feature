@@ -1,0 +1,11 @@
+*
+!drafter/
+!drafter/**
+!shared/
+!shared/cube-format.cjs
+!tools/
+!tools/stage.cjs
+drafter/renderer/data/
+drafter/renderer/card-render-tester.html
+drafter/renderer/assets/*
+!drafter/renderer/assets/manifest.example.json

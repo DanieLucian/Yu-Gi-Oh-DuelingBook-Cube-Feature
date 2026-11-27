@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: duelingbook-cube-drafter
+    runtime: docker
+    plan: starter
+    branch: main
+    dockerfilePath: ./drafter/Dockerfile
+    dockerContext: .
+    healthCheckPath: /draft
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - drafter/**
+        - shared/**
+        - tools/stage.cjs
+        - .dockerignore
+        - render.yaml
+    disk:
+      name: drafter-data
+      mountPath: /var/data
+      sizeGB: 2
