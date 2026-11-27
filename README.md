@@ -1,100 +1,37 @@
 # DuelingBook Cube Draft
 
-An unofficial Chrome extension prototype to import custom and official Yu-Gi-Oh! cards from the DuelingBook deck editor or deck/card pages and build a local Cube collection. Online drafting is planned.
+An unofficial Chrome extension for collecting DuelingBook cards and a separate
+web application for hosting Cube drafts. The apps exchange `dbcd-cube-v1` JSON.
 
-## Versions
+| Directory | Purpose | Build from repository root |
+| --- | --- | --- |
+| [extension/](extension/README.md) | Chrome extension, Windows ZIP updater, and extension tests | `npm run build:extension` → `dist/extension/` |
+| [drafter/](drafter/README.md) | Browser frontend, Node.js backend, renderer, and drafter tests | `npm run build:drafter` → `dist/drafter/` |
+| [shared/](shared/README.md) | Cube and card interchange format and shared validators | Included by each build |
+| `integration/` | Tests that render cards exported by the extension | `npm run test:integration` |
 
-- **v0.4.6** - Save Xyz ranks so rank stars appear on the drafting page (pending live verification).
-- **v0.4.5** - Extract official DuelingBook IDs from standard artwork URLs (pending live verification).
-- **v0.4.4** � Save Pendulum scales for official and custom monsters (pending live verification).
-- **v0.4.3** � Include Extra Deck cards in editor scans and previews (pending live verification).
-- **v0.4.2** — Extract Spell/Trap subtypes for renderer icons (pending live user verification).
-- **v0.1.0** — Initial custom-card import and Cube management. User verified successful import of 26 unique custom cards and persistence across imports.
-- **v0.2.0** — Experimental full-card previews (not yet verified by user).
-- **v0.3.0** — Mixed official/custom-card import and full-card previews.
-- **v0.4.0** — Cube JSON restore, manual section editing and deck-editor imports.
-- **v0.4.1** — Fix constructor detection for class-named deck/side containers (pending user verification).
+Use Node.js 24. Both builds run without installing npm dependencies.
+For drafter development, run `npm run start:drafter` and open
+[the local draft page](http://127.0.0.1:3210/draft). For the extension, build it
+and load `dist/extension/` as an unpacked extension. If you used the repository
+root as an unpacked extension, export your Cube before updating that checkout
+so you can restore it after changing the loaded folder.
 
-## Install / update
+To run the checks locally:
 
-Use Chrome's `chrome://extensions` → **Developer mode** → **Load unpacked** and select this repository folder. For updates, replace the files in the *same* directory and click **Reload** in Chrome; do not remove the extension without backing up your saved Cube JSON.
-
-## Roadmap
-
-1. Validate complete-card previews and mixed official/custom imports.
-2. Improve Cube editing, duplicate/copy management, and XML ID reconciliation.
-3. Add synchronized four-player drafting and final 40-card deck building.
-4. Export DuelingBook-compatible XML decks.
-
-This project is unofficial and not affiliated with DuelingBook. Only import cards you have rights to access and use.
-
-Windows users can use the [ZIP updater](docs/windows-update.md) to extract a
-verified update, back up the files it replaces and copy the runtime files into
-the existing extension directory.
-
-## Import from the deck editor
-
-Reload the extension and refresh your DuelingBook tab after updating. Open the
-Deck Constructor/editor, load a deck, then use **Scan & import current page**.
-All recognized cards inside `deck_cards`, `extra_cards` and `side_cards` containers (IDs or
-CSS classes) are included. Search
-results and hover cards outside those containers are excluded. Existing IDs are
-refreshed without increasing saved copy counts or replacing manual annotations.
-See [deck-editor checks](docs/deck-editor.md) for details and remaining live checks.
-
-Spell/Trap scans now include `visual.spellTrapIcon` (`normal`, `continuous`,
-`counter`, `equip`, `field`, `quick-play`, or `ritual`) from the displayed subtype
-icon. Normal cards correctly have no icon. Unknown or unavailable subtype data
-is left unresolved. Scanning preserves saved copies, sections and other visual
-metadata, and Cube JSON export/restore carries the subtype through to the renderer.
-
-To repair older exports with missing icons, reload the extension, refresh
-DuelingBook, scan each deck containing your Cube cards again, then export a fresh
-Cube JSON and load it into the drafting platform/renderer. Old JSON alone cannot
-recover a subtype that was never extracted.
-
-Pendulum scans save both printed scales as `visual.scaleLeft` and
-`visual.scaleRight`, including scale 0. Reload the extension, refresh DuelingBook,
-rescan decks containing Pendulum cards and export a fresh Cube JSON to repair
-older exports. Existing copies, sections and other visual metadata are preserved.
-
-Official cards using `https://images.duelingbook.com/low-res/<id>.jpg` now save
-that numeric ID in `duelingbookId`. Existing `official:` collection keys remain
-unchanged, so rescanning fills missing IDs without duplicating saved cards.
-External or unrecognized artwork URLs still require XML matching. Previously
-XML-matched IDs are preserved. Reload, refresh DuelingBook and rescan to update
-older records, then export a fresh Cube JSON.
-
-Xyz scans now count the separate `.rank` stars and save `visual.rank`. To repair
-Cube JSON with missing ranks, reload the extension, refresh DuelingBook, rescan
-your Xyz cards, export a fresh Cube JSON and import it into the drafting page.
-The missing ranks cannot be recovered from an old export alone.
-
-## Manage and restore a Cube
-
-Use each card's **Section** menu to select Unassigned, Main Deck, Extra Deck or
-Side Deck, and **Copies** to set its quantity (1–99). These are collection
-annotations; they do not enforce deck legality or change drafting rules.
-
-**Export Cube JSON** saves a backup. **Import Cube JSON** adds missing card IDs
-from a backup in the existing `dbcd-cube-v1` format. Existing cards, quantities,
-and annotations stay unchanged; repeated import does not add copies together.
-Same-name cards with different IDs remain separate.
-
-See [Cube management behavior and manual checks](docs/cube-management.md) for
-validation details, exact-restore instructions and remaining limitations.
-
-## Development and automated checks
-
-No application build or runtime dependencies are required. Load this directory as
-an unpacked Chrome extension. Test tooling requires Node.js 20+ and Chromium:
-
-```sh
+~~~sh
 npm ci
-CHROMIUM_PATH=/usr/bin/chromium npm test
-```
+npx playwright install chromium
+npm run test:extension
+npm run test:drafter
+npm run test:integration
+~~~
 
-Set `CHROMIUM_PATH` to your Chromium/Chrome executable if it is elsewhere. Tests
-use Playwright with an isolated browser and synthetic page fixtures; they do not
-contact DuelingBook. They cover backup restore, collection edits and preview
-rendering. See [preview review and manual checks](docs/preview-review.md).
+Use `npm test` to run all three suites. On Linux, add `--with-deps` to the
+Playwright install if the browser libraries are missing. Set `CHROMIUM_PATH`
+to use an existing Chrome or Edge installation instead.
+
+GitHub Actions builds the apps separately. The extension workflow publishes
+a Chrome Web Store ZIP as a build artifact and the drafter workflow publishes
+a standalone Node.js runtime archive. See [drafter deployment](drafter/DEPLOYMENT.md)
+for Windows and Render instructions using the GitHub `main` branch.
